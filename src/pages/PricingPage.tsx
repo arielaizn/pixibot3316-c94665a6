@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,8 @@ import CreditBar from "@/components/CreditBar";
 import { useCredits } from "@/hooks/useCredits";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
-import { Check, Zap, Star, Crown, Building2, Rocket, Package, AlertCircle } from "lucide-react";
+import { usePayment } from "@/hooks/usePayment";
+import { Check, Zap, Star, Crown, Building2, Rocket, Package, AlertCircle, Loader2 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /*  DATA                                                               */
