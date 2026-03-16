@@ -499,6 +499,7 @@ export type Database = {
         Returns: Json
       }
       consume_credit: { Args: { p_user_id: string }; Returns: Json }
+      ensure_admin_credits: { Args: { p_user_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -507,6 +508,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
+      is_admin_by_email: { Args: { p_email: string }; Returns: boolean }
     }
     Enums: {
       app_role: "user" | "admin"
