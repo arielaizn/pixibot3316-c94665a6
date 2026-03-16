@@ -240,6 +240,103 @@ serve(async (req) => {
         break;
       }
 
+      // ── ACTIVATE PLAN (called from callback page after Sumit hosted link redirect) ──
+      case "activate_plan": {
+        const { plan_key, billing_cycle } = params;
+
+        if (!plan_key || !PLAN_CREDITS[plan_key]) {
+          throw new Error("Invalid plan");
+        }
+
+        const planCredits = PLAN_CREDITS[plan_key];
+
+        // Idempotency: check if already on this plan
+        const { data: currentCredits } = await adminClient
+          .from("user_credits")
+          .select("plan_type")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        // Record payment
+        const { data: payment } = await adminClient
+          .from("payments")
+          .insert({
+            user_id: user.id,
+            amount: 0, // amount tracked by Sumit hosted page
+            currency: "ILS",
+            status: "completed",
+            payment_type: "subscription",
+            plan_key,
+            billing_cycle: billing_cycle || "monthly",
+            credits: planCredits,
+          })
+          .select()
+          .single();
+
+        // Update user credits
+        await adminClient
+          .from("user_credits")
+          .update({
+            plan_type: plan_key,
+            plan_credits: planCredits,
+            used_credits: 0,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", user.id);
+
+        // Deactivate old subscriptions
+        await adminClient
+          .from("subscriptions")
+          .update({ status: "inactive" })
+          .eq("user_id", user.id)
+          .eq("status", "active");
+
+        // Create new subscription
+        const cycleDays = billing_cycle === "yearly" ? 365 : 30;
+        const cycleEnd = new Date(Date.now() + cycleDays * 86400000).toISOString();
+
+        await adminClient.from("subscriptions").insert({
+          user_id: user.id,
+          plan_type: plan_key,
+          monthly_credits: planCredits,
+          status: "active",
+          billing_cycle_start: new Date().toISOString(),
+          billing_cycle_end: cycleEnd,
+        });
+
+        await adminClient.from("credit_transactions").insert({
+          user_id: user.id,
+          type: "plan_upgrade",
+          amount: planCredits,
+          source: `${plan_key}_${billing_cycle}_hosted`,
+        });
+
+        // Invoice (non-blocking)
+        try {
+          const { data: profile } = await adminClient
+            .from("profiles")
+            .select("full_name")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          await sumitCall("/accounting/documents/create/", {
+            Document: {
+              Type: 320,
+              CustomerName: profile?.full_name || user.email?.split("@")[0] || "",
+              CustomerEmail: user.email,
+              Items: [{ Name: `Pixi ${plan_key} Plan (${billing_cycle})`, Price: 0, Quantity: 1 }],
+              SendByEmail: true,
+              Language: "he",
+            },
+          });
+        } catch (e) {
+          console.error("Invoice failed (non-blocking):", e);
+        }
+
+        result = { status: "activated", plan: plan_key, credits: planCredits };
+        break;
+      }
+
       // ── LIST USER PAYMENTS ──
       case "list_payments": {
         const { data, error } = await adminClient
