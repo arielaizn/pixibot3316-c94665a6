@@ -83,7 +83,6 @@ const ProjectsPage = () => {
     uploadFiles, renameFile, deleteFile, toggleStar,
   } = useFileManager(currentFolderId);
 
-  const { t: tr } = useDirection();
   const t = {
     title: tr("projects.title"),
     subtitle: tr("projects.subtitle"),
