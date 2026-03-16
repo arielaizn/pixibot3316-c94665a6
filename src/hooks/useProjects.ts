@@ -203,6 +203,18 @@ export const useProjects = () => {
           file_size: file.size,
         });
         if (dbError) throw dbError;
+
+        // If the file is a video, also create a videos row with the storage path
+        if (file.type?.startsWith("video/")) {
+          const { error: vidError } = await supabase.from("videos").insert({
+            user_id: user!.id,
+            project_id: projectId,
+            title: file.name.replace(/\.[^/.]+$/, ""),
+            video_url: path,
+            status: "completed",
+          });
+          if (vidError) throw vidError;
+        }
         results.push({ progress: ((i + 1) / fileList.length) * 100 });
       }
       return results;
