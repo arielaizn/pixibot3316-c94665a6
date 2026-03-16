@@ -338,8 +338,19 @@ const PricingPage = () => {
                     <p className="mb-5 flex-1 text-center text-sm text-muted-foreground">
                       {isRTL ? pack.descHe : pack.descEn}
                     </p>
-                    <Button variant="outline" className="w-full rounded-xl border-accent py-4 text-accent hover:bg-accent hover:text-accent-foreground">
-                      {t.packCta}
+                    <Button
+                      variant="outline"
+                      disabled={paymentLoading}
+                      onClick={() => {
+                        if (!user) {
+                          navigate("/signup");
+                          return;
+                        }
+                        buyCredits(pack.videos, pack.price);
+                      }}
+                      className="w-full rounded-xl border-accent py-4 text-accent hover:bg-accent hover:text-accent-foreground"
+                    >
+                      {paymentLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t.packCta}
                     </Button>
                   </div>
                 ))}
