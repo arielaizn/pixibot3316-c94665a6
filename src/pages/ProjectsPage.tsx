@@ -463,7 +463,19 @@ const ProjectsPage = () => {
                       Icon={Icon}
                       viewMode={viewMode}
                       t={t}
-                      onPreview={() => setPreviewFile(file as any)}
+                      onPreview={() => {
+                        if (file.file_type?.startsWith("video") && selectedProject) {
+                          // Find matching video record or navigate with file URL
+                          const matchingVideo = selectedProject.videos.find(v => v.video_url && file.file_url.includes(v.video_url.replace(/\s/g, '%20')));
+                          if (matchingVideo) {
+                            navigate(`/projects/${selectedProject.id}/video/${matchingVideo.id}`);
+                          } else {
+                            setPreviewFile(file as any);
+                          }
+                        } else {
+                          setPreviewFile(file as any);
+                        }
+                      }}
                       onRename={() => setRenameTarget({ id: file.id, name: file.file_name, type: "file" })}
                       onDelete={() => deleteFile.mutate(file.id)}
                       onStar={() => toggleStar.mutate({ id: file.id, starred: !file.is_starred })}
