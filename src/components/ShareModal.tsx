@@ -137,6 +137,11 @@ const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, proj
   const handleInvite = async () => {
     if (!email.trim() || !user) return;
     setSending(true);
+    if (!projectId) {
+      toast.error(t("share.errorInvite"));
+      setSending(false);
+      return;
+    }
     const { error } = await supabase
       .from("project_shares")
       .insert({
