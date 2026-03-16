@@ -246,6 +246,57 @@ export type Database = {
         }
         Relationships: []
       }
+      project_shares: {
+        Row: {
+          created_at: string
+          id: string
+          permission: string
+          project_id: string
+          share_token: string | null
+          shared_by: string
+          shared_with_email: string | null
+          video_id: string | null
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission?: string
+          project_id: string
+          share_token?: string | null
+          shared_by: string
+          shared_with_email?: string | null
+          video_id?: string | null
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission?: string
+          project_id?: string
+          share_token?: string | null
+          shared_by?: string
+          shared_with_email?: string | null
+          video_id?: string | null
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_shares_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_shares_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           created_at: string
@@ -458,6 +509,8 @@ export type Database = {
           id: string
           project_id: string | null
           status: string
+          thumbnail_url: string | null
+          title: string
           user_id: string
           video_url: string | null
         }
@@ -467,6 +520,8 @@ export type Database = {
           id?: string
           project_id?: string | null
           status?: string
+          thumbnail_url?: string | null
+          title?: string
           user_id: string
           video_url?: string | null
         }
@@ -476,6 +531,8 @@ export type Database = {
           id?: string
           project_id?: string | null
           status?: string
+          thumbnail_url?: string | null
+          title?: string
           user_id?: string
           video_url?: string | null
         }
