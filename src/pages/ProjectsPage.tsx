@@ -3,6 +3,7 @@ import { Navigate, Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
 import { getVideoPublicUrl } from "@/lib/videoUrl";
+import { downloadFile } from "@/lib/downloadFile";
 import { useFileManager, UserFile, UserFolder } from "@/hooks/useFileManager";
 import { useProjects, ProjectWithContent, VideoRecord, ProjectFile } from "@/hooks/useProjects";
 import Navbar from "@/components/Navbar";
@@ -288,19 +289,10 @@ const ProjectsPage = () => {
               <Button
                 size="sm"
                 className="rounded-xl gap-1.5 bg-green-500 hover:bg-green-600 text-white"
-                onClick={async () => {
+                onClick={() => {
                   if (!playingVideo.video_url) return;
                   const url = getVideoPublicUrl(playingVideo.video_url);
-                  const response = await fetch(url);
-                  const blob = await response.blob();
-                  const blobUrl = window.URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = blobUrl;
-                  a.download = (playingVideo.title || "video") + ".mp4";
-                  document.body.appendChild(a);
-                  a.click();
-                  a.remove();
-                  window.URL.revokeObjectURL(blobUrl);
+                  downloadFile(url, (playingVideo.title || "video") + ".mp4");
                 }}
               >
                 <Download className="h-4 w-4" />
@@ -969,11 +961,7 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
                 e.stopPropagation();
                 if (vid.video_url) {
                   const url = getVideoPublicUrl(vid.video_url);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = (vid.title || "video") + ".mp4";
-                  a.target = "_blank";
-                  a.click();
+                  downloadFile(url, (vid.title || "video") + ".mp4");
                 }
               }}>
                 <Download className="me-2 h-3.5 w-3.5" /> {t.download}
@@ -1026,7 +1014,7 @@ function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onSt
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onPreview}><Eye className="me-2 h-3.5 w-3.5" /> {t.preview}</DropdownMenuItem>
-            <DropdownMenuItem asChild><a href={file.file_url} download={file.file_name}><Download className="me-2 h-3.5 w-3.5" /> {t.download}</a></DropdownMenuItem>
+            <DropdownMenuItem onClick={() => downloadFile(file.file_url, file.file_name)}><Download className="me-2 h-3.5 w-3.5" /> {t.download}</DropdownMenuItem>
             <DropdownMenuItem onClick={onRename}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
             <DropdownMenuItem onClick={onMove}><FolderInput className="me-2 h-3.5 w-3.5" /> {t.moveTo}</DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -1058,7 +1046,7 @@ function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onSt
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onPreview}><Eye className="me-2 h-3.5 w-3.5" /> {t.preview}</DropdownMenuItem>
-            <DropdownMenuItem asChild><a href={file.file_url} download={file.file_name}><Download className="me-2 h-3.5 w-3.5" /> {t.download}</a></DropdownMenuItem>
+            <DropdownMenuItem onClick={() => downloadFile(file.file_url, file.file_name)}><Download className="me-2 h-3.5 w-3.5" /> {t.download}</DropdownMenuItem>
             <DropdownMenuItem onClick={onRename}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
             <DropdownMenuItem onClick={onMove}><FolderInput className="me-2 h-3.5 w-3.5" /> {t.moveTo}</DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -1132,8 +1120,11 @@ function FilePreviewDialog({ previewFile, onClose, isRTL, t }: {
             </div>
           )}
           <div className="mt-4 flex justify-end">
-            <Button asChild className="rounded-xl bg-primary px-6 py-5 font-bold text-primary-foreground hover:bg-primary/90">
-              <a href={previewFile?.file_url} download={previewFile?.file_name}><Download className="me-2 h-4 w-4" />{t.download}</a>
+            <Button
+              className="rounded-xl bg-primary px-6 py-5 font-bold text-primary-foreground hover:bg-primary/90"
+              onClick={() => previewFile && downloadFile(previewFile.file_url, previewFile.file_name)}
+            >
+              <Download className="me-2 h-4 w-4" />{t.download}
             </Button>
           </div>
         </div>
