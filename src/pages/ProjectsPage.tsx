@@ -608,7 +608,7 @@ const ProjectsPage = () => {
                   {searchResults.videos.map((v) => (
                     <VideoCard key={v.id} vid={v} viewMode={viewMode} isRTL={isRTL} t={t}
                       onPlay={() => { setPlayingVideo(v); setSearch(""); }}
-                      onShare={() => setShareTarget({ projectId: v.project_id || "", videoId: v.id, name: v.title })}
+                      onShare={() => setShareTarget({ projectId: v.project_id || undefined, videoId: v.id, name: v.title })}
                       onRename={() => setRenameTarget({ id: v.id, name: v.title, type: "video" })}
                       onDelete={() => deleteVideo.mutate(v.id)}
                       onVersions={() => setShowVersions(v)}
