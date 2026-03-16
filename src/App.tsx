@@ -47,6 +47,7 @@ const App = () => (
                 <Route path="/welcome" element={<WelcomePage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/payment/callback" element={<PaymentCallbackPage />} />
                 {/* Admin */}
                 <Route path="/admin" element={<AdminLoginPage />} />
                 <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
