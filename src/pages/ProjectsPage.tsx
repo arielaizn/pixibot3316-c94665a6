@@ -1107,6 +1107,31 @@ function RenameDialog({ renameTarget, onClose, onSave, isRTL, t }: {
 function FilePreviewDialog({ previewFile, onClose, isRTL, t }: {
   previewFile: UserFile | null; onClose: () => void; isRTL: boolean; t: any;
 }) {
+  const [previewLoading, setPreviewLoading] = useState(true);
+  const [textContent, setTextContent] = useState<string | null>(null);
+
+  // Reset loading state when file changes
+  useEffect(() => {
+    setPreviewLoading(true);
+    setTextContent(null);
+    if (!previewFile) return;
+
+    const isText = previewFile.file_type.startsWith("text") || previewFile.file_name.endsWith(".md") || previewFile.file_name.endsWith(".txt");
+    if (isText) {
+      fetch(previewFile.file_url)
+        .then((r) => r.text())
+        .then((txt) => { setTextContent(txt); setPreviewLoading(false); })
+        .catch(() => setPreviewLoading(false));
+    } else {
+      // For non-text files, a short delay simulates loading; real loading happens via onLoad
+      const timer = setTimeout(() => setPreviewLoading(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [previewFile?.id]);
+
+  const isTextFile = previewFile && (previewFile.file_type.startsWith("text") || previewFile.file_name.endsWith(".md") || previewFile.file_name.endsWith(".txt"));
+  const isMd = previewFile?.file_name.endsWith(".md");
+
   return (
     <Dialog open={!!previewFile} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl rounded-2xl p-0 overflow-hidden">
@@ -1115,24 +1140,65 @@ function FilePreviewDialog({ previewFile, onClose, isRTL, t }: {
           <p className="text-sm text-muted-foreground">{previewFile && `${formatSize(previewFile.file_size)} · ${formatDate(previewFile.created_at)}`}</p>
         </DialogHeader>
         <div className="p-6 pt-4">
-          {previewFile?.file_type.startsWith("video") && (
+          {/* Loading skeleton */}
+          {previewLoading && previewFile && (
+            <div className="space-y-3">
+              <Skeleton className="h-[40vh] w-full rounded-xl" />
+              <Skeleton className="h-4 w-1/3" />
+            </div>
+          )}
+
+          {/* Video */}
+          {!previewLoading && previewFile?.file_type.startsWith("video") && (
             <PixiVideoPlayer src={previewFile.file_url} title={previewFile.file_name} />
           )}
-          {previewFile?.file_type.startsWith("image") && (
-            <img src={previewFile.file_url} alt={previewFile.file_name} className="max-h-[60vh] w-full rounded-xl object-contain" />
+
+          {/* Image */}
+          {!previewLoading && previewFile?.file_type.startsWith("image") && (
+            <img
+              src={previewFile.file_url}
+              alt={previewFile.file_name}
+              className="max-h-[60vh] w-full rounded-xl object-contain"
+              onLoad={() => setPreviewLoading(false)}
+            />
           )}
-          {previewFile?.file_type.startsWith("audio") && (
-            <audio src={previewFile.file_url} controls className="w-full" />
+
+          {/* Audio */}
+          {!previewLoading && previewFile?.file_type.startsWith("audio") && (
+            <div className="flex flex-col items-center gap-6 py-8">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
+                <Music className="h-12 w-12 text-primary" />
+              </div>
+              <audio controls className="w-full">
+                <source src={previewFile.file_url} type={previewFile.file_type} />
+              </audio>
+            </div>
           )}
-          {previewFile?.file_type === "application/pdf" && (
-            <iframe src={previewFile.file_url} className="h-[60vh] w-full rounded-xl" />
+
+          {/* PDF */}
+          {!previewLoading && previewFile?.file_type === "application/pdf" && (
+            <iframe src={previewFile.file_url} className="h-[60vh] w-full rounded-xl border border-border" />
           )}
-          {previewFile && !previewFile.file_type.startsWith("video") && !previewFile.file_type.startsWith("image") && !previewFile.file_type.startsWith("audio") && previewFile.file_type !== "application/pdf" && (
+
+          {/* Text / Markdown */}
+          {!previewLoading && isTextFile && textContent !== null && (
+            <div className="max-h-[60vh] overflow-auto rounded-xl border border-border bg-muted/30 p-4">
+              {isMd ? (
+                <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: textContent.replace(/^### (.*$)/gm, '<h3>$1</h3>').replace(/^## (.*$)/gm, '<h2>$1</h2>').replace(/^# (.*$)/gm, '<h1>$1</h1>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/`(.*?)`/g, '<code>$1</code>').replace(/\n/g, '<br/>') }} />
+              ) : (
+                <pre className="whitespace-pre-wrap text-sm text-foreground font-mono">{textContent}</pre>
+              )}
+            </div>
+          )}
+
+          {/* Fallback */}
+          {!previewLoading && previewFile && !previewFile.file_type.startsWith("video") && !previewFile.file_type.startsWith("image") && !previewFile.file_type.startsWith("audio") && previewFile.file_type !== "application/pdf" && !isTextFile && (
             <div className="flex flex-col items-center py-12 text-center">
               <FileIcon className="mb-4 h-16 w-16 text-muted-foreground/40" />
               <p className="text-muted-foreground">{isRTL ? "תצוגה מקדימה לא זמינה" : "Preview not available"}</p>
             </div>
           )}
+
           <div className="mt-4 flex justify-end">
             <Button
               className="rounded-xl bg-primary px-6 py-5 font-bold text-primary-foreground hover:bg-primary/90"
