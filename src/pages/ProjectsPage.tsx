@@ -264,7 +264,7 @@ const ProjectsPage = () => {
             {selectedProject && (
               <>
                 <ChevronRight className="h-3.5 w-3.5 text-muted-foreground rtl:rotate-180" />
-                <button onClick={() => setPlayingVideo(null)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <button onClick={() => navigate(`/projects/${urlProjectId}`)} className="text-muted-foreground hover:text-foreground transition-colors">
                   {selectedProject.name}
                 </button>
               </>
