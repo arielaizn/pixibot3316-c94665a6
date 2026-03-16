@@ -105,6 +105,8 @@ const packs: Pack[] = [
 const PricingPage = () => {
   const { isRTL } = useDirection();
   const [yearly, setYearly] = useState(false);
+  const { user } = useAuth();
+  const { credits } = useCredits();
 
   const t = {
     title: isRTL ? "תוכניות ומחירים" : "Plans & Pricing",
