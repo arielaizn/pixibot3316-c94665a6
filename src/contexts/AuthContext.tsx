@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   session: Session | null;
@@ -20,10 +19,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Save pending WhatsApp number from signup form
+      if (session?.user) {
+        const pending = localStorage.getItem("pixi_pending_whatsapp");
+        if (pending) {
+          localStorage.removeItem("pixi_pending_whatsapp");
+          await supabase
+            .from("profiles")
+            .update({ whatsapp_number: pending })
+            .eq("user_id", session.user.id);
+        }
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
