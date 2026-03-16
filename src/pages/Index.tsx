@@ -6,19 +6,22 @@ import PricingPreview from "@/components/PricingPreview";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 import FloatingMascot from "@/components/FloatingMascot";
+import PageTransition from "@/components/motion/PageTransition";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <HeroSection />
-      <FeaturesSection />
-      <HowItWorksSection />
-      <PricingPreview />
-      <FinalCTA />
-      <Footer />
-      <FloatingMascot />
-    </div>
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <HeroSection />
+        <FeaturesSection />
+        <HowItWorksSection />
+        <PricingPreview />
+        <FinalCTA />
+        <Footer />
+        <FloatingMascot />
+      </div>
+    </PageTransition>
   );
 };
 

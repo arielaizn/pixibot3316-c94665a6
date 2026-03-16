@@ -112,7 +112,7 @@ const Navbar = () => {
 
           {user &&
             authLinks.map((link) => (
-              <Link key={link.href} to={link.href} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <Link key={link.href} to={link.href} className="nav-link pb-0.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 {link.label}
               </Link>
             ))}
