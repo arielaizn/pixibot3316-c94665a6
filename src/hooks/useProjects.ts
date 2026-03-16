@@ -1,15 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-export interface ProjectWithVideos {
-  id: string;
-  name: string;
-  status: string;
-  created_at: string;
-  user_id: string;
-  videos: VideoRecord[];
-}
+import { useToast } from "@/hooks/use-toast";
 
 export interface VideoRecord {
   id: string;
@@ -21,10 +13,43 @@ export interface VideoRecord {
   status: string;
   credits_used: number;
   created_at: string;
+  version_number: number;
+  parent_video_id: string | null;
+}
+
+export interface ProjectFile {
+  id: string;
+  user_id: string;
+  project_id: string | null;
+  folder_id: string | null;
+  file_name: string;
+  file_url: string;
+  file_type: string;
+  file_size: number;
+  is_starred: boolean;
+  is_deleted: boolean;
+  visibility: string;
+  created_at: string;
+}
+
+export interface ProjectWithContent {
+  id: string;
+  name: string;
+  status: string;
+  created_at: string;
+  user_id: string;
+  videos: VideoRecord[];
+  files: ProjectFile[];
 }
 
 export const useProjects = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const qc = useQueryClient();
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["projects"] });
+  };
 
   const projectsQuery = useQuery({
     queryKey: ["projects", user?.id],
@@ -41,17 +66,29 @@ export const useProjects = () => {
       const projectIds = (projects || []).map((p) => p.id);
 
       let videos: VideoRecord[] = [];
+      let projectFiles: ProjectFile[] = [];
+
       if (projectIds.length > 0) {
-        const { data: vids, error: vErr } = await supabase
-          .from("videos")
-          .select("*")
-          .in("project_id", projectIds)
-          .order("created_at", { ascending: false });
-        if (vErr) throw vErr;
-        videos = (vids || []) as VideoRecord[];
+        const [vidsRes, filesRes] = await Promise.all([
+          supabase
+            .from("videos")
+            .select("*")
+            .in("project_id", projectIds)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("user_files")
+            .select("*")
+            .in("project_id", projectIds)
+            .eq("is_deleted", false)
+            .order("created_at", { ascending: false }),
+        ]);
+        if (vidsRes.error) throw vidsRes.error;
+        if (filesRes.error) throw filesRes.error;
+        videos = (vidsRes.data || []) as VideoRecord[];
+        projectFiles = (filesRes.data || []) as ProjectFile[];
       }
 
-      // Also get orphan videos (no project)
+      // Orphan videos
       const { data: orphans } = await supabase
         .from("videos")
         .select("*")
@@ -61,12 +98,12 @@ export const useProjects = () => {
 
       const orphanVideos = (orphans || []) as VideoRecord[];
 
-      const mapped: ProjectWithVideos[] = (projects || []).map((p) => ({
+      const mapped: ProjectWithContent[] = (projects || []).map((p) => ({
         ...p,
         videos: videos.filter((v) => v.project_id === p.id),
+        files: projectFiles.filter((f) => f.project_id === p.id),
       }));
 
-      // Add virtual project for orphan videos
       if (orphanVideos.length > 0) {
         mapped.push({
           id: "__orphan__",
@@ -75,6 +112,7 @@ export const useProjects = () => {
           created_at: orphanVideos[0].created_at,
           user_id: user!.id,
           videos: orphanVideos,
+          files: [],
         });
       }
 
@@ -82,5 +120,134 @@ export const useProjects = () => {
     },
   });
 
-  return projectsQuery;
+  // Create project
+  const createProject = useMutation({
+    mutationFn: async (name: string) => {
+      const { data, error } = await supabase
+        .from("projects")
+        .insert({ user_id: user!.id, name })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      invalidate();
+      toast({ title: "פרויקט נוצר בהצלחה" });
+    },
+    onError: (err: any) => toast({ title: "שגיאה", description: err.message, variant: "destructive" }),
+  });
+
+  // Rename project
+  const renameProject = useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const { error } = await supabase.from("projects").update({ name }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(),
+  });
+
+  // Delete project
+  const deleteProject = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("projects").update({ status: "deleted" }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(),
+  });
+
+  // Rename video
+  const renameVideo = useMutation({
+    mutationFn: async ({ id, title }: { id: string; title: string }) => {
+      const { error } = await supabase.from("videos").update({ title }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(),
+  });
+
+  // Delete video
+  const deleteVideo = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("videos").update({ status: "deleted" }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(),
+  });
+
+  // Upload files to a project
+  const uploadToProject = useMutation({
+    mutationFn: async ({ projectId, files: fileList }: { projectId: string; files: File[] }) => {
+      const results: { progress: number }[] = [];
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        const path = `${user!.id}/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("user-files")
+          .upload(path, file);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(path);
+        const { error: dbError } = await supabase.from("user_files").insert({
+          user_id: user!.id,
+          project_id: projectId,
+          file_name: file.name,
+          file_url: urlData.publicUrl,
+          file_type: file.type || "unknown",
+          file_size: file.size,
+        });
+        if (dbError) throw dbError;
+        results.push({ progress: ((i + 1) / fileList.length) * 100 });
+      }
+      return results;
+    },
+    onSuccess: () => {
+      invalidate();
+      qc.invalidateQueries({ queryKey: ["user-files"] });
+      toast({ title: "הקבצים הועלו בהצלחה" });
+    },
+    onError: (err: any) => toast({ title: "שגיאה בהעלאה", description: err.message, variant: "destructive" }),
+  });
+
+  // Move file to project
+  const moveFileToProject = useMutation({
+    mutationFn: async ({ fileId, projectId }: { fileId: string; projectId: string | null }) => {
+      const { error } = await supabase.from("user_files").update({ project_id: projectId }).eq("id", fileId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidate();
+      qc.invalidateQueries({ queryKey: ["user-files"] });
+    },
+  });
+
+  // Get version history for a video
+  const useVideoVersions = (parentVideoId: string | null, videoId: string) => {
+    return useQuery({
+      queryKey: ["video-versions", parentVideoId || videoId],
+      enabled: !!videoId,
+      queryFn: async () => {
+        const rootId = parentVideoId || videoId;
+        const { data, error } = await supabase
+          .from("videos")
+          .select("*")
+          .or(`id.eq.${rootId},parent_video_id.eq.${rootId}`)
+          .order("version_number", { ascending: true });
+        if (error) throw error;
+        return (data || []) as VideoRecord[];
+      },
+    });
+  };
+
+  return {
+    ...projectsQuery,
+    projects: projectsQuery.data || [],
+    createProject,
+    renameProject,
+    deleteProject,
+    renameVideo,
+    deleteVideo,
+    uploadToProject,
+    moveFileToProject,
+    useVideoVersions,
+    invalidate,
+  };
 };
