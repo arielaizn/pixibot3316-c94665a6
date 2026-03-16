@@ -3,7 +3,7 @@ import { useDirection } from "@/contexts/DirectionContext";
 import { Slider } from "@/components/ui/slider";
 import {
   Play, Pause, Volume2, VolumeX, Maximize, Minimize,
-  Download, Share2, PictureInPicture2, SkipBack, SkipForward,
+  Download, Share2, PictureInPicture2, SkipBack, SkipForward, AlertCircle,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -14,6 +14,7 @@ interface PixiVideoPlayerProps {
   title?: string;
   thumbnail?: string | null;
   onShare?: () => void;
+  onDownload?: () => void;
   autoPlay?: boolean;
 }
 
@@ -25,7 +26,7 @@ const formatTime = (s: number) => {
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: PixiVideoPlayerProps) => {
+const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay = false }: PixiVideoPlayerProps) => {
   const { isRTL } = useDirection();
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,16 +40,17 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
   const [speed, setSpeed] = useState(1);
   const [showControls, setShowControls] = useState(true);
   const [started, setStarted] = useState(autoPlay);
+  const [error, setError] = useState(false);
   const hideTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const video = videoRef.current;
 
   const togglePlay = useCallback(() => {
-    if (!video) return;
+    if (!video || !src) return;
     if (!started) setStarted(true);
-    if (video.paused) { video.play(); setPlaying(true); }
+    if (video.paused) { video.play().catch(() => setError(true)); setPlaying(true); }
     else { video.pause(); setPlaying(false); }
-  }, [video, started]);
+  }, [video, started, src]);
 
   const seek = useCallback((val: number[]) => {
     if (!video) return;
@@ -95,11 +97,30 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
   }, [video]);
 
   const handleDownload = useCallback(() => {
-    const a = document.createElement("a");
-    a.href = src;
-    a.download = title || "video";
-    a.click();
-  }, [src, title]);
+    if (onDownload) {
+      onDownload();
+      return;
+    }
+    if (!src) return;
+    const fileName = `${(title || "pixi-video").replace(/[^a-zA-Z0-9\u0590-\u05FF\s_-]/g, "")}.mp4`;
+    fetch(src)
+      .then((r) => r.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+      })
+      .catch(() => {
+        const a = document.createElement("a");
+        a.href = src;
+        a.download = fileName;
+        a.target = "_blank";
+        a.click();
+      });
+  }, [src, title, onDownload]);
 
   // Time updates
   useEffect(() => {
@@ -108,13 +129,16 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
     const onTime = () => setCurrentTime(v.currentTime);
     const onMeta = () => setDuration(v.duration);
     const onEnd = () => setPlaying(false);
+    const onError = () => setError(true);
     v.addEventListener("timeupdate", onTime);
     v.addEventListener("loadedmetadata", onMeta);
     v.addEventListener("ended", onEnd);
+    v.addEventListener("error", onError);
     return () => {
       v.removeEventListener("timeupdate", onTime);
       v.removeEventListener("loadedmetadata", onMeta);
       v.removeEventListener("ended", onEnd);
+      v.removeEventListener("error", onError);
     };
   }, [started]);
 
@@ -147,6 +171,17 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  if (!src) {
+    return (
+      <div className="flex aspect-video items-center justify-center rounded-2xl bg-muted/80 shadow-lg">
+        <div className="text-center">
+          <AlertCircle className="mx-auto mb-2 h-10 w-10 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">{isRTL ? "אין סרטון זמין" : "No video available"}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
@@ -154,14 +189,30 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
       onMouseMove={resetHide}
       onMouseLeave={() => playing && setShowControls(false)}
     >
+      {/* Error overlay */}
+      {error && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-muted/90">
+          <div className="text-center">
+            <AlertCircle className="mx-auto mb-3 h-12 w-12 text-destructive/70" />
+            <p className="text-sm font-medium text-foreground">{isRTL ? "שגיאה בטעינת הסרטון" : "Video failed to load"}</p>
+            <button
+              onClick={() => { setError(false); setStarted(false); }}
+              className="mt-3 rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 transition-colors"
+            >
+              {isRTL ? "נסה שוב" : "Try Again"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Thumbnail / play gate */}
-      {!started && (
+      {!started && !error && (
         <div
           className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-muted/90"
           onClick={togglePlay}
         >
           {thumbnail && (
-            <img src={thumbnail} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+            <img src={thumbnail} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" loading="lazy" />
           )}
           <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-primary/90 shadow-xl shadow-primary/30 transition-transform hover:scale-110">
             <Play className="h-8 w-8 text-primary-foreground ms-1" />
@@ -176,6 +227,7 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
         onClick={togglePlay}
         playsInline
         autoPlay={autoPlay}
+        preload="metadata"
       />
 
       {/* Controls overlay */}
@@ -198,12 +250,10 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
 
         {/* Controls row */}
         <div className="flex items-center gap-2 px-4 py-3">
-          {/* Play/Pause */}
           <button onClick={togglePlay} className="rounded-full p-1.5 text-foreground transition-colors hover:bg-primary/20 hover:text-primary">
             {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </button>
 
-          {/* Skip */}
           <button onClick={() => video && (video.currentTime -= 10)} className="rounded-full p-1 text-muted-foreground hover:text-foreground">
             <SkipBack className="h-4 w-4" />
           </button>
@@ -211,14 +261,12 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
             <SkipForward className="h-4 w-4" />
           </button>
 
-          {/* Time */}
           <span className="min-w-[80px] text-xs tabular-nums text-muted-foreground">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
 
           <div className="flex-1" />
 
-          {/* Volume */}
           <div className="flex items-center gap-1">
             <button onClick={toggleMute} className="rounded-full p-1 text-muted-foreground hover:text-foreground">
               {muted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
@@ -232,7 +280,6 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
             />
           </div>
 
-          {/* Speed */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="rounded-lg px-2 py-1 text-xs font-semibold text-muted-foreground hover:bg-primary/10 hover:text-foreground">
@@ -248,24 +295,20 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, autoPlay = false }: P
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* PiP */}
           <button onClick={togglePiP} className="rounded-full p-1.5 text-muted-foreground hover:text-foreground" title="Picture in Picture">
             <PictureInPicture2 className="h-4 w-4" />
           </button>
 
-          {/* Download */}
           <button onClick={handleDownload} className="rounded-full p-1.5 text-muted-foreground hover:text-foreground" title={isRTL ? "הורדה" : "Download"}>
             <Download className="h-4 w-4" />
           </button>
 
-          {/* Share */}
           {onShare && (
             <button onClick={onShare} className="rounded-full p-1.5 text-muted-foreground hover:text-foreground" title={isRTL ? "שיתוף" : "Share"}>
               <Share2 className="h-4 w-4" />
             </button>
           )}
 
-          {/* Fullscreen */}
           <button onClick={toggleFullscreen} className="rounded-full p-1.5 text-muted-foreground hover:text-foreground">
             {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
           </button>
