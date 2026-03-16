@@ -299,7 +299,7 @@ const ProjectsPage = () => {
             thumbnail={playingVideo.thumbnail_url}
             onShare={() =>
               setShareTarget({
-                projectId: playingVideo.project_id || "",
+                projectId: playingVideo.project_id,
                 videoId: playingVideo.id,
                 name: playingVideo.title,
               })
