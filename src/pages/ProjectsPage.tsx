@@ -303,18 +303,27 @@ const ProjectsPage = () => {
             </div>
           </div>
 
-          <PixiVideoPlayer
-            src={getVideoPublicUrl(playingVideo.video_url)}
-            title={playingVideo.title}
-            thumbnail={playingVideo.thumbnail_url}
-            onShare={() =>
-              setShareTarget({
-                projectId: playingVideo.project_id,
-                videoId: playingVideo.id,
-                name: playingVideo.title,
-              })
-            }
-          />
+          {playingVideo.video_url ? (
+            <div className="animate-in fade-in duration-300">
+              <PixiVideoPlayer
+                src={getVideoPublicUrl(playingVideo.video_url)}
+                title={playingVideo.title}
+                thumbnail={playingVideo.thumbnail_url}
+                onShare={() =>
+                  setShareTarget({
+                    projectId: playingVideo.project_id,
+                    videoId: playingVideo.id,
+                    name: playingVideo.title,
+                  })
+                }
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-muted/30 py-20 gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">Loading video...</span>
+            </div>
+          )}
           <p className="mt-4 text-sm text-muted-foreground">
             {formatDate(playingVideo.created_at)}
             {playingVideo.version_number > 1 && ` · ${t.version} ${playingVideo.version_number}`}
