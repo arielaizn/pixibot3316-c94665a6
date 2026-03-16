@@ -61,23 +61,14 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    const ADMIN_EMAILS = [
-      "pixmindstudio3316@gmail.com",
-      "aa046114609@gmail.com",
-    ];
-    const isAdmin = ADMIN_EMAILS.includes(user.email || "");
+    // Check admin via DB function (no hardcoded emails)
+    const { data: isAdminResult } = await adminClient.rpc("is_admin", { p_user_id: user.id });
+    const isAdmin = isAdminResult === true;
 
-    // If admin, ensure their credits reflect unlimited status
+    // If admin, ensure credits reflect unlimited status via DB function
     if (isAdmin) {
-      await adminClient
-        .from("user_credits")
-        .update({
-          is_unlimited: true,
-          plan_type: "enterprise",
-          plan_credits: 80,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id);
+      await adminClient.rpc("ensure_admin_credits", { p_user_id: user.id });
+    }
     }
 
     // Fetch user credits to determine plan and quota
