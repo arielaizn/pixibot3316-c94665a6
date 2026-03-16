@@ -48,7 +48,6 @@ const ProjectsPage = () => {
   const { isRTL, t: tr } = useDirection();
   const { projectId: urlProjectId, videoId: urlVideoId } = useParams();
   const navigate = useNavigate();
-  const { isRTL, t: tr } = useDirection();
   const {
     projects, isLoading: projectsLoading,
     createProject, renameProject, deleteProject,
