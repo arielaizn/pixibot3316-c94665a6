@@ -270,21 +270,11 @@ async function handleTokenMessage(
     .eq("user_id", handoff.user_id);
 
   // Fetch user details
-  const { data: userData } = await admin.auth.admin.getUserById(handoff.user_id);
-  const email = userData?.user?.email || "";
-  const isAdmin = ADMIN_EMAILS.includes(email);
+  const isAdmin = await checkIsAdmin(admin, handoff.user_id);
 
-  // If admin, ensure DB reflects unlimited status
+  // If admin, ensure credits reflect unlimited status via DB function
   if (isAdmin) {
-    await admin
-      .from("user_credits")
-      .update({
-        is_unlimited: true,
-        plan_type: "enterprise",
-        plan_credits: 80,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("user_id", handoff.user_id);
+    await ensureAdminCredits(admin, handoff.user_id);
   }
 
   const { data: profile } = await admin
