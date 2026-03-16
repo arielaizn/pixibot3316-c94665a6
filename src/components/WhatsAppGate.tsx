@@ -16,6 +16,7 @@ const WhatsAppGate = ({ children }: { children: React.ReactNode }) => {
   const isExcluded =
     !user ||
     location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/share") ||
     location.pathname === "/not-admin" ||
     location.pathname === "/" ||
     location.pathname === "/signup" ||

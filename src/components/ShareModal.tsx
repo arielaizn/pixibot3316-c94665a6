@@ -81,9 +81,12 @@ const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, proj
         .update({ visibility, permission })
         .eq("share_token", existingShareToken);
 
+      // For video shares, use the simple /share/:videoId format
+      if (videoId) {
+        return `${window.location.origin}/share/${videoId}`;
+      }
       const base = window.location.origin;
-      const type = videoId ? "video" : "project";
-      return `${base}/share/${type}/${existingShareToken}`;
+      return `${base}/share/project/${existingShareToken}`;
     }
 
     // Must have at least a projectId to create a share record
@@ -98,7 +101,7 @@ const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, proj
         project_id: projectId,
         video_id: videoId || null,
         shared_by: user.id,
-        visibility,
+        visibility: visibility === "private" ? "link" : visibility,
         permission,
       })
       .select("share_token")
@@ -109,9 +112,14 @@ const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, proj
       return null;
     }
     setExistingShareToken(data.share_token);
+    setVisibility(visibility === "private" ? "link" : visibility);
+
+    // For video shares, use the simple /share/:videoId format
+    if (videoId) {
+      return `${window.location.origin}/share/${videoId}`;
+    }
     const base = window.location.origin;
-    const type = videoId ? "video" : "project";
-    return `${base}/share/${type}/${data.share_token}`;
+    return `${base}/share/project/${data.share_token}`;
   };
 
   // Persist visibility changes

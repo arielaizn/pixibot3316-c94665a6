@@ -17,6 +17,7 @@ import PricingPage from "./pages/PricingPage.tsx";
 import PaymentCallbackPage from "./pages/PaymentCallbackPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SharedPage from "./pages/SharedPage.tsx";
+import PublicVideoPage from "./pages/PublicVideoPage.tsx";
 // Admin pages
 import AdminLoginPage from "./pages/admin/AdminLoginPage.tsx";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage.tsx";
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/admin/referrals" element={<AdminReferralsPage />} />
                 <Route path="/not-admin" element={<NotAdminPage />} />
                 <Route path="/share/:type/:token" element={<SharedPage />} />
+                <Route path="/share/:videoId" element={<PublicVideoPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               </WhatsAppGate>
