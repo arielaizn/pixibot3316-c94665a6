@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCredits, getPlanLabel } from "@/hooks/useCredits";
 import { useDirection } from "@/contexts/DirectionContext";
 import { useProjects } from "@/hooks/useProjects";
+import PageTransition from "@/components/motion/PageTransition";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CreditBar from "@/components/CreditBar";
@@ -82,7 +83,7 @@ const DashboardPage = () => {
   const hasContent = recentProjects.length > 0 || recentVideos.length > 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageTransition className="min-h-screen bg-background">
       <Navbar />
 
       <img
@@ -278,7 +279,7 @@ const DashboardPage = () => {
           )}
         </div>
       </main>
-    </div>
+    </PageTransition>
   );
 };
 

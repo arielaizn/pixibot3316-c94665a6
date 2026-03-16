@@ -78,6 +78,7 @@
   }
 }
 
+/* ── Core animations ── */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
@@ -88,10 +89,81 @@
   50% { filter: drop-shadow(0 0 20px hsl(145 63% 49% / 0.7)); }
 }
 
+@keyframes gradient-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
 
 .animate-glow {
   animation: glow 2s ease-in-out infinite;
+}
+
+.animate-gradient-drift {
+  background-size: 200% 200%;
+  animation: gradient-drift 15s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ── Premium card hover ── */
+@layer components {
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow:
+      0 10px 30px -10px hsl(var(--primary) / 0.12),
+      0 4px 12px -4px hsl(var(--foreground) / 0.06);
+  }
+
+  /* Button press effect */
+  .btn-press {
+    @apply transition-transform duration-150;
+  }
+  .btn-press:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 16px hsl(var(--primary) / 0.25);
+  }
+  .btn-press:active {
+    transform: scale(0.97);
+  }
+
+  /* Navbar link underline */
+  .nav-link {
+    @apply relative;
+  }
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-0.5 w-full origin-bottom-right scale-x-0 bg-primary transition-transform duration-300;
+  }
+  .nav-link:hover::after {
+    @apply origin-bottom-left scale-x-100;
+  }
+
+  /* Glow badge */
+  .glow-badge {
+    box-shadow: 0 0 12px hsl(var(--primary) / 0.3);
+  }
 }
