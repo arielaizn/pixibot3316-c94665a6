@@ -329,7 +329,7 @@ const ProjectsPage = () => {
         <VersionHistoryDialog
           video={showVersions}
           onClose={() => setShowVersions(null)}
-          onSelect={(v) => { setPlayingVideo(v); setShowVersions(null); }}
+          onSelect={(v) => { navigate(`/projects/${urlProjectId}/video/${v.id}`); setShowVersions(null); }}
           t={t}
         />
       </div>
