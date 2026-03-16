@@ -118,6 +118,11 @@ const DashboardPage = () => {
           </div>
         </div>
 
+        {/* Referral section */}
+        <div className="mb-8">
+          <ReferralCard />
+        </div>
+
         {/* Recent projects — empty state */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
           <h2 className="mb-6 text-xl font-bold text-foreground">{t.recentTitle}</h2>
