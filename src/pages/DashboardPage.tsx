@@ -279,7 +279,7 @@ const DashboardPage = () => {
           )}
         </div>
       </main>
-    </div>
+    </PageTransition>
   );
 };
 
