@@ -118,20 +118,23 @@ const ProjectsPage = () => {
     uploading: isRTL ? "מעלה קבצים..." : "Uploading files...",
   };
 
-  /* ── Global search across projects, videos, files ── */
+  /* ── Global search across projects, videos, files — includes tags & categories ── */
   const searchResults = useMemo(() => {
     if (!search.trim()) return null;
     const q = search.toLowerCase();
     const matchedProjects = (projects || []).filter((p) =>
-      p.name.toLowerCase().includes(q) || p.status === "active"
-    ).filter((p) => p.name.toLowerCase().includes(q));
+      p.name.toLowerCase().includes(q)
+    );
 
     const matchedVideos: (VideoRecord & { projectName: string })[] = [];
     const matchedFiles: (ProjectFile & { projectName: string })[] = [];
 
     (projects || []).forEach((p) => {
       p.videos.forEach((v) => {
-        if (v.title.toLowerCase().includes(q)) {
+        const matchTitle = v.title.toLowerCase().includes(q);
+        const matchCategory = v.category?.toLowerCase().includes(q);
+        const matchTags = v.tags?.some((tag) => tag.toLowerCase().includes(q));
+        if (matchTitle || matchCategory || matchTags) {
           matchedVideos.push({ ...v, projectName: p.name });
         }
       });
@@ -142,11 +145,34 @@ const ProjectsPage = () => {
       });
     });
 
-    // Also search standalone files
     const standaloneMatches = allFiles.filter((f) => f.file_name.toLowerCase().includes(q));
 
     return { projects: matchedProjects, videos: matchedVideos, files: matchedFiles, standalone: standaloneMatches };
   }, [search, projects, allFiles]);
+
+  /* ── Suggested folders based on uncategorized videos ── */
+  const suggestedFolders = useMemo(() => {
+    if (!projects) return [];
+    const categoryMap: Record<string, VideoRecord[]> = {};
+    const existingProjectNames = new Set((projects || []).map((p) => p.name.toLowerCase()));
+
+    (projects || []).forEach((p) => {
+      p.videos.forEach((v) => {
+        if (v.category && v.category !== "Other") {
+          const folderName = `${v.category} Videos`;
+          if (!existingProjectNames.has(folderName.toLowerCase())) {
+            if (!categoryMap[folderName]) categoryMap[folderName] = [];
+            categoryMap[folderName].push(v);
+          }
+        }
+      });
+    });
+
+    return Object.entries(categoryMap)
+      .filter(([, vids]) => vids.length >= 1)
+      .map(([name, vids]) => ({ name, videoCount: vids.length, category: vids[0].category! }))
+      .slice(0, 5);
+  }, [projects]);
 
   /* ── Folder navigation ── */
   const navigateToFolder = useCallback((folder: UserFolder) => {
