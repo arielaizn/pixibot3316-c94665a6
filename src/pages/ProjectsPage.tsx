@@ -617,7 +617,7 @@ const ProjectsPage = () => {
                 <div className={viewMode === "grid" ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3" : "space-y-2"}>
                   {searchResults.videos.map((v) => (
                     <VideoCard key={v.id} vid={v} viewMode={viewMode} isRTL={isRTL} t={t}
-                      onPlay={() => { setPlayingVideo(v); setSearch(""); }}
+                      onPlay={() => { navigate(`/projects/${v.project_id}/video/${v.id}`); setSearch(""); }}
                       onShare={() => setShareTarget({ projectId: v.project_id || undefined, videoId: v.id, name: v.title })}
                       onRename={() => setRenameTarget({ id: v.id, name: v.title, type: "video" })}
                       onDelete={() => deleteVideo.mutate(v.id)}
