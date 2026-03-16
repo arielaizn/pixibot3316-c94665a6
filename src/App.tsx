@@ -29,7 +29,7 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/pricing" element={<PlaceholderPage title="מחירים" />} />
               <Route path="/welcome" element={<WelcomePage />} />
-              <Route path="/dashboard" element={<PlaceholderPage title="לוח בקרה" />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/projects" element={<PlaceholderPage title="הפרויקטים שלי" />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
