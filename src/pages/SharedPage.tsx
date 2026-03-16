@@ -143,7 +143,7 @@ const SharedPage = () => {
       </header>
       <main className="container mx-auto max-w-4xl px-4 py-8">
         {videoUrl ? (
-          <PixiVideoPlayer src={videoUrl} title={title} />
+          <PixiVideoPlayer src={videoUrl} title={title} autoPlay />
         ) : (
           <div className="rounded-2xl border border-border bg-card p-12 text-center space-y-4">
             <p className="text-muted-foreground">הסרטון לא זמין</p>
