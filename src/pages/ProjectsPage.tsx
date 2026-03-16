@@ -366,7 +366,7 @@ const ProjectsPage = () => {
         <main className="container mx-auto px-4 py-8">
           {/* Breadcrumbs */}
           <div className="mb-4 flex items-center gap-1 text-sm">
-            <button onClick={() => setSelectedProject(null)} className="text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={() => navigate("/projects")} className="text-muted-foreground hover:text-foreground transition-colors">
               {t.allProjects}
             </button>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground rtl:rotate-180" />
