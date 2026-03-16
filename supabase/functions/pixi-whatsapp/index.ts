@@ -314,6 +314,7 @@ async function handleTokenMessage(
     .maybeSingle();
 
   const name = profile?.full_name?.split(" ")[0] || "";
+  const greeting = name ? `שלום ${name}! 👋` : "שלום! 👋";
   const plan = isAdmin ? "enterprise" : (credits?.plan_type || "free");
   const isUnlimited = credits?.is_unlimited || isAdmin;
   const remaining = isUnlimited
