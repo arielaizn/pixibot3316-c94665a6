@@ -373,11 +373,58 @@ async function handleTokenMessage(
   };
 }
 
+// ── Forward message to OpenClaw API ──
+async function forwardToOpenClaw(
+  userId: string,
+  text: string,
+  phone: string
+): Promise<string> {
+  const openClawUrl = Deno.env.get("OPENCLAW_API_URL");
+  if (!openClawUrl) {
+    console.error("OPENCLAW_API_URL not configured");
+    return "⚠️ המערכת לא זמינה כרגע. נסה שוב מאוחר יותר.";
+  }
+
+  try {
+    console.log(`Forwarding to OpenClaw: userId=${userId}, text="${text.substring(0, 50)}..."`);
+    const res = await fetch(openClawUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        user_id: userId,
+        phone,
+        source: "whatsapp",
+      }),
+    });
+
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.error(`OpenClaw error [${res.status}]: ${errBody}`);
+      return "⚠️ לא הצלחתי לעבד את ההודעה. נסה שוב.";
+    }
+
+    const data = await res.json();
+    // Support common response shapes: { reply }, { message }, { response }, { text }, { output }
+    const reply = data.reply || data.message || data.response || data.text || data.output;
+    if (!reply) {
+      console.error("OpenClaw returned no reply field:", JSON.stringify(data));
+      return "⚠️ קיבלתי תשובה ריקה מהמערכת. נסה שוב.";
+    }
+    console.log(`OpenClaw reply: "${String(reply).substring(0, 100)}..."`);
+    return String(reply);
+  } catch (err) {
+    console.error("OpenClaw fetch error:", err);
+    return "⚠️ לא הצלחתי להתחבר למערכת. נסה שוב מאוחר יותר.";
+  }
+}
+
 // ── Handle returning user (already linked phone) ──
 async function handleReturningUser(
   admin: ReturnType<typeof createClient>,
   user: { userId: string; email: string; fullName: string | null },
-  text: string
+  text: string,
+  phone: string
 ): Promise<BotResponse> {
   const isAdmin = await checkIsAdmin(admin, user.userId);
 
@@ -395,37 +442,18 @@ async function handleReturningUser(
 
   const name = user.fullName?.split(" ")[0] || "";
 
-  // ── Admin — never upsell ──
-  if (isAdmin || isUnlimited) {
-    return {
-      reply: [
-        name ? `ברוך שחזרת ${name}! 👋` : "ברוך שחזרת! 👋",
-        "",
-        "יש לך גישה *ללא הגבלה*. ♾️",
-        "",
-        "על איזה סרטון נעבוד היום? 🎬",
-      ].join("\n"),
-      userId: user.userId,
-      plan: "unlimited",
-      creditsRemaining: -1,
-    };
-  }
-
-  // ── No credits left — upgrade nudge ──
-  if (remaining <= 0) {
+  // ── No credits left (non-admin) — upgrade nudge ──
+  if (!isAdmin && !isUnlimited && remaining <= 0) {
     return buildUpgradeMessage(user.userId, plan, name);
   }
 
-  // ── Has credits — ready to create ──
+  // ── Forward to OpenClaw AI ──
+  const aiReply = await forwardToOpenClaw(user.userId, text, phone);
+
   return {
-    reply: [
-      name ? `ברוך שחזרת ${name}! 👋` : "ברוך שחזרת! 👋",
-      `נשארו לך *${remaining} קרדיטים* החודש.`,
-      "",
-      "על איזה סרטון נעבוד היום? 🎬",
-    ].join("\n"),
+    reply: aiReply,
     userId: user.userId,
-    plan,
+    plan: isUnlimited ? "unlimited" : plan,
     creditsRemaining: remaining,
   };
 }
