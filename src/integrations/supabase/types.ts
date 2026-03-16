@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      pixi_handoff_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          plan: string
+          quota: number
+          token: string
+          used: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          plan?: string
+          quota?: number
+          token: string
+          used?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          plan?: string
+          quota?: number
+          token?: string
+          used?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
