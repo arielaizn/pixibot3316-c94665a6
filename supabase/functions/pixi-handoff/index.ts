@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
     const token = generateShortToken();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
+    const { error: insertError } = await adminClient
       .from("pixi_handoff_tokens")
       .insert({
         token,
