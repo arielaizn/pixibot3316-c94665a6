@@ -203,7 +203,7 @@ async function handleMessage(
   // ── Look up user by phone number (returning user) ──
   const user = await findUserByPhone(admin, msg.from);
   if (user) {
-    return handleReturningUser(admin, user, text);
+    return handleReturningUser(admin, user, text, msg.from);
   }
 
   // ── Unknown user — prompt to register ──
