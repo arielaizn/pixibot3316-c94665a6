@@ -5,6 +5,7 @@ import { useDirection } from "@/contexts/DirectionContext";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
 import { getVideoPublicUrl } from "@/lib/videoUrl";
 import { Loader2, Download, Eye, ExternalLink } from "lucide-react";
+import { downloadFile } from "@/lib/downloadFile";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
