@@ -19,6 +19,7 @@ interface VideoData {
   thumbnail_url: string | null;
   created_at: string;
   view_count?: number;
+  status?: string;
 }
 
 interface SharedFileData {
@@ -135,6 +136,34 @@ const SharedPage = () => {
   useEffect(() => {
     loadShare();
   }, [token]);
+
+  // Realtime: auto-update when a single shared video gets its video_url
+  useEffect(() => {
+    if (!video || videoUrl) return; // only subscribe while waiting
+    const channel = supabase
+      .channel(`shared-video-${video.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "videos",
+          filter: `id=eq.${video.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          if (updated.video_url) {
+            setVideoUrl(getVideoPublicUrl(updated.video_url));
+            setVideo((prev) => prev ? { ...prev, ...updated } : prev);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [video?.id, videoUrl]);
 
   const handleDownload = () => {
     if (!videoUrl || !video) return;
@@ -404,6 +433,11 @@ const SharedPage = () => {
             <div className="overflow-hidden rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] ring-1 ring-border/10">
               {videoUrl ? (
                 <PixiVideoPlayer src={videoUrl} title={video?.title} thumbnail={video?.thumbnail_url} autoPlay />
+              ) : video?.status && video.status !== "completed" && video.status !== "failed" ? (
+                <div className="flex aspect-video flex-col items-center justify-center gap-3 bg-muted">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-muted-foreground">{isRTL ? "הסרטון בעיבוד... העמוד יתעדכן אוטומטית" : "Video is processing... will update automatically"}</p>
+                </div>
               ) : (
                 <div className="flex aspect-video items-center justify-center bg-muted">
                   <p className="text-muted-foreground">{isRTL ? "הסרטון לא זמין" : "Video not available"}</p>
