@@ -265,6 +265,19 @@ async function handleTokenMessage(
   const email = userData?.user?.email || "";
   const isAdmin = ADMIN_EMAILS.includes(email);
 
+  // If admin, ensure DB reflects unlimited status
+  if (isAdmin) {
+    await admin
+      .from("user_credits")
+      .update({
+        is_unlimited: true,
+        plan_type: "enterprise",
+        plan_credits: 80,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", handoff.user_id);
+  }
+
   const { data: profile } = await admin
     .from("profiles")
     .select("full_name")
@@ -278,8 +291,7 @@ async function handleTokenMessage(
     .maybeSingle();
 
   const name = profile?.full_name?.split(" ")[0] || "";
-  const greeting = name ? `שלום ${name}! 👋` : "שלום! 👋";
-  const plan = credits?.plan_type || "free";
+  const plan = isAdmin ? "enterprise" : (credits?.plan_type || "free");
   const isUnlimited = credits?.is_unlimited || isAdmin;
   const remaining = isUnlimited
     ? -1
@@ -289,15 +301,16 @@ async function handleTokenMessage(
   if (isAdmin || isUnlimited) {
     return {
       reply: [
-        greeting,
-        "אני *Pixi* – יוצר סרטוני AI. 🎬",
+        name ? `שלום ${name}! 👋` : "שלום! 👋",
         "",
-        "יש לך גישה *ללא הגבלה*. ♾️",
+        "אתה מחובר כעת כמשתמש מנהל.",
         "",
-        "כתוב לי על מה הסרטון שאתה רוצה ליצור 🎥",
+        "🎬 סרטונים ללא הגבלה",
+        "",
+        "ספר לי איזה סרטון ליצור!",
       ].join("\n"),
       userId: handoff.user_id,
-      plan: "unlimited",
+      plan: "enterprise",
       creditsRemaining: -1,
     };
   }
