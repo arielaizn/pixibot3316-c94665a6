@@ -27,7 +27,7 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardNavbar />
+      <Navbar />
 
       {/* Decorative mascot */}
       <img
