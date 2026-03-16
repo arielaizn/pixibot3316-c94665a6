@@ -7,6 +7,22 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function getAuthUser(req: Request, supabaseUrl: string) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await userClient.auth.getClaims(token);
+  if (error || !data?.claims?.sub) return null;
+
+  return { id: data.claims.sub as string, email: (data.claims.email as string) || "" };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -23,7 +39,6 @@ serve(async (req) => {
 
     switch (action) {
       // ── ATTRIBUTE SIGNUP ──
-      // Called after a new user signs up with a referral code
       case "attribute_signup": {
         const { referral_code, referred_user_id } = params;
         if (!referral_code || !referred_user_id) {
@@ -33,7 +48,6 @@ serve(async (req) => {
           });
         }
 
-        // Find the referrer
         const { data: codeRecord } = await adminClient
           .from("referral_codes")
           .select("user_id")
@@ -47,7 +61,6 @@ serve(async (req) => {
           });
         }
 
-        // Anti-abuse: can't refer yourself
         if (codeRecord.user_id === referred_user_id) {
           return new Response(JSON.stringify({ error: "Cannot refer yourself" }), {
             status: 400,
@@ -55,7 +68,6 @@ serve(async (req) => {
           });
         }
 
-        // Anti-abuse: check if this user was already referred
         const { data: existing } = await adminClient
           .from("referrals")
           .select("id")
@@ -69,7 +81,6 @@ serve(async (req) => {
           });
         }
 
-        // Create referral record
         const { data: referral, error: refErr } = await adminClient
           .from("referrals")
           .insert({
@@ -87,7 +98,6 @@ serve(async (req) => {
       }
 
       // ── ATTRIBUTE PAID CONVERSION ──
-      // Called when a referred user makes a payment
       case "attribute_payment": {
         const { referred_user_id } = params;
         if (!referred_user_id) {
@@ -97,7 +107,6 @@ serve(async (req) => {
           });
         }
 
-        // Find referral record for this user that hasn't been converted yet
         const { data: referral } = await adminClient
           .from("referrals")
           .select("*")
@@ -106,18 +115,15 @@ serve(async (req) => {
           .single();
 
         if (!referral) {
-          // No pending referral or already converted
           result = { converted: false, reason: "no_pending_referral" };
           break;
         }
 
-        // Update referral status
         await adminClient
           .from("referrals")
           .update({ status: "paid", converted_at: new Date().toISOString() })
           .eq("id", referral.id);
 
-        // Anti-abuse: check if reward already given for this referral
         const { data: existingReward } = await adminClient
           .from("referral_rewards")
           .select("id")
@@ -129,7 +135,6 @@ serve(async (req) => {
           break;
         }
 
-        // Grant reward: 3 extra credits to the referrer
         const REWARD_CREDITS = 3;
 
         const { data: rewardData, error: rewardErr } = await adminClient
@@ -145,7 +150,6 @@ serve(async (req) => {
 
         if (rewardErr) throw rewardErr;
 
-        // Add credits to user balance
         await adminClient.rpc("add_extra_credits", {
           p_user_id: referral.referrer_user_id,
           p_amount: REWARD_CREDITS,
@@ -155,29 +159,16 @@ serve(async (req) => {
         break;
       }
 
-      // ── GET REFERRAL STATS (for user dashboard) ──
+      // ── GET REFERRAL STATS ──
       case "get_stats": {
-        const authHeader = req.headers.get("Authorization");
-        if (!authHeader) {
+        const user = await getAuthUser(req, supabaseUrl);
+        if (!user) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
 
-        const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-        const userClient = createClient(supabaseUrl, anonKey, {
-          global: { headers: { Authorization: authHeader } },
-        });
-        const { data: { user }, error: authErr } = await userClient.auth.getUser();
-        if (authErr || !user) {
-          return new Response(JSON.stringify({ error: "Invalid token" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
-        // Get or create referral code
         let { data: codeRecord } = await adminClient
           .from("referral_codes")
           .select("*")
@@ -194,21 +185,18 @@ serve(async (req) => {
           codeRecord = newCode;
         }
 
-        // Get referrals
         const { data: referrals } = await adminClient
           .from("referrals")
           .select("*")
           .eq("referrer_user_id", user.id)
           .order("created_at", { ascending: false });
 
-        // Get rewards
         const { data: rewards } = await adminClient
           .from("referral_rewards")
           .select("*")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
 
-        // Get referred user emails
         const referredIds = (referrals || [])
           .map((r: any) => r.referred_user_id)
           .filter(Boolean);
@@ -245,21 +233,9 @@ serve(async (req) => {
 
       // ── ADMIN REFERRAL STATS ──
       case "admin_stats": {
-        const authHeader = req.headers.get("Authorization");
-        if (!authHeader) {
+        const user = await getAuthUser(req, supabaseUrl);
+        if (!user) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
-        const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-        const userClient = createClient(supabaseUrl, anonKey, {
-          global: { headers: { Authorization: authHeader } },
-        });
-        const { data: { user }, error: authErr } = await userClient.auth.getUser();
-        if (authErr || !user) {
-          return new Response(JSON.stringify({ error: "Invalid token" }), {
             status: 401,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -273,7 +249,6 @@ serve(async (req) => {
           });
         }
 
-        // All referrals
         const { data: allReferrals } = await adminClient
           .from("referrals")
           .select("*")
@@ -286,7 +261,6 @@ serve(async (req) => {
           .order("created_at", { ascending: false })
           .limit(200);
 
-        // Get user emails for display
         const { data: authUsers } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
         const emailMap: Record<string, string> = {};
         if (authUsers?.users) {
@@ -299,7 +273,6 @@ serve(async (req) => {
         const totalPaid = (allReferrals || []).filter((r: any) => r.status === "paid").length;
         const totalRewardsGranted = (allRewards || []).reduce((sum: number, r: any) => sum + (r.reward_value || 0), 0);
 
-        // Top referrers
         const referrerCounts: Record<string, number> = {};
         (allReferrals || []).forEach((r: any) => {
           referrerCounts[r.referrer_user_id] = (referrerCounts[r.referrer_user_id] || 0) + 1;
