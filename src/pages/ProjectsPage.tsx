@@ -485,6 +485,7 @@ const ProjectsPage = () => {
                       onDelete={() => deleteFile.mutate(file.id)}
                       onStar={() => toggleStar.mutate({ id: file.id, starred: !file.is_starred })}
                       onMove={() => setMoveTarget({ fileId: file.id, fileName: file.file_name })}
+                      onShare={() => setFileShareTarget({ fileId: file.id, fileName: file.file_name })}
                     />
                   );
                 })}
