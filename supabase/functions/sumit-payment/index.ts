@@ -221,7 +221,9 @@ serve(async (req) => {
         break;
       }
 
-      // ── VERIFY PAYMENT (called after redirect back) ──
+      // ── CHECK PAYMENT STATUS (called after redirect back) ──
+      // NOTE: Actual activation happens via the sumit-webhook endpoint.
+      // This only checks current status for the frontend UI.
       case "verify_payment": {
         const { payment_id } = params;
 
@@ -233,117 +235,8 @@ serve(async (req) => {
           .single();
 
         if (pErr || !payment) throw new Error("Payment not found");
-        if (payment.status === "completed") {
-          result = { status: "already_completed", payment };
-          break;
-        }
 
-        // Mark as completed
-        await adminClient
-          .from("payments")
-          .update({ status: "completed" })
-          .eq("id", payment_id);
-
-        // Apply credits based on payment type
-        if (payment.payment_type === "subscription" && payment.plan_key) {
-          const planCredits = PLAN_CREDITS[payment.plan_key] || 0;
-
-          await adminClient
-            .from("user_credits")
-            .update({
-              plan_type: payment.plan_key,
-              plan_credits: planCredits,
-              used_credits: 0,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("user_id", user.id);
-
-          // Deactivate old subscription
-          await adminClient
-            .from("subscriptions")
-            .update({ status: "inactive" })
-            .eq("user_id", user.id)
-            .eq("status", "active");
-
-          // Create new subscription
-          const cycleMs =
-            (payment.billing_cycle === "yearly" ? 365 : 30) * 86400000;
-          await adminClient.from("subscriptions").insert({
-            user_id: user.id,
-            plan_type: payment.plan_key,
-            monthly_credits: planCredits,
-            status: "active",
-            billing_cycle_start: new Date().toISOString(),
-            billing_cycle_end: new Date(Date.now() + cycleMs).toISOString(),
-          });
-
-          await adminClient.from("credit_transactions").insert({
-            user_id: user.id,
-            type: "plan_upgrade",
-            amount: planCredits,
-            source: `${payment.plan_key}_${payment.billing_cycle}`,
-          });
-        } else if (payment.payment_type === "credit_pack" && payment.credits) {
-          await adminClient.rpc("add_extra_credits", {
-            p_user_id: user.id,
-            p_amount: payment.credits,
-          });
-
-          await adminClient.from("credit_purchases").insert({
-            user_id: user.id,
-            credits: payment.credits,
-            payment_id: payment.id,
-          });
-        }
-
-        // Create & send invoice (non-blocking)
-        try {
-          const { data: profile } = await adminClient
-            .from("profiles")
-            .select("full_name")
-            .eq("user_id", user.id)
-            .maybeSingle();
-
-          const invoiceResult = await sumitCall(
-            "/accounting/documents/create/",
-            {
-              Document: {
-                Type: 320,
-                CustomerName:
-                  profile?.full_name || user.email?.split("@")[0] || "",
-                CustomerEmail: user.email,
-                Items: [
-                  {
-                    Name:
-                      payment.payment_type === "subscription"
-                        ? `Pixi ${payment.plan_key} Plan`
-                        : `Pixi Credit Pack (${payment.credits} videos)`,
-                    Price: payment.amount,
-                    Quantity: 1,
-                  },
-                ],
-                SendByEmail: true,
-                Language: "he",
-              },
-            }
-          );
-
-          // Send invoice via email
-          const docId =
-            invoiceResult.Data?.DocumentID || invoiceResult.DocumentID;
-          if (docId) {
-            await sumitCall("/accounting/documents/send/", {
-              DocumentID: docId,
-              Email: user.email,
-            }).catch((e: any) =>
-              console.error("Invoice send failed:", e)
-            );
-          }
-        } catch (invoiceErr) {
-          console.error("Invoice creation failed (non-blocking):", invoiceErr);
-        }
-
-        result = { status: "completed", payment };
+        result = { status: payment.status, payment };
         break;
       }
 
