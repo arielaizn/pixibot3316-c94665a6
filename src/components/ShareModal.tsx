@@ -206,6 +206,8 @@ const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, proj
               {copied ? t("share.copied") : t("share.copyLink")}
             </Button>
 
+            {/* Email sharing disabled – kept for future use */}
+            {false && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">{t("share.inviteEmail")}</label>
               <div className="flex gap-2">
@@ -237,6 +239,7 @@ const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, proj
                 {t("share.send")}
               </Button>
             </div>
+            )}
           </div>
         )}
       </DialogContent>
