@@ -2,11 +2,13 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCredits, getPlanLabel } from "@/hooks/useCredits";
 import { useDirection } from "@/contexts/DirectionContext";
+import { useProjects } from "@/hooks/useProjects";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import CreditBar from "@/components/CreditBar";
 import ReferralCard from "@/components/ReferralCard";
 import Navbar from "@/components/Navbar";
-import { Loader2, FolderOpen, Plus, Film } from "lucide-react";
+import { Loader2, FolderOpen, Plus, Film, Play, ExternalLink } from "lucide-react";
 import mascot from "@/assets/pixi-mascot.png";
 
 const DashboardPage = () => {
