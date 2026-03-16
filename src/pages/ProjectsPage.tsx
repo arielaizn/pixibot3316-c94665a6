@@ -531,7 +531,6 @@ const ProjectsPage = () => {
           else renameFile.mutate({ id, name });
           setRenameTarget(null);
         }} isRTL={isRTL} t={t} />
-        <FilePreviewDialog previewFile={previewFile} onClose={() => setPreviewFile(null)} isRTL={isRTL} t={t} />
       </div>
     );
   }
