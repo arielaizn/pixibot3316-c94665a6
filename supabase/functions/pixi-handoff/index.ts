@@ -72,7 +72,10 @@ Deno.serve(async (req) => {
     const plan = userCredits?.plan_type || "free";
     const quota = isUnlimited ? 999999 : Math.max(0, (userCredits?.plan_credits || 0) + (userCredits?.extra_credits || 0) - (userCredits?.used_credits || 0));
 
-    const { error: insertError } = await adminClient
+    // Generate short human-friendly token
+    const token = generateShortToken();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
       .from("pixi_handoff_tokens")
       .insert({
         token,
