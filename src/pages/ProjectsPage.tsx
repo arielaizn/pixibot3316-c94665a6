@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, useMemo } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import { Navigate, Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
 import { getVideoPublicUrl } from "@/lib/videoUrl";
