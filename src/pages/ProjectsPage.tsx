@@ -629,6 +629,31 @@ const ProjectsPage = () => {
         {/* Main content (no search) */}
         {!searchResults && (
           <>
+            {/* AI Suggested Folders */}
+            {suggestedFolders.length > 0 && (
+              <div className="mb-6">
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  {isRTL ? "תיקיות מוצעות" : "Suggested Folders"}
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {suggestedFolders.map((sf) => (
+                    <button
+                      key={sf.name}
+                      onClick={() => { createProject.mutate(sf.name); }}
+                      className="group flex items-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-2.5 transition-all hover:border-primary hover:bg-primary/10"
+                    >
+                      <Wand2 className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium text-foreground">{sf.name}</span>
+                      <Badge variant="secondary" className="rounded-full text-[10px]">
+                        {sf.videoCount} {isRTL ? "סרטונים" : "videos"}
+                      </Badge>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {projectsLoading ? (
               <div className="flex justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
