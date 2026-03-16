@@ -923,7 +923,17 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(); }}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onVersions(); }}><History className="me-2 h-3.5 w-3.5" /> {t.versions}</DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(); }}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); vid.video_url && window.open(vid.video_url); }}>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                if (vid.video_url) {
+                  const url = getVideoPublicUrl(vid.video_url);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = (vid.title || "video") + ".mp4";
+                  a.target = "_blank";
+                  a.click();
+                }
+              }}>
                 <Download className="me-2 h-3.5 w-3.5" /> {t.download}
               </DropdownMenuItem>
               {onClassify && !vid.category && (

@@ -73,7 +73,7 @@ const SharedPage = () => {
           .order("created_at", { ascending: false })
           .limit(1);
         if (vids?.[0]) {
-          setVideoUrl(vids[0].video_url || "");
+          setVideoUrl(getVideoPublicUrl(vids[0].video_url));
           setTitle(vids[0].title || "");
         }
       }
