@@ -14,6 +14,16 @@ import DashboardPage from "./pages/DashboardPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
 import PricingPage from "./pages/PricingPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+// Admin pages
+import AdminLoginPage from "./pages/admin/AdminLoginPage.tsx";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage.tsx";
+import AdminUsersPage from "./pages/admin/AdminUsersPage.tsx";
+import AdminSubscriptionsPage from "./pages/admin/AdminSubscriptionsPage.tsx";
+import AdminCreditsPage from "./pages/admin/AdminCreditsPage.tsx";
+import AdminVideosPage from "./pages/admin/AdminVideosPage.tsx";
+import AdminProjectsPage from "./pages/admin/AdminProjectsPage.tsx";
+import AdminWhatsAppPage from "./pages/admin/AdminWhatsAppPage.tsx";
+import NotAdminPage from "./pages/admin/NotAdminPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +44,16 @@ const App = () => (
                 <Route path="/welcome" element={<WelcomePage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/projects" element={<ProjectsPage />} />
+                {/* Admin */}
+                <Route path="/admin" element={<AdminLoginPage />} />
+                <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+                <Route path="/admin/users" element={<AdminUsersPage />} />
+                <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
+                <Route path="/admin/credits" element={<AdminCreditsPage />} />
+                <Route path="/admin/videos" element={<AdminVideosPage />} />
+                <Route path="/admin/projects" element={<AdminProjectsPage />} />
+                <Route path="/admin/whatsapp" element={<AdminWhatsAppPage />} />
+                <Route path="/not-admin" element={<NotAdminPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>
