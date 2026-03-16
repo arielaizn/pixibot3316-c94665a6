@@ -478,7 +478,7 @@ const ProjectsPage = () => {
                       viewMode={viewMode}
                       t={t}
                       onPreview={() => {
-                        setPreviewFile(file as any);
+                        navigate(`/projects/file/${file.id}`);
                       }}
                       onRename={() => setRenameTarget({ id: file.id, name: file.file_name, type: "file" })}
                       onDelete={() => deleteFile.mutate(file.id)}
