@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
+import CreditBar from "@/components/CreditBar";
+import { useCredits } from "@/hooks/useCredits";
+import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
 import { Check, Zap, Star, Crown, Building2, Rocket, Package, AlertCircle } from "lucide-react";
 
@@ -103,6 +105,8 @@ const packs: Pack[] = [
 const PricingPage = () => {
   const { isRTL } = useDirection();
   const [yearly, setYearly] = useState(false);
+  const { user } = useAuth();
+  const { credits } = useCredits();
 
   const t = {
     title: isRTL ? "תוכניות ומחירים" : "Plans & Pricing",
@@ -264,11 +268,18 @@ const PricingPage = () => {
         </div>
 
         {/* ── USAGE PRESSURE ── */}
-        <div className="mx-auto mb-16 max-w-md rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-center shadow-sm dark:bg-primary/[0.06]">
-          <p className="mb-3 text-3xl font-extrabold text-foreground">🎬 12 / 15</p>
-          <p className="mb-1 text-sm font-semibold text-foreground">{t.usageUsed}</p>
-          <p className="text-sm text-muted-foreground">{t.usageText}</p>
-        </div>
+        {user && credits && (
+          <div className="mx-auto mb-16 max-w-md rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 shadow-sm dark:bg-primary/[0.06]">
+            <CreditBar credits={credits} showPlan showWarning />
+          </div>
+        )}
+        {!user && (
+          <div className="mx-auto mb-16 max-w-md rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-center shadow-sm dark:bg-primary/[0.06]">
+            <p className="mb-3 text-3xl font-extrabold text-foreground">🎬 12 / 15</p>
+            <p className="mb-1 text-sm font-semibold text-foreground">{t.usageUsed}</p>
+            <p className="text-sm text-muted-foreground">{t.usageText}</p>
+          </div>
+        )}
 
         {/* ── ADDITIONAL PACKS ── */}
         <div className="mx-auto max-w-4xl">
