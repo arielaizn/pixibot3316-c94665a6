@@ -44,7 +44,10 @@ const DashboardPage = () => {
     firstVideo: isRTL ? "צור סרטון ראשון" : "Create First Video",
   };
 
-  const plan = credits ? getPlanLabel(credits.plan_type, isRTL) : "...";
+  const isUnlimited = credits?.isUnlimited;
+  const plan = isUnlimited
+    ? (isRTL ? "מנהל" : "Admin")
+    : credits ? getPlanLabel(credits.plan_type, isRTL) : "...";
 
   return (
     <div className="min-h-screen bg-background">
