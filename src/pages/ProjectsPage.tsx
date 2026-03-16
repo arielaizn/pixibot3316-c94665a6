@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useMemo } from "react";
 import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
+import { getVideoPublicUrl } from "@/lib/videoUrl";
 import { useFileManager, UserFile, UserFolder } from "@/hooks/useFileManager";
 import { useProjects, ProjectWithContent, VideoRecord, ProjectFile } from "@/hooks/useProjects";
 import Navbar from "@/components/Navbar";
