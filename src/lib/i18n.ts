@@ -315,6 +315,7 @@ const translations = {
   "admin.nav.projects": { he: "פרויקטים", en: "Projects" },
   "admin.nav.whatsapp": { he: "WhatsApp", en: "WhatsApp" },
   "admin.nav.referrals": { he: "הפניות", en: "Referrals" },
+  "admin.nav.userStats": { he: "סטטיסטיקות סרטונים", en: "Video Stats" },
 
   // ── Common ──
   "common.video": { he: "סרטון", en: "Video" },

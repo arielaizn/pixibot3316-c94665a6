@@ -3,7 +3,7 @@ import { Link, useLocation, Navigate } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useDirection } from "@/contexts/DirectionContext";
 import {
-  LayoutDashboard, Users, CreditCard, Film, FolderOpen, MessageCircle, Shield, LogOut, Loader2, Menu, Gift,
+  LayoutDashboard, Users, CreditCard, Film, FolderOpen, MessageCircle, Shield, LogOut, Loader2, Menu, Gift, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,6 +18,7 @@ const navItems = [
   { path: "/admin/projects", icon: FolderOpen, labelKey: "admin.nav.projects" as const },
   { path: "/admin/whatsapp", icon: MessageCircle, labelKey: "admin.nav.whatsapp" as const },
   { path: "/admin/referrals", icon: Gift, labelKey: "admin.nav.referrals" as const },
+  { path: "/admin/user-stats", icon: BarChart3, labelKey: "admin.nav.userStats" as const },
 ];
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {

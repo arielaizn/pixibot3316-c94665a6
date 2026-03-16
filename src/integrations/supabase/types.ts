@@ -614,6 +614,65 @@ export type Database = {
         }
         Relationships: []
       }
+      user_videos: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          generation_time: number | null
+          id: string
+          status: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          generation_time?: number | null
+          id?: string
+          status?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          generation_time?: number | null
+          id?: string
+          status?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_videos_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: true
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users_stats: {
+        Row: {
+          last_video_created_at: string | null
+          total_generation_time: number
+          total_videos_created: number
+          user_id: string
+        }
+        Insert: {
+          last_video_created_at?: string | null
+          total_generation_time?: number
+          total_videos_created?: number
+          user_id: string
+        }
+        Update: {
+          last_video_created_at?: string | null
+          total_generation_time?: number
+          total_videos_created?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           category: string | null

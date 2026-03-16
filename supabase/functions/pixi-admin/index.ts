@@ -201,6 +201,22 @@ serve(async (req) => {
         break;
       }
 
+      // ── LIST USER STATS ──
+      case "list_user_stats": {
+        const { data, error } = await adminClient
+          .from("users_stats")
+          .select("*")
+          .order("total_videos_created", { ascending: false });
+        if (error) throw error;
+        // Enrich with user email
+        const statUserIds = (data || []).map((s: any) => s.user_id);
+        const { data: authList } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+        const emailMap: Record<string, string> = {};
+        (authList?.users || []).forEach((u: any) => { emailMap[u.id] = u.email || ""; });
+        result = (data || []).map((s: any) => ({ ...s, email: emailMap[s.user_id] || "unknown" }));
+        break;
+      }
+
       // ── LIST PROJECTS ──
       case "list_projects": {
         const { data, error } = await adminClient
