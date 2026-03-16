@@ -391,35 +391,57 @@ function buildUpgradeMessage(
   };
 }
 
-// ── Post-video upgrade nudge (called externally after video generation) ──
-export function buildPostVideoUpgrade(
+// ── Post-video response builder (called after video generation) ──
+// Returns the WOW moment message + upgrade nudge when appropriate
+export function buildPostVideoResponse(
   userId: string,
   plan: string,
   remaining: number,
-  name: string
+  name: string,
+  videoUrl?: string,
+  isFirstVideo?: boolean
 ): string {
-  // Don't nudge if user has credits or is unlimited
-  if (remaining > 0 || remaining === -1) {
+  const isUnlimited = remaining === -1;
+
+  // ── Video delivery header ──
+  const deliveryLines = [
+    "🎬 הסרטון שלך מוכן! 🎉",
+  ];
+  if (videoUrl) {
+    deliveryLines.push("", `📥 ${videoUrl}`);
+  }
+
+  // ── Admin / unlimited — just deliver ──
+  if (isUnlimited) {
     return [
-      "הסרטון שלך מוכן! 🎉",
-      "",
-      `נשארו לך *${remaining === -1 ? "∞" : remaining} קרדיטים*.`,
+      ...deliveryLines,
       "",
       "שלח לי את הנושא של הסרטון הבא כשתהיה מוכן 🎬",
     ].join("\n");
   }
 
-  // No credits left — friendly upgrade
+  // ── Has remaining credits — deliver + show balance ──
+  if (remaining > 0) {
+    return [
+      ...deliveryLines,
+      "",
+      `נשארו לך *${remaining} קרדיטים* החודש.`,
+      "",
+      "שלח לי את הנושא של הסרטון הבא כשתהיה מוכן 🎬",
+    ].join("\n");
+  }
+
+  // ── No credits left — WOW moment + upgrade ──
   const planOrder = ["free", "starter", "creator", "pro", "business", "enterprise"];
   const currentIndex = planOrder.indexOf(plan);
   const nextPlans = planOrder.filter((_, i) => i > currentIndex).slice(0, 3);
 
   const planLabels: Record<string, string> = {
-    starter: "🎬 *Starter* — 3 סרטונים — ₪49/חודש",
-    creator: "🎬 *Creator* — 7 סרטונים — ₪99/חודש",
-    pro: "🎬 *Pro* — 15 סרטונים — ₪199/חודש",
-    business: "🏢 *Business* — 35 סרטונים — ₪399/חודש",
-    enterprise: "🚀 *Enterprise* — 80 סרטונים — ₪799/חודש",
+    starter: "🎬 *Starter* — 3 סרטונים בחודש — ₪49",
+    creator: "🎬 *Creator* — 7 סרטונים בחודש — ₪99",
+    pro: "🎬 *Pro* — 15 סרטונים בחודש — ₪199",
+    business: "🏢 *Business* — 35 סרטונים בחודש — ₪399",
+    enterprise: "🚀 *Enterprise* — 80 סרטונים בחודש — ₪799",
   };
 
   const planLines = nextPlans.map((p) => {
@@ -427,14 +449,27 @@ export function buildPostVideoUpgrade(
     return `${planLabels[p]}\n${link}`;
   });
 
+  const wowIntro = isFirstVideo
+    ? [
+        "",
+        "רוצה ליצור עוד סרטונים כאלה? 🚀",
+        "",
+        "Pixi יכול ליצור עבורך סרטונים תוך שניות.",
+        "בחר חבילה שמתאימה לך 👇",
+      ]
+    : [
+        "",
+        "הקרדיטים שלך נגמרו.",
+        "רוצה להמשיך ליצור? בחר חבילה 👇",
+      ];
+
   return [
-    "הסרטון הראשון שלך מוכן! 🎉",
-    "",
-    "רוצה ליצור עוד סרטונים?",
+    ...deliveryLines,
+    ...wowIntro,
     "",
     ...planLines,
     "",
-    "בחרו חבילה כאן 👆",
+    "לחצו על הקישור לתשלום מאובטח 🔒",
   ].join("\n");
 }
 
