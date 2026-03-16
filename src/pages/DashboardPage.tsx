@@ -74,9 +74,11 @@ const DashboardPage = () => {
               </div>
               <div className="h-8 w-px bg-border" />
               <div className="text-right">
-                <p className="text-xs text-muted-foreground">{t.creditsLeft}</p>
+                <p className="text-xs text-muted-foreground">
+                  {isUnlimited ? (isRTL ? "סרטונים" : "Videos") : t.creditsLeft}
+                </p>
                 <p className="font-bold text-primary">
-                  {creditsLoading ? "..." : credits ? (credits.isUnlimited ? "∞" : `${credits.used_credits} / ${credits.totalCredits}`) : "—"}
+                  {creditsLoading ? "..." : credits ? (isUnlimited ? "🎬 ∞" : `${credits.used_credits} / ${credits.totalCredits}`) : "—"}
                 </p>
               </div>
             </div>
