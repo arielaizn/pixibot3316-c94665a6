@@ -81,12 +81,7 @@ const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, proj
         .update({ visibility, permission })
         .eq("share_token", existingShareToken);
 
-      // For video shares, use the simple /share/:videoId format
-      if (videoId) {
-        return `${window.location.origin}/share/${videoId}`;
-      }
-      const base = window.location.origin;
-      return `${base}/share/project/${existingShareToken}`;
+      return `${window.location.origin}/s/${existingShareToken}`;
     }
 
     // Must have at least a projectId to create a share record
@@ -114,12 +109,7 @@ const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, proj
     setExistingShareToken(data.share_token);
     setVisibility(visibility === "private" ? "link" : visibility);
 
-    // For video shares, use the simple /share/:videoId format
-    if (videoId) {
-      return `${window.location.origin}/share/${videoId}`;
-    }
-    const base = window.location.origin;
-    return `${base}/share/project/${data.share_token}`;
+      return `${window.location.origin}/s/${data.share_token}`;
   };
 
   // Persist visibility changes
