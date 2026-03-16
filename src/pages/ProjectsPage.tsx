@@ -463,7 +463,19 @@ const ProjectsPage = () => {
                       Icon={Icon}
                       viewMode={viewMode}
                       t={t}
-                      onPreview={() => setPreviewFile(file as any)}
+                      onPreview={() => {
+                        // For video files, open in the main project player instead of the modal
+                        if (file.file_type?.startsWith("video") && selectedProject) {
+                          const match = selectedProject.videos.find(v =>
+                            v.video_url && file.file_url.includes(encodeURIComponent(v.video_url).replace(/%2F/g, '/'))
+                          );
+                          if (match) {
+                            navigate(`/projects/${selectedProject.id}/video/${match.id}`);
+                            return;
+                          }
+                        }
+                        setPreviewFile(file as any);
+                      }}
                       onRename={() => setRenameTarget({ id: file.id, name: file.file_name, type: "file" })}
                       onDelete={() => deleteFile.mutate(file.id)}
                       onStar={() => toggleStar.mutate({ id: file.id, starred: !file.is_starred })}
