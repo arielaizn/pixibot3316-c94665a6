@@ -1120,8 +1120,11 @@ function FilePreviewDialog({ previewFile, onClose, isRTL, t }: {
             </div>
           )}
           <div className="mt-4 flex justify-end">
-            <Button asChild className="rounded-xl bg-primary px-6 py-5 font-bold text-primary-foreground hover:bg-primary/90">
-              <a href={previewFile?.file_url} download={previewFile?.file_name}><Download className="me-2 h-4 w-4" />{t.download}</a>
+            <Button
+              className="rounded-xl bg-primary px-6 py-5 font-bold text-primary-foreground hover:bg-primary/90"
+              onClick={() => previewFile && downloadFile(previewFile.file_url, previewFile.file_name)}
+            >
+              <Download className="me-2 h-4 w-4" />{t.download}
             </Button>
           </div>
         </div>

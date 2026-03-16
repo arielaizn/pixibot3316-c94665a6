@@ -115,11 +115,7 @@ const SharedPage = () => {
 
   const handleDownload = () => {
     if (!videoUrl || !video) return;
-    const a = document.createElement("a");
-    a.href = videoUrl;
-    a.download = (video.title || "video") + ".mp4";
-    a.target = "_blank";
-    a.click();
+    downloadFile(videoUrl, (video.title || "video") + ".mp4");
   };
 
   const formatDate = (d: string) => {
