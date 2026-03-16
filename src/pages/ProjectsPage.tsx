@@ -70,7 +70,6 @@ const ProjectsPage = () => {
   const [newName, setNewName] = useState("");
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string; type: "file" | "folder" | "project" | "video" } | null>(null);
   const [dragOver, setDragOver] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [moveTarget, setMoveTarget] = useState<{ fileId: string; fileName: string } | null>(null);
 
