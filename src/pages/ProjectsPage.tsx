@@ -281,7 +281,7 @@ const ProjectsPage = () => {
                 className="rounded-xl gap-1.5"
                 onClick={() =>
                   setShareTarget({
-                    projectId: playingVideo.project_id || "",
+                    projectId: playingVideo.project_id,
                     videoId: playingVideo.id,
                     name: playingVideo.title,
                   })
