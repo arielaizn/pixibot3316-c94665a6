@@ -2,3 +2,6 @@ project_id = "hjgfdrurmdbpwcwzuret"
 
 [functions.sumit-webhook]
 verify_jwt = false
+
+[functions.pixi-whatsapp]
+verify_jwt = false
