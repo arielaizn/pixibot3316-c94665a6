@@ -136,6 +136,34 @@ const SharedPage = () => {
     loadShare();
   }, [token]);
 
+  // Realtime: auto-update when a single shared video gets its video_url
+  useEffect(() => {
+    if (!video || videoUrl) return; // only subscribe while waiting
+    const channel = supabase
+      .channel(`shared-video-${video.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "videos",
+          filter: `id=eq.${video.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          if (updated.video_url) {
+            setVideoUrl(getVideoPublicUrl(updated.video_url));
+            setVideo((prev) => prev ? { ...prev, ...updated } : prev);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [video?.id, videoUrl]);
+
   const handleDownload = () => {
     if (!videoUrl || !video) return;
     downloadFile(videoUrl, (video.title || "video") + ".mp4");
