@@ -27,6 +27,7 @@ const App = () => (
               <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/pricing" element={<PlaceholderPage title="מחירים" />} />
+              <Route path="/welcome" element={<WelcomePage />} />
               <Route path="/dashboard" element={<PlaceholderPage title="לוח בקרה" />} />
               <Route path="/projects" element={<PlaceholderPage title="הפרויקטים שלי" />} />
               <Route path="*" element={<NotFound />} />
