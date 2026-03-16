@@ -9,6 +9,7 @@ import { useProjects, ProjectWithContent, VideoRecord, ProjectFile } from "@/hoo
 import Navbar from "@/components/Navbar";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
 import ShareModal from "@/components/ShareModal";
+import FileShareModal from "@/components/FileShareModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
