@@ -1,0 +1,128 @@
+import { useDirection } from "@/contexts/DirectionContext";
+import { useAdminReferralStats } from "@/hooks/useReferral";
+import AdminLayout from "@/components/admin/AdminLayout";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Users, CreditCard, Gift, Trophy } from "lucide-react";
+
+const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: string; value: number | string; color: string }) => (
+  <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+    <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ${color}`}>
+      <Icon className="h-5 w-5" />
+    </div>
+    <p className="text-sm text-muted-foreground">{label}</p>
+    <p className="text-3xl font-extrabold text-foreground">{value}</p>
+  </div>
+);
+
+const AdminReferralsPage = () => {
+  const { isRTL } = useDirection();
+  const { data, isLoading } = useAdminReferralStats();
+
+  const t = {
+    title: isRTL ? "ניהול הפניות" : "Referral Management",
+    totalSignups: isRTL ? "הרשמות מהפניות" : "Referral Signups",
+    totalPaid: isRTL ? "המרות בתשלום" : "Paid Conversions",
+    totalRewards: isRTL ? "קרדיטים שחולקו" : "Credits Awarded",
+    topReferrers: isRTL ? "מפנים מובילים" : "Top Referrers",
+    referrer: isRTL ? "מפנה" : "Referrer",
+    referred: isRTL ? "הופנה" : "Referred",
+    status: isRTL ? "סטטוס" : "Status",
+    date: isRTL ? "תאריך" : "Date",
+    count: isRTL ? "הפניות" : "Referrals",
+    recentReferrals: isRTL ? "הפניות אחרונות" : "Recent Referrals",
+  };
+
+  const statusLabels: Record<string, string> = {
+    clicked: isRTL ? "לחץ" : "Clicked",
+    signed_up: isRTL ? "נרשם" : "Signed Up",
+    paid: isRTL ? "שילם" : "Paid",
+  };
+
+  return (
+    <AdminLayout>
+      <h2 className="mb-6 text-2xl font-bold text-foreground">{t.title}</h2>
+
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <>
+          {/* Stats */}
+          <div className="mb-8 grid gap-5 sm:grid-cols-3">
+            <StatCard icon={Users} label={t.totalSignups} value={data?.totalSignups || 0} color="bg-primary/10 text-primary" />
+            <StatCard icon={CreditCard} label={t.totalPaid} value={data?.totalPaid || 0} color="bg-accent/10 text-accent" />
+            <StatCard icon={Gift} label={t.totalRewards} value={data?.totalRewardsGranted || 0} color="bg-primary/10 text-primary" />
+          </div>
+
+          {/* Top referrers */}
+          {data?.topReferrers?.length > 0 && (
+            <div className="mb-8">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
+                <Trophy className="h-5 w-5 text-primary" />
+                {t.topReferrers}
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {data.topReferrers.map((ref: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-sm">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                        {i + 1}
+                      </span>
+                      <span className="truncate text-sm font-medium text-foreground" dir="ltr">{ref.email}</span>
+                    </div>
+                    <Badge variant="secondary" className="rounded-full shrink-0">
+                      {ref.count} {t.count}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recent referrals table */}
+          {data?.referrals?.length > 0 && (
+            <div>
+              <h3 className="mb-4 text-lg font-bold text-foreground">{t.recentReferrals}</h3>
+              <div className="overflow-x-auto rounded-xl border border-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/50">
+                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t.referrer}</th>
+                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t.referred}</th>
+                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t.status}</th>
+                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t.date}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.referrals.map((r: any) => (
+                      <tr key={r.id} className="border-b border-border last:border-0">
+                        <td className="px-4 py-3 text-foreground" dir="ltr">{r.referrer_email || "—"}</td>
+                        <td className="px-4 py-3 text-foreground" dir="ltr">{r.referred_email || "—"}</td>
+                        <td className="px-4 py-3">
+                          <Badge
+                            variant={r.status === "paid" ? "default" : "secondary"}
+                            className={`rounded-full text-xs ${
+                              r.status === "paid" ? "bg-primary/10 text-primary" : ""
+                            }`}
+                          >
+                            {statusLabels[r.status] || r.status}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground">
+                          {new Date(r.created_at).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </AdminLayout>
+  );
+};
+
+export default AdminReferralsPage;
