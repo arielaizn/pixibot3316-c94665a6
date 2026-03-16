@@ -85,7 +85,56 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     console.log("WhatsApp webhook payload:", JSON.stringify(payload));
 
-    // Extract message — supports direct format and Meta webhook format
+    // ── Internal action: post_video (called by video generation system) ──
+    if (payload.action === "post_video") {
+      const { user_id, video_url } = payload;
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "Missing user_id" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: userData } = await admin.auth.admin.getUserById(user_id);
+      const email = userData?.user?.email || "";
+      const isAdmin = ADMIN_EMAILS.includes(email);
+
+      const { data: credits } = await admin
+        .from("user_credits")
+        .select("*")
+        .eq("user_id", user_id)
+        .maybeSingle();
+
+      const { data: profile } = await admin
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", user_id)
+        .maybeSingle();
+
+      const plan = credits?.plan_type || "free";
+      const isUnlimited = credits?.is_unlimited || isAdmin;
+      const remaining = isUnlimited
+        ? -1
+        : Math.max(0, (credits?.plan_credits || 0) + (credits?.extra_credits || 0) - (credits?.used_credits || 0));
+
+      // Detect first video: used_credits was 0 before this one (now 1)
+      const isFirstVideo = plan === "free" && (credits?.used_credits || 0) <= 1;
+
+      const reply = buildPostVideoResponse(
+        user_id,
+        plan,
+        remaining,
+        profile?.full_name?.split(" ")[0] || "",
+        video_url,
+        isFirstVideo
+      );
+
+      return new Response(JSON.stringify({ reply, userId: user_id, plan, creditsRemaining: remaining }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ── Standard WhatsApp message handling ──
     const msg = extractMessage(payload);
     if (!msg) {
       return new Response(JSON.stringify({ status: "no_message" }), {
@@ -391,35 +440,57 @@ function buildUpgradeMessage(
   };
 }
 
-// ── Post-video upgrade nudge (called externally after video generation) ──
-export function buildPostVideoUpgrade(
+// ── Post-video response builder (called after video generation) ──
+// Returns the WOW moment message + upgrade nudge when appropriate
+export function buildPostVideoResponse(
   userId: string,
   plan: string,
   remaining: number,
-  name: string
+  name: string,
+  videoUrl?: string,
+  isFirstVideo?: boolean
 ): string {
-  // Don't nudge if user has credits or is unlimited
-  if (remaining > 0 || remaining === -1) {
+  const isUnlimited = remaining === -1;
+
+  // ── Video delivery header ──
+  const deliveryLines = [
+    "🎬 הסרטון שלך מוכן! 🎉",
+  ];
+  if (videoUrl) {
+    deliveryLines.push("", `📥 ${videoUrl}`);
+  }
+
+  // ── Admin / unlimited — just deliver ──
+  if (isUnlimited) {
     return [
-      "הסרטון שלך מוכן! 🎉",
-      "",
-      `נשארו לך *${remaining === -1 ? "∞" : remaining} קרדיטים*.`,
+      ...deliveryLines,
       "",
       "שלח לי את הנושא של הסרטון הבא כשתהיה מוכן 🎬",
     ].join("\n");
   }
 
-  // No credits left — friendly upgrade
+  // ── Has remaining credits — deliver + show balance ──
+  if (remaining > 0) {
+    return [
+      ...deliveryLines,
+      "",
+      `נשארו לך *${remaining} קרדיטים* החודש.`,
+      "",
+      "שלח לי את הנושא של הסרטון הבא כשתהיה מוכן 🎬",
+    ].join("\n");
+  }
+
+  // ── No credits left — WOW moment + upgrade ──
   const planOrder = ["free", "starter", "creator", "pro", "business", "enterprise"];
   const currentIndex = planOrder.indexOf(plan);
   const nextPlans = planOrder.filter((_, i) => i > currentIndex).slice(0, 3);
 
   const planLabels: Record<string, string> = {
-    starter: "🎬 *Starter* — 3 סרטונים — ₪49/חודש",
-    creator: "🎬 *Creator* — 7 סרטונים — ₪99/חודש",
-    pro: "🎬 *Pro* — 15 סרטונים — ₪199/חודש",
-    business: "🏢 *Business* — 35 סרטונים — ₪399/חודש",
-    enterprise: "🚀 *Enterprise* — 80 סרטונים — ₪799/חודש",
+    starter: "🎬 *Starter* — 3 סרטונים בחודש — ₪49",
+    creator: "🎬 *Creator* — 7 סרטונים בחודש — ₪99",
+    pro: "🎬 *Pro* — 15 סרטונים בחודש — ₪199",
+    business: "🏢 *Business* — 35 סרטונים בחודש — ₪399",
+    enterprise: "🚀 *Enterprise* — 80 סרטונים בחודש — ₪799",
   };
 
   const planLines = nextPlans.map((p) => {
@@ -427,14 +498,27 @@ export function buildPostVideoUpgrade(
     return `${planLabels[p]}\n${link}`;
   });
 
+  const wowIntro = isFirstVideo
+    ? [
+        "",
+        "רוצה ליצור עוד סרטונים כאלה? 🚀",
+        "",
+        "Pixi יכול ליצור עבורך סרטונים תוך שניות.",
+        "בחר חבילה שמתאימה לך 👇",
+      ]
+    : [
+        "",
+        "הקרדיטים שלך נגמרו.",
+        "רוצה להמשיך ליצור? בחר חבילה 👇",
+      ];
+
   return [
-    "הסרטון הראשון שלך מוכן! 🎉",
-    "",
-    "רוצה ליצור עוד סרטונים?",
+    ...deliveryLines,
+    ...wowIntro,
     "",
     ...planLines,
     "",
-    "בחרו חבילה כאן 👆",
+    "לחצו על הקישור לתשלום מאובטח 🔒",
   ].join("\n");
 }
 
