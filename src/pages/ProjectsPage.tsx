@@ -85,6 +85,7 @@ const ProjectsPage = () => {
     return selectedProject.videos.find((v) => v.id === urlVideoId) || null;
   }, [urlVideoId, selectedProject]);
   const [shareTarget, setShareTarget] = useState<{ projectId?: string | null; videoId?: string; name?: string } | null>(null);
+  const [fileShareTarget, setFileShareTarget] = useState<{ fileId: string; fileName: string } | null>(null);
   const [showVersions, setShowVersions] = useState<VideoRecord | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
