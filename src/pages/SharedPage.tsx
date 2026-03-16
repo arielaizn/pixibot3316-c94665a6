@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useDirection } from "@/contexts/DirectionContext";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
+import { getVideoPublicUrl } from "@/lib/videoUrl";
 import { Loader2 } from "lucide-react";
 
 const SharedPage = () => {
@@ -61,7 +62,7 @@ const SharedPage = () => {
           .eq("id", share.video_id)
           .single();
         if (vid) {
-          setVideoUrl(vid.video_url || "");
+          setVideoUrl(getVideoPublicUrl(vid.video_url));
           setTitle(vid.title || "");
         }
       } else {
@@ -72,7 +73,7 @@ const SharedPage = () => {
           .order("created_at", { ascending: false })
           .limit(1);
         if (vids?.[0]) {
-          setVideoUrl(vids[0].video_url || "");
+          setVideoUrl(getVideoPublicUrl(vids[0].video_url));
           setTitle(vids[0].title || "");
         }
       }

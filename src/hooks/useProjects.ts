@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { generateThumbnail } from "@/lib/thumbnailGenerator";
+import { getVideoPublicUrl } from "@/lib/videoUrl";
 
 export interface VideoRecord {
   id: string;
@@ -293,7 +294,8 @@ export const useProjects = () => {
 
     for (const v of candidates) {
       generatingRef.current.add(v.id);
-      generateThumbnail(v.id, v.video_url!, user.id).then((url) => {
+      const publicUrl = getVideoPublicUrl(v.video_url!);
+      generateThumbnail(v.id, publicUrl, user.id).then((url) => {
         if (url) invalidate();
       });
     }
