@@ -15,5 +15,5 @@ export function getVideoPublicUrl(videoUrl: string | null | undefined): string {
 
   // It's a storage path — resolve via Supabase storage
   const { data } = supabase.storage.from("user-files").getPublicUrl(videoUrl);
-  return data?.publicUrl || "";
+  return data?.publicUrl ? encodeURI(decodeURI(data.publicUrl)) : "";
 }
