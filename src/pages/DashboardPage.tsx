@@ -83,7 +83,7 @@ const DashboardPage = () => {
   const hasContent = recentProjects.length > 0 || recentVideos.length > 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageTransition className="min-h-screen bg-background">
       <Navbar />
 
       <img
