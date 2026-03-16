@@ -464,17 +464,17 @@ const ProjectsPage = () => {
                       viewMode={viewMode}
                       t={t}
                       onPreview={() => {
+                        // For video files, open in the main project player instead of the modal
                         if (file.file_type?.startsWith("video") && selectedProject) {
-                          // Find matching video record or navigate with file URL
-                          const matchingVideo = selectedProject.videos.find(v => v.video_url && file.file_url.includes(v.video_url.replace(/\s/g, '%20')));
-                          if (matchingVideo) {
-                            navigate(`/projects/${selectedProject.id}/video/${matchingVideo.id}`);
-                          } else {
-                            setPreviewFile(file as any);
+                          const match = selectedProject.videos.find(v =>
+                            v.video_url && file.file_url.includes(encodeURIComponent(v.video_url).replace(/%2F/g, '/'))
+                          );
+                          if (match) {
+                            navigate(`/projects/${selectedProject.id}/video/${match.id}`);
+                            return;
                           }
-                        } else {
-                          setPreviewFile(file as any);
                         }
+                        setPreviewFile(file as any);
                       }}
                       onRename={() => setRenameTarget({ id: file.id, name: file.file_name, type: "file" })}
                       onDelete={() => deleteFile.mutate(file.id)}
