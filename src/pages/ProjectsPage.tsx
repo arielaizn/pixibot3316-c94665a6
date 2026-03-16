@@ -72,9 +72,16 @@ const ProjectsPage = () => {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [moveTarget, setMoveTarget] = useState<{ fileId: string; fileName: string } | null>(null);
 
-  // Navigation state
-  const [selectedProject, setSelectedProject] = useState<ProjectWithContent | null>(null);
-  const [playingVideo, setPlayingVideo] = useState<VideoRecord | null>(null);
+  // Navigation state — derived from URL params
+  const selectedProject = useMemo(() => {
+    if (!urlProjectId || !projects) return null;
+    return projects.find((p) => p.id === urlProjectId) || null;
+  }, [urlProjectId, projects]);
+
+  const playingVideo = useMemo(() => {
+    if (!urlVideoId || !selectedProject) return null;
+    return selectedProject.videos.find((v) => v.id === urlVideoId) || null;
+  }, [urlVideoId, selectedProject]);
   const [shareTarget, setShareTarget] = useState<{ projectId?: string | null; videoId?: string; name?: string } | null>(null);
   const [showVersions, setShowVersions] = useState<VideoRecord | null>(null);
 
