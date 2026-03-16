@@ -4,11 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDirection } from "@/contexts/DirectionContext";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
 import { getVideoPublicUrl } from "@/lib/videoUrl";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SharedPage = () => {
-  const { type, token } = useParams<{ type: string; token: string }>();
-  const { t, direction } = useDirection();
+  const { token } = useParams<{ token: string }>();
+  const { direction } = useDirection();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
@@ -16,69 +17,90 @@ const SharedPage = () => {
   const [projectName, setProjectName] = useState("");
   const [creatorName, setCreatorName] = useState("");
 
-  useEffect(() => {
-    if (!token) return;
-    (async () => {
-      // Fetch the share record (anon can read link/public shares)
-      const { data: share, error: sErr } = await supabase
-        .from("project_shares")
-        .select("*")
-        .eq("share_token", token)
-        .single();
-
-      if (sErr || !share) {
-        setError(t("shared.notFound"));
-        setLoading(false);
-        return;
-      }
-
-      // Check visibility
-      if (share.visibility === "private") {
-        setError(t("shared.notFound"));
-        setLoading(false);
-        return;
-      }
-
-      // Fetch project name
-      const { data: project } = await supabase
-        .from("projects")
-        .select("name")
-        .eq("id", share.project_id)
-        .single();
-      setProjectName(project?.name || "");
-
-      // Fetch creator name
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("user_id", share.shared_by)
-        .single();
-      setCreatorName(profile?.full_name || "Pixi User");
-
-      if (share.video_id) {
-        const { data: vid } = await supabase
-          .from("videos")
-          .select("*")
-          .eq("id", share.video_id)
-          .single();
-        if (vid) {
-          setVideoUrl(getVideoPublicUrl(vid.video_url));
-          setTitle(vid.title || "");
-        }
-      } else {
-        const { data: vids } = await supabase
-          .from("videos")
-          .select("*")
-          .eq("project_id", share.project_id)
-          .order("created_at", { ascending: false })
-          .limit(1);
-        if (vids?.[0]) {
-          setVideoUrl(getVideoPublicUrl(vids[0].video_url));
-          setTitle(vids[0].title || "");
-        }
-      }
+  const loadShare = async () => {
+    if (!token) {
+      setError("קישור לא תקין");
       setLoading(false);
-    })();
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setVideoUrl("");
+
+    // 1. Fetch share record by token
+    const { data: share, error: sErr } = await supabase
+      .from("project_shares")
+      .select("*")
+      .eq("share_token", token)
+      .maybeSingle();
+
+    if (sErr || !share) {
+      console.error("Share fetch error:", sErr);
+      setError("הקישור לא נמצא");
+      setLoading(false);
+      return;
+    }
+
+    if (share.visibility === "private") {
+      setError("הקישור לא נמצא");
+      setLoading(false);
+      return;
+    }
+
+    // 2. Fetch project name (optional, for display)
+    const { data: project } = await supabase
+      .from("projects")
+      .select("name")
+      .eq("id", share.project_id)
+      .maybeSingle();
+    setProjectName(project?.name || "");
+
+    // 3. Fetch creator name (optional, for display)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("user_id", share.shared_by)
+      .maybeSingle();
+    setCreatorName(profile?.full_name || "Pixi User");
+
+    // 4. Fetch the video
+    let videoData = null;
+
+    if (share.video_id) {
+      const { data: vid, error: vidErr } = await supabase
+        .from("videos")
+        .select("*")
+        .eq("id", share.video_id)
+        .maybeSingle();
+      if (vidErr) console.error("Video fetch error:", vidErr);
+      videoData = vid;
+    } else {
+      // Fallback: get latest video in the project
+      const { data: vids, error: vidsErr } = await supabase
+        .from("videos")
+        .select("*")
+        .eq("project_id", share.project_id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (vidsErr) console.error("Videos fetch error:", vidsErr);
+      videoData = vids?.[0] || null;
+    }
+
+    if (videoData) {
+      setTitle(videoData.title || "");
+      if (videoData.video_url) {
+        const resolved = getVideoPublicUrl(videoData.video_url);
+        console.log("Resolved video URL:", resolved);
+        setVideoUrl(resolved);
+      }
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadShare();
   }, [token]);
 
   if (loading) {
@@ -93,6 +115,10 @@ const SharedPage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-4">
         <p className="text-xl font-bold text-foreground">{error}</p>
+        <Button variant="outline" onClick={() => window.location.reload()} className="gap-2">
+          <RefreshCw className="h-4 w-4" />
+          נסה שוב
+        </Button>
       </div>
     );
   }
@@ -114,8 +140,12 @@ const SharedPage = () => {
         {videoUrl ? (
           <PixiVideoPlayer src={videoUrl} title={title} />
         ) : (
-          <div className="rounded-2xl border border-border bg-card p-12 text-center">
-            <p className="text-muted-foreground">{t("shared.noVideo")}</p>
+          <div className="rounded-2xl border border-border bg-card p-12 text-center space-y-4">
+            <p className="text-muted-foreground">הסרטון לא זמין</p>
+            <Button variant="outline" onClick={loadShare} className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              נסה שוב
+            </Button>
           </div>
         )}
       </main>
