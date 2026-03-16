@@ -279,10 +279,18 @@ const PricingPage = () => {
           </div>
         )}
         {!user && (
-          <div className="mx-auto mb-16 max-w-md rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 text-center shadow-sm dark:bg-primary/[0.06]">
-            <p className="mb-3 text-3xl font-extrabold text-foreground">🎬 12 / 15</p>
-            <p className="mb-1 text-sm font-semibold text-foreground">{t.usageUsed}</p>
-            <p className="text-sm text-muted-foreground">{t.usageText}</p>
+          <div className="mx-auto mb-16 max-w-md rounded-2xl border border-border bg-card p-6 text-center shadow-sm">
+            <p className="mb-3 text-lg font-semibold text-foreground">
+              {isRTL ? "התחברו כדי לראות את הקרדיטים שלכם" : "Log in to see your credits"}
+            </p>
+            <div className="flex justify-center gap-3">
+              <Button asChild size="sm" className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link to="/login">{isRTL ? "התחברות" : "Log In"}</Link>
+              </Button>
+              <Button asChild size="sm" variant="outline" className="rounded-lg">
+                <Link to="/signup">{isRTL ? "הרשמה" : "Sign Up"}</Link>
+              </Button>
+            </div>
           </div>
         )}
 
