@@ -1018,9 +1018,32 @@ function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onSt
 
   return (
     <div className="group flex flex-col rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex aspect-[4/3] cursor-pointer items-center justify-center rounded-t-xl bg-muted/50" onClick={onPreview}>
+      <div className="flex aspect-[4/3] cursor-pointer items-center justify-center rounded-t-xl bg-muted/50 overflow-hidden" onClick={onPreview}>
         {file.file_type.startsWith("image") ? (
           <img src={file.file_url} alt={file.file_name} className="h-full w-full rounded-t-xl object-cover" loading="lazy" />
+        ) : file.file_type.startsWith("audio") ? (
+          <div className="flex flex-col items-center justify-center gap-2 p-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <Music className="h-7 w-7 text-primary" />
+            </div>
+            <div className="flex gap-[2px]">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="w-1 rounded-full bg-primary/30" style={{ height: `${8 + Math.sin(i * 0.8) * 8 + Math.random() * 6}px` }} />
+              ))}
+            </div>
+          </div>
+        ) : file.file_type === "application/pdf" ? (
+          <div className="flex flex-col items-center justify-center gap-1">
+            <FileText className="h-10 w-10 text-destructive/60" />
+            <span className="text-[10px] font-bold uppercase text-destructive/60">PDF</span>
+          </div>
+        ) : file.file_type.startsWith("text") || file.file_name.endsWith(".md") || file.file_name.endsWith(".txt") ? (
+          <div className="flex flex-col items-center justify-center gap-1">
+            <FileType className="h-10 w-10 text-muted-foreground/50" />
+            <span className="text-[10px] font-bold uppercase text-muted-foreground/50">
+              {file.file_name.split('.').pop()?.toUpperCase()}
+            </span>
+          </div>
         ) : (
           <Icon className="h-12 w-12 text-muted-foreground/40" />
         )}
