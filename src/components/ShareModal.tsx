@@ -86,6 +86,12 @@ const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, proj
       return `${base}/share/${type}/${existingShareToken}`;
     }
 
+    // Must have at least a projectId to create a share record
+    if (!projectId) {
+      toast.error(t("share.errorCreate"));
+      return null;
+    }
+
     const { data, error } = await supabase
       .from("project_shares")
       .insert({
