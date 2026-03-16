@@ -58,6 +58,7 @@ const App = () => (
                 <Route path="/not-admin" element={<NotAdminPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </WhatsAppGate>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
