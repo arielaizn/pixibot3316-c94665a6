@@ -10,20 +10,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 
 const navItems = [
-  { path: "/admin/dashboard", icon: LayoutDashboard, labelHe: "דשבורד", labelEn: "Dashboard" },
-  { path: "/admin/users", icon: Users, labelHe: "משתמשים", labelEn: "Users" },
-  { path: "/admin/subscriptions", icon: CreditCard, labelHe: "מנויים", labelEn: "Subscriptions" },
-  { path: "/admin/credits", icon: CreditCard, labelHe: "קרדיטים", labelEn: "Credits" },
-  { path: "/admin/videos", icon: Film, labelHe: "סרטונים", labelEn: "Videos" },
-  { path: "/admin/projects", icon: FolderOpen, labelHe: "פרויקטים", labelEn: "Projects" },
-  { path: "/admin/whatsapp", icon: MessageCircle, labelHe: "WhatsApp", labelEn: "WhatsApp" },
-  { path: "/admin/referrals", icon: Gift, labelHe: "הפניות", labelEn: "Referrals" },
+  { path: "/admin/dashboard", icon: LayoutDashboard, labelKey: "admin.nav.dashboard" as const },
+  { path: "/admin/users", icon: Users, labelKey: "admin.nav.users" as const },
+  { path: "/admin/subscriptions", icon: CreditCard, labelKey: "admin.nav.subscriptions" as const },
+  { path: "/admin/credits", icon: CreditCard, labelKey: "admin.nav.credits" as const },
+  { path: "/admin/videos", icon: Film, labelKey: "admin.nav.videos" as const },
+  { path: "/admin/projects", icon: FolderOpen, labelKey: "admin.nav.projects" as const },
+  { path: "/admin/whatsapp", icon: MessageCircle, labelKey: "admin.nav.whatsapp" as const },
+  { path: "/admin/referrals", icon: Gift, labelKey: "admin.nav.referrals" as const },
 ];
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { user, isAdmin, loading } = useAdminAuth();
   const { signOut } = useAuth();
-  const { isRTL } = useDirection();
+  const { t, isRTL } = useDirection();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -40,7 +40,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 z-30 flex w-64 flex-col border-e border-border bg-card transition-transform duration-200 md:relative md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : isRTL ? "translate-x-full" : "-translate-x-full"
@@ -66,7 +65,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                 }`}
               >
                 <item.icon className="h-4 w-4" />
-                {isRTL ? item.labelHe : item.labelEn}
+                {t(item.labelKey)}
               </Link>
             );
           })}
@@ -81,24 +80,22 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             onClick={signOut}
           >
             <LogOut className="h-4 w-4" />
-            {isRTL ? "התנתק" : "Sign Out"}
+            {t("admin.signOut")}
           </Button>
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-20 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Main content */}
       <div className="flex flex-1 flex-col">
         <header className="flex h-16 items-center gap-4 border-b border-border bg-card px-6">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
           <h1 className="text-lg font-bold text-foreground">
-            {isRTL ? "ניהול Pixi" : "Pixi Management"}
+            {t("admin.title")}
           </h1>
         </header>
         <main className="flex-1 overflow-auto p-6">{children}</main>

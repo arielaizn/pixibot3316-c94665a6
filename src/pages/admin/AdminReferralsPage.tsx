@@ -15,32 +15,18 @@ const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: strin
 );
 
 const AdminReferralsPage = () => {
-  const { isRTL } = useDirection();
+  const { t } = useDirection();
   const { data, isLoading } = useAdminReferralStats();
 
-  const t = {
-    title: isRTL ? "ניהול הפניות" : "Referral Management",
-    totalSignups: isRTL ? "הרשמות מהפניות" : "Referral Signups",
-    totalPaid: isRTL ? "המרות בתשלום" : "Paid Conversions",
-    totalRewards: isRTL ? "קרדיטים שחולקו" : "Credits Awarded",
-    topReferrers: isRTL ? "מפנים מובילים" : "Top Referrers",
-    referrer: isRTL ? "מפנה" : "Referrer",
-    referred: isRTL ? "הופנה" : "Referred",
-    status: isRTL ? "סטטוס" : "Status",
-    date: isRTL ? "תאריך" : "Date",
-    count: isRTL ? "הפניות" : "Referrals",
-    recentReferrals: isRTL ? "הפניות אחרונות" : "Recent Referrals",
-  };
-
   const statusLabels: Record<string, string> = {
-    clicked: isRTL ? "לחץ" : "Clicked",
-    signed_up: isRTL ? "נרשם" : "Signed Up",
-    paid: isRTL ? "שילם" : "Paid",
+    clicked: t("admin.referrals.clicked"),
+    signed_up: t("admin.referrals.signedUp"),
+    paid: t("admin.referrals.paidStatus"),
   };
 
   return (
     <AdminLayout>
-      <h2 className="mb-6 text-2xl font-bold text-foreground">{t.title}</h2>
+      <h2 className="mb-6 text-2xl font-bold text-foreground">{t("admin.referrals.title")}</h2>
 
       {isLoading ? (
         <div className="flex justify-center py-20">
@@ -48,19 +34,17 @@ const AdminReferralsPage = () => {
         </div>
       ) : (
         <>
-          {/* Stats */}
           <div className="mb-8 grid gap-5 sm:grid-cols-3">
-            <StatCard icon={Users} label={t.totalSignups} value={data?.totalSignups || 0} color="bg-primary/10 text-primary" />
-            <StatCard icon={CreditCard} label={t.totalPaid} value={data?.totalPaid || 0} color="bg-accent/10 text-accent" />
-            <StatCard icon={Gift} label={t.totalRewards} value={data?.totalRewardsGranted || 0} color="bg-primary/10 text-primary" />
+            <StatCard icon={Users} label={t("admin.referrals.totalSignups")} value={data?.totalSignups || 0} color="bg-primary/10 text-primary" />
+            <StatCard icon={CreditCard} label={t("admin.referrals.totalPaid")} value={data?.totalPaid || 0} color="bg-accent/10 text-accent" />
+            <StatCard icon={Gift} label={t("admin.referrals.totalRewards")} value={data?.totalRewardsGranted || 0} color="bg-primary/10 text-primary" />
           </div>
 
-          {/* Top referrers */}
           {data?.topReferrers?.length > 0 && (
             <div className="mb-8">
               <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
                 <Trophy className="h-5 w-5 text-primary" />
-                {t.topReferrers}
+                {t("admin.referrals.topReferrers")}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {data.topReferrers.map((ref: any, i: number) => (
@@ -72,7 +56,7 @@ const AdminReferralsPage = () => {
                       <span className="truncate text-sm font-medium text-foreground" dir="ltr">{ref.email}</span>
                     </div>
                     <Badge variant="secondary" className="rounded-full shrink-0">
-                      {ref.count} {t.count}
+                      {ref.count} {t("admin.referrals.count")}
                     </Badge>
                   </div>
                 ))}
@@ -80,18 +64,17 @@ const AdminReferralsPage = () => {
             </div>
           )}
 
-          {/* Recent referrals table */}
           {data?.referrals?.length > 0 && (
             <div>
-              <h3 className="mb-4 text-lg font-bold text-foreground">{t.recentReferrals}</h3>
+              <h3 className="mb-4 text-lg font-bold text-foreground">{t("admin.referrals.recent")}</h3>
               <div className="overflow-x-auto rounded-xl border border-border">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/50">
-                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t.referrer}</th>
-                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t.referred}</th>
-                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t.status}</th>
-                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t.date}</th>
+                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.referrals.referrer")}</th>
+                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.referrals.referred")}</th>
+                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.referrals.status")}</th>
+                      <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.referrals.date")}</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -1,33 +1,41 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-
-type Direction = "rtl" | "ltr";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { createTranslator, type Lang, type TranslationKey } from "@/lib/i18n";
 
 interface DirectionContextType {
-  direction: Direction;
+  direction: "rtl" | "ltr";
+  lang: Lang;
   toggleDirection: () => void;
   isRTL: boolean;
+  t: (key: TranslationKey) => string;
 }
 
 const DirectionContext = createContext<DirectionContextType | undefined>(undefined);
 
 export const DirectionProvider = ({ children }: { children: ReactNode }) => {
-  const [direction, setDirection] = useState<Direction>(() => {
-    const saved = localStorage.getItem("pixi_direction");
-    return (saved === "ltr" ? "ltr" : "rtl") as Direction;
+  const [lang, setLang] = useState<Lang>(() => {
+    const saved = localStorage.getItem("pixi_language");
+    return saved === "en" ? "en" : "he";
   });
+
+  const direction = lang === "he" ? "rtl" : "ltr";
+  const isRTL = lang === "he";
 
   useEffect(() => {
     document.documentElement.dir = direction;
-    document.documentElement.lang = direction === "rtl" ? "he" : "en";
+    document.documentElement.lang = lang;
+    localStorage.setItem("pixi_language", lang);
+    // Keep legacy key in sync
     localStorage.setItem("pixi_direction", direction);
-  }, [direction]);
+  }, [lang, direction]);
 
-  const toggleDirection = () => {
-    setDirection((prev) => (prev === "rtl" ? "ltr" : "rtl"));
-  };
+  const toggleDirection = useCallback(() => {
+    setLang((prev) => (prev === "he" ? "en" : "he"));
+  }, []);
+
+  const t = useCallback(createTranslator(lang), [lang]);
 
   return (
-    <DirectionContext.Provider value={{ direction, toggleDirection, isRTL: direction === "rtl" }}>
+    <DirectionContext.Provider value={{ direction, lang, toggleDirection, isRTL, t }}>
       {children}
     </DirectionContext.Provider>
   );

@@ -44,7 +44,7 @@ const formatDate = (d: string) =>
 /* ── component ── */
 const ProjectsPage = () => {
   const { user, loading: authLoading } = useAuth();
-  const { isRTL } = useDirection();
+  const { isRTL, t: tr } = useDirection();
   const {
     projects, isLoading: projectsLoading,
     createProject, renameProject, deleteProject,
@@ -84,38 +84,38 @@ const ProjectsPage = () => {
   } = useFileManager(currentFolderId);
 
   const t = {
-    title: isRTL ? "הפרויקטים שלי" : "My Projects",
-    subtitle: isRTL ? "נהלו את הסרטונים, הקבצים והפרויקטים שלכם" : "Manage your videos, files and projects",
-    newFolder: isRTL ? "תיקיה חדשה" : "New Folder",
-    newProject: isRTL ? "פרויקט חדש" : "New Project",
-    upload: isRTL ? "העלאת קבצים" : "Upload Files",
-    search: isRTL ? "חיפוש פרויקטים, סרטונים, קבצים..." : "Search projects, videos, files...",
-    empty: isRTL ? "אין קבצים בתיקיה זו" : "No files in this folder",
-    emptyDesc: isRTL ? "העלו קבצים או צרו תיקיה חדשה" : "Upload files or create a new folder",
-    dragDrop: isRTL ? "גררו קבצים לכאן להעלאה" : "Drop files here to upload",
-    rename: isRTL ? "שנה שם" : "Rename",
-    delete: isRTL ? "מחק" : "Delete",
-    star: isRTL ? "סמן כמועדף" : "Star",
-    unstar: isRTL ? "הסר מועדף" : "Unstar",
-    preview: isRTL ? "תצוגה מקדימה" : "Preview",
-    download: isRTL ? "הורדה" : "Download",
-    create: isRTL ? "צור" : "Create",
-    cancel: isRTL ? "ביטול" : "Cancel",
-    save: isRTL ? "שמור" : "Save",
-    back: isRTL ? "חזרה" : "Back",
-    createFirst: isRTL ? "צור סרטון ראשון" : "Create First Video",
-    videos: isRTL ? "סרטונים" : "Videos",
-    filesLabel: isRTL ? "קבצים" : "Files",
-    noProjects: isRTL ? "אין פרויקטים עדיין" : "No projects yet",
-    noVideos: isRTL ? "אין סרטונים בפרויקט" : "No videos in this project",
-    share: isRTL ? "שיתוף" : "Share",
-    moveTo: isRTL ? "העבר לפרויקט" : "Move to project",
-    versions: isRTL ? "גרסאות" : "Versions",
-    version: isRTL ? "גרסה" : "Version",
-    allProjects: isRTL ? "כל הפרויקטים" : "All Projects",
-    projectName: isRTL ? "שם הפרויקט" : "Project name",
-    noFiles: isRTL ? "אין קבצים עדיין" : "No files yet",
-    uploading: isRTL ? "מעלה קבצים..." : "Uploading files...",
+    title: tr("projects.title"),
+    subtitle: tr("projects.subtitle"),
+    newFolder: tr("projects.newFolder"),
+    newProject: tr("projects.newProject"),
+    upload: tr("projects.upload"),
+    search: tr("projects.search"),
+    empty: tr("projects.empty"),
+    emptyDesc: tr("projects.emptyDesc"),
+    dragDrop: tr("projects.dragDrop"),
+    rename: tr("projects.rename"),
+    delete: tr("projects.delete"),
+    star: tr("projects.star"),
+    unstar: tr("projects.unstar"),
+    preview: tr("projects.preview"),
+    download: tr("projects.download"),
+    create: tr("projects.create"),
+    cancel: tr("projects.cancel"),
+    save: tr("projects.save"),
+    back: tr("projects.back"),
+    createFirst: tr("projects.createFirst"),
+    videos: tr("projects.videosLabel"),
+    filesLabel: tr("projects.filesLabel"),
+    noProjects: tr("projects.noProjects"),
+    noVideos: tr("projects.noVideos"),
+    share: tr("projects.share"),
+    moveTo: tr("projects.moveTo"),
+    versions: tr("projects.versions"),
+    version: tr("projects.version"),
+    allProjects: tr("projects.allProjects"),
+    projectName: tr("projects.projectName"),
+    noFiles: tr("projects.noFiles"),
+    uploading: tr("projects.uploading"),
   };
 
   /* ── Global search across projects, videos, files — includes tags & categories ── */
@@ -622,7 +622,7 @@ const ProjectsPage = () => {
             {searchResults.projects.length === 0 && searchResults.videos.length === 0 && searchResults.files.length === 0 && searchResults.standalone.length === 0 && (
               <div className="rounded-2xl border border-border bg-card p-12 text-center">
                 <Search className="mx-auto mb-4 h-10 w-10 text-muted-foreground/40" />
-                <p className="text-foreground font-semibold">{isRTL ? "לא נמצאו תוצאות" : "No results found"}</p>
+                <p className="text-foreground font-semibold">{tr("projects.noResults")}</p>
               </div>
             )}
           </div>
@@ -636,7 +636,7 @@ const ProjectsPage = () => {
               <div className="mb-6">
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  {isRTL ? "תיקיות מוצעות" : "Suggested Folders"}
+                  {tr("projects.suggestedFolders")}
                 </h3>
                 <div className="flex flex-wrap gap-3">
                   {suggestedFolders.map((sf) => (
@@ -648,7 +648,7 @@ const ProjectsPage = () => {
                       <Wand2 className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium text-foreground">{sf.name}</span>
                       <Badge variant="secondary" className="rounded-full text-[10px]">
-                        {sf.videoCount} {isRTL ? "סרטונים" : "videos"}
+                        {sf.videoCount} {tr("common.videos")}
                       </Badge>
                     </button>
                   ))}

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useDirection } from "@/contexts/DirectionContext";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
 import { Loader2 } from "lucide-react";
 
 const SharedPage = () => {
   const { token } = useParams<{ type: string; token: string }>();
+  const { t, direction } = useDirection();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
@@ -16,7 +18,6 @@ const SharedPage = () => {
   useEffect(() => {
     if (!token) return;
     (async () => {
-      // Fetch share record
       const { data: share, error: sErr } = await supabase
         .from("project_shares")
         .select("*")
@@ -24,12 +25,11 @@ const SharedPage = () => {
         .single();
 
       if (sErr || !share) {
-        setError("הקישור לא נמצא או שפג תוקפו");
+        setError(t("shared.notFound"));
         setLoading(false);
         return;
       }
 
-      // Get project name
       const { data: project } = await supabase
         .from("projects")
         .select("name")
@@ -37,7 +37,6 @@ const SharedPage = () => {
         .single();
       setProjectName(project?.name || "");
 
-      // Get creator
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
@@ -45,7 +44,6 @@ const SharedPage = () => {
         .single();
       setCreatorName(profile?.full_name || "Pixi User");
 
-      // If specific video shared
       if (share.video_id) {
         const { data: vid } = await supabase
           .from("videos")
@@ -57,7 +55,6 @@ const SharedPage = () => {
           setTitle(vid.title || "");
         }
       } else {
-        // Get first video of project
         const { data: vids } = await supabase
           .from("videos")
           .select("*")
@@ -90,7 +87,7 @@ const SharedPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background" dir={direction}>
       <header className="border-b border-border px-6 py-4">
         <div className="container mx-auto flex items-center justify-between">
           <div>
@@ -107,7 +104,7 @@ const SharedPage = () => {
           <PixiVideoPlayer src={videoUrl} title={title} />
         ) : (
           <div className="rounded-2xl border border-border bg-card p-12 text-center">
-            <p className="text-muted-foreground">אין סרטון זמין</p>
+            <p className="text-muted-foreground">{t("shared.noVideo")}</p>
           </div>
         )}
       </main>

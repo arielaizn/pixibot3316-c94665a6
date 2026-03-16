@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useDirection } from "@/contexts/DirectionContext";
 import { lovable } from "@/integrations/lovable";
 import { Loader2, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +14,7 @@ import mascot from "@/assets/pixi-mascot.png";
 const AdminLoginPage = () => {
   const { user, loading: authLoading, signIn } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdminAuth();
+  const { t } = useDirection();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +42,7 @@ const AdminLoginPage = () => {
     const { error } = await signIn(email, password);
     setLoading(false);
     if (error) {
-      toast({ title: "שגיאה", description: "אימייל או סיסמה שגויים", variant: "destructive" });
+      toast({ title: t("admin.login.error"), description: t("admin.login.errorDesc"), variant: "destructive" });
     }
   };
 
@@ -50,7 +52,7 @@ const AdminLoginPage = () => {
       redirect_uri: window.location.origin + "/admin",
     });
     if (result.error) {
-      toast({ title: "שגיאה", description: String(result.error), variant: "destructive" });
+      toast({ title: t("admin.login.error"), description: String(result.error), variant: "destructive" });
       setLoading(false);
     }
   };
@@ -63,7 +65,7 @@ const AdminLoginPage = () => {
             <Shield className="h-7 w-7 text-primary" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Pixi Admin</h1>
-          <p className="text-sm text-muted-foreground">גישה מוגבלת למנהלים בלבד</p>
+          <p className="text-sm text-muted-foreground">{t("admin.login.desc")}</p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
@@ -79,32 +81,32 @@ const AdminLoginPage = () => {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
             </svg>
-            המשך עם Google
+            {t("login.google")}
           </Button>
 
           <div className="mb-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground">או</span>
+            <span className="text-xs text-muted-foreground">{t("login.or")}</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">אימייל</Label>
+              <Label htmlFor="email">{t("login.email")}</Label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@pixi.com" dir="ltr" className="rounded-xl py-5 text-left" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">סיסמה</Label>
+              <Label htmlFor="password">{t("login.password")}</Label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" dir="ltr" className="rounded-xl py-5 text-left" required />
             </div>
             <Button type="submit" className="w-full rounded-xl bg-primary py-6 text-base font-bold text-primary-foreground hover:bg-primary/90" disabled={loading}>
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "כניסה לניהול"}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t("admin.login.submit")}
             </Button>
           </form>
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          <Link to="/" className="hover:underline">חזרה לאתר</Link>
+          <Link to="/" className="hover:underline">{t("admin.login.backToSite")}</Link>
         </p>
       </div>
     </div>

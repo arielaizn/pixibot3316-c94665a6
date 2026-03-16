@@ -1,0 +1,338 @@
+// Centralized translations for Pixi - Hebrew (default) and English
+
+export type Lang = "he" | "en";
+
+const translations = {
+  // ── Navbar ──
+  "nav.home": { he: "בית", en: "Home" },
+  "nav.pricing": { he: "מחירים", en: "Pricing" },
+  "nav.login": { he: "התחברות", en: "Login" },
+  "nav.signup": { he: "הרשמה", en: "Sign Up" },
+  "nav.dashboard": { he: "דשבורד", en: "Dashboard" },
+  "nav.projects": { he: "פרויקטים", en: "Projects" },
+  "nav.upgrade": { he: "שדרוג", en: "Upgrade" },
+  "nav.getStarted": { he: "התחל עכשיו", en: "Get Started" },
+  "nav.logout": { he: "התנתק", en: "Log Out" },
+
+  // ── Hero ──
+  "hero.title1": { he: "סרטוני AI", en: "AI Videos" },
+  "hero.title2": { he: "שמניעים פעולה", en: "That Drive Action" },
+  "hero.subtitle": { he: "צור סרטונים מקצועיים בדקות — ישירות דרך WhatsApp", en: "Create professional videos in minutes — directly via WhatsApp" },
+  "hero.cta": { he: "התחל עכשיו - חינם", en: "Get Started — Free" },
+  "hero.noCreditCard": { he: "סרטון ראשון חינם. בלי כרטיס אשראי.", en: "First video free. No credit card." },
+  "hero.chatOnline": { he: "מקוון", en: "Online" },
+  "hero.chatUser": { he: "אני צריך סרטון שיווקי", en: "I need a marketing video" },
+  "hero.chatBot1": { he: "מעולה! אנחנו מתחילים ליצור את הסרטון שלך 🎬", en: "Great! We're starting to create your video 🎬" },
+  "hero.chatBot2": { he: "הסרטון שלך מוכן! 🎉", en: "Your video is ready! 🎉" },
+
+  // ── Features ──
+  "features.title": { he: "למה Pixi?", en: "Why Pixi?" },
+  "features.fast.title": { he: "יצירה מהירה", en: "Fast Creation" },
+  "features.fast.desc": { he: "מרעיון לסרטון בפחות משעה", en: "From idea to video in under an hour" },
+  "features.ai.title": { he: "AI מתקדם", en: "Advanced AI" },
+  "features.ai.desc": { he: "תמונות, אנימציה, מוזיקה וקריינות אוטומטית", en: "Images, animation, music & auto voiceover" },
+  "features.whatsapp.title": { he: "WhatsApp נוח", en: "Easy WhatsApp" },
+  "features.whatsapp.desc": { he: "כל התהליך קורה בתוך WhatsApp", en: "The entire process happens inside WhatsApp" },
+
+  // ── How it works ──
+  "howItWorks.title": { he: "איך זה עובד?", en: "How Does It Work?" },
+  "howItWorks.step": { he: "שלב", en: "Step" },
+  "howItWorks.step1": { he: "הירשם בחינם", en: "Sign up for free" },
+  "howItWorks.step2": { he: "ספר לנו מה אתה רוצה ב-WhatsApp", en: "Tell us what you want on WhatsApp" },
+  "howItWorks.step3": { he: "קבל את הסרטון המוגמר", en: "Get the finished video" },
+
+  // ── Pricing Preview ──
+  "pricingPreview.title": { he: "התחל חינם, שדרג בהמשך", en: "Start Free, Upgrade Later" },
+  "pricingPreview.subtitle": { he: "סרטון ראשון חינם — שדרוג רק אם צריך", en: "First video free — upgrade only if needed" },
+  "pricingPreview.cta": { he: "ראה תוכניות ומחירים", en: "View Plans & Pricing" },
+
+  // ── Final CTA ──
+  "finalCta.title": { he: "מוכן ליצור סרטון AI?", en: "Ready to Create an AI Video?" },
+  "finalCta.subtitle": { he: "התחל עכשיו וקבל את הסרטון הראשון שלך בחינם", en: "Start now and get your first video for free" },
+  "finalCta.cta": { he: "התחל עכשיו", en: "Get Started" },
+
+  // ── Footer ──
+  "footer.pricing": { he: "מחירים", en: "Pricing" },
+  "footer.terms": { he: "תנאי שימוש", en: "Terms" },
+  "footer.privacy": { he: "פרטיות", en: "Privacy" },
+
+  // ── Floating Mascot ──
+  "mascot.tooltip": { he: "התחל בחינם", en: "Start Free" },
+
+  // ── Login ──
+  "login.title": { he: "התחבר לחשבון שלך", en: "Log In to Your Account" },
+  "login.subtitle": { he: "חזור להמשיך ליצור סרטוני AI", en: "Come back to keep creating AI videos" },
+  "login.google": { he: "המשך עם Google", en: "Continue with Google" },
+  "login.or": { he: "או", en: "or" },
+  "login.email": { he: "אימייל", en: "Email" },
+  "login.password": { he: "סיסמה", en: "Password" },
+  "login.submit": { he: "התחבר", en: "Log In" },
+  "login.noAccount": { he: "אין לך חשבון עדיין?", en: "Don't have an account yet?" },
+  "login.signupLink": { he: "הירשם", en: "Sign Up" },
+  "login.error": { he: "שגיאה בהתחברות", en: "Login error" },
+  "login.errorDesc": { he: "אימייל או סיסמה שגויים", en: "Incorrect email or password" },
+
+  // ── Signup ──
+  "signup.title": { he: "צור חשבון", en: "Create Account" },
+  "signup.subtitle": { he: "התחל ליצור סרטוני AI תוך דקות", en: "Start creating AI videos in minutes" },
+  "signup.google": { he: "המשך עם Google", en: "Continue with Google" },
+  "signup.or": { he: "או", en: "or" },
+  "signup.fullName": { he: "שם מלא", en: "Full Name" },
+  "signup.fullNamePlaceholder": { he: "ישראל ישראלי", en: "John Doe" },
+  "signup.email": { he: "אימייל", en: "Email" },
+  "signup.whatsapp": { he: "מספר וואטסאפ", en: "WhatsApp Number" },
+  "signup.password": { he: "סיסמה", en: "Password" },
+  "signup.submit": { he: "הירשם", en: "Sign Up" },
+  "signup.hasAccount": { he: "כבר יש לך חשבון?", en: "Already have an account?" },
+  "signup.loginLink": { he: "התחבר", en: "Log In" },
+  "signup.error": { he: "שגיאה בהרשמה", en: "Sign up error" },
+  "signup.success": { he: "נרשמת בהצלחה! 🎉", en: "Signed up successfully! 🎉" },
+  "signup.successDesc": { he: "בדוק את האימייל שלך לאימות החשבון", en: "Check your email to verify your account" },
+  "signup.whatsappError": { he: "נא להזין מספר וואטסאפ בפורמט בינלאומי", en: "Please enter a WhatsApp number in international format" },
+
+  // ── Dashboard ──
+  "dash.welcome": { he: "ברוכים הבאים לאזור האישי שלכם", en: "Welcome to your personal area" },
+  "dash.currentPlan": { he: "תוכנית נוכחית", en: "Current Plan" },
+  "dash.creditsLeft": { he: "סרטונים שנשארו החודש", en: "Credits remaining" },
+  "dash.myProjects": { he: "הפרויקטים שלי", en: "My Projects" },
+  "dash.myProjectsDesc": { he: "צפו בכל הסרטונים שיצרנו עבורכם", en: "View all videos we created for you" },
+  "dash.openProjects": { he: "פתח פרויקטים", en: "Open Projects" },
+  "dash.newVideo": { he: "צור סרטון חדש", en: "Create New Video" },
+  "dash.newVideoDesc": { he: "מעבר לעמוד יצירת הסרטון", en: "Go to the video creation page" },
+  "dash.continueToVideo": { he: "המשך ליצירת סרטון", en: "Continue to Create Video" },
+  "dash.recentTitle": { he: "פרויקטים אחרונים", en: "Recent Projects" },
+  "dash.recentVideos": { he: "סרטונים אחרונים", en: "Recent Videos" },
+  "dash.noVideos": { he: "עדיין לא יצרת סרטונים", en: "You haven't created any videos yet" },
+  "dash.noProjects": { he: "עדיין אין פרויקטים. צור את הסרטון הראשון שלך!", en: "No projects yet. Create your first video!" },
+  "dash.startCreating": { he: "התחל ליצור את הסרטון הראשון שלך", en: "Start creating your first video" },
+  "dash.firstVideo": { he: "צור סרטון ראשון", en: "Create First Video" },
+  "dash.viewAll": { he: "הצג הכל", en: "View All" },
+  "dash.videos": { he: "סרטונים", en: "videos" },
+  "dash.files": { he: "קבצים", en: "files" },
+  "dash.admin": { he: "מנהל", en: "Admin" },
+
+  // ── Projects ──
+  "projects.title": { he: "הפרויקטים שלי", en: "My Projects" },
+  "projects.subtitle": { he: "נהלו את הסרטונים, הקבצים והפרויקטים שלכם", en: "Manage your videos, files and projects" },
+  "projects.newFolder": { he: "תיקיה חדשה", en: "New Folder" },
+  "projects.newProject": { he: "פרויקט חדש", en: "New Project" },
+  "projects.upload": { he: "העלאת קבצים", en: "Upload Files" },
+  "projects.search": { he: "חיפוש פרויקטים, סרטונים, קבצים...", en: "Search projects, videos, files..." },
+  "projects.empty": { he: "אין קבצים בתיקיה זו", en: "No files in this folder" },
+  "projects.emptyDesc": { he: "העלו קבצים או צרו תיקיה חדשה", en: "Upload files or create a new folder" },
+  "projects.dragDrop": { he: "גררו קבצים לכאן להעלאה", en: "Drop files here to upload" },
+  "projects.rename": { he: "שנה שם", en: "Rename" },
+  "projects.delete": { he: "מחק", en: "Delete" },
+  "projects.star": { he: "סמן כמועדף", en: "Star" },
+  "projects.unstar": { he: "הסר מועדף", en: "Unstar" },
+  "projects.preview": { he: "תצוגה מקדימה", en: "Preview" },
+  "projects.download": { he: "הורדה", en: "Download" },
+  "projects.create": { he: "צור", en: "Create" },
+  "projects.cancel": { he: "ביטול", en: "Cancel" },
+  "projects.save": { he: "שמור", en: "Save" },
+  "projects.back": { he: "חזרה", en: "Back" },
+  "projects.createFirst": { he: "צור סרטון ראשון", en: "Create First Video" },
+  "projects.videosLabel": { he: "סרטונים", en: "Videos" },
+  "projects.filesLabel": { he: "קבצים", en: "Files" },
+  "projects.noProjects": { he: "אין פרויקטים עדיין", en: "No projects yet" },
+  "projects.noVideos": { he: "אין סרטונים בפרויקט", en: "No videos in this project" },
+  "projects.share": { he: "שיתוף", en: "Share" },
+  "projects.moveTo": { he: "העבר לפרויקט", en: "Move to project" },
+  "projects.versions": { he: "גרסאות", en: "Versions" },
+  "projects.version": { he: "גרסה", en: "Version" },
+  "projects.allProjects": { he: "כל הפרויקטים", en: "All Projects" },
+  "projects.projectName": { he: "שם הפרויקט", en: "Project name" },
+  "projects.noFiles": { he: "אין קבצים עדיין", en: "No files yet" },
+  "projects.uploading": { he: "מעלה קבצים...", en: "Uploading files..." },
+  "projects.noResults": { he: "לא נמצאו תוצאות", en: "No results found" },
+  "projects.suggestedFolders": { he: "תיקיות מוצעות", en: "Suggested Folders" },
+  "projects.myFiles": { he: "הקבצים שלי", en: "My Files" },
+  "projects.video": { he: "סרטון", en: "Video" },
+
+  // ── Welcome ──
+  "welcome.youreIn": { he: "🎉 אתם בפנים", en: "🎉 You're In" },
+  "welcome.howContinue": { he: "איך תרצו להמשיך?", en: "How would you like to continue?" },
+  "welcome.dashboard": { he: "כניסה לאזור האישי", en: "Go to Dashboard" },
+  "welcome.dashboardDesc": { he: "נהלו את הפרויקטים שלכם, צפו בסרטונים ועקבו אחרי ההתקדמות", en: "Manage your projects, watch videos and track progress" },
+  "welcome.enterDashboard": { he: "כניסה לדשבורד", en: "Enter Dashboard" },
+  "welcome.whatsapp": { he: "המשיכו ל-Pixi ב-WhatsApp", en: "Continue to Pixi on WhatsApp" },
+  "welcome.whatsappDesc": { he: "שלחו הודעה למספר הייעודי שלנו והתחילו ליצור סרטונים מיד", en: "Send a message to our dedicated number and start creating videos instantly" },
+  "welcome.continueWA": { he: "המשיכו ל-WhatsApp", en: "Continue to WhatsApp" },
+  "welcome.preparing": { he: "מכין קישור מאובטח...", en: "Preparing secure link..." },
+  "welcome.noCredits": { he: "נגמרו הקרדיטים", en: "Out of credits" },
+  "welcome.noCreditsDesc": { he: "שדרגו תוכנית או רכשו קרדיטים נוספים כדי להמשיך ליצור סרטונים", en: "Upgrade your plan or buy more credits to continue creating videos" },
+  "welcome.upgrade": { he: "שדרגו תוכנית", en: "Upgrade Plan" },
+
+  // ── CreditBar ──
+  "credits.used": { he: "קרדיטים נוצלו החודש", en: "credits used this month" },
+  "credits.low": { he: "⚠ נשארו לכם מעט קרדיטים", en: "⚠ Running low on credits" },
+  "credits.empty": { he: "⚠ נגמרו הקרדיטים", en: "⚠ Out of credits" },
+  "credits.upgradePlan": { he: "שדרגו תוכנית", en: "Upgrade Plan" },
+  "credits.buyMore": { he: "רכשו קרדיטים נוספים", en: "Buy More Credits" },
+  "credits.currentPlan": { he: "התוכנית הנוכחית", en: "Current Plan" },
+  "credits.unlimited": { he: "קרדיטים ללא הגבלה", en: "Unlimited credits" },
+  "credits.unlimitedPlan": { he: "תוכנית מנהל ללא הגבלה", en: "Admin Unlimited Plan" },
+
+  // ── Referral ──
+  "referral.title": { he: "הזמינו חברים וקבלו קרדיטים", en: "Invite Friends & Earn Credits" },
+  "referral.subtitle": { he: "שתפו את הקישור שלכם. כשחבר נרשם ומשלם, תקבלו 3 קרדיטים בחינם!", en: "Share your link. When a friend signs up and pays, you get 3 free credits!" },
+  "referral.copyLink": { he: "העתיקו קישור הזמנה", en: "Copy Invite Link" },
+  "referral.copied": { he: "הועתק!", en: "Copied!" },
+  "referral.linkCopied": { he: "הקישור הועתק!", en: "Link copied!" },
+  "referral.invited": { he: "הוזמנו", en: "Invited" },
+  "referral.paid": { he: "שילמו", en: "Converted" },
+  "referral.earned": { he: "קרדיטים שהרווחתם", en: "Credits Earned" },
+  "referral.history": { he: "היסטוריית הזמנות", en: "Referral History" },
+  "referral.noReferrals": { he: "עדיין לא הזמנתם אף אחד", en: "No referrals yet" },
+  "referral.statusClicked": { he: "נרשם דרך הקישור", en: "Clicked" },
+  "referral.statusSignedUp": { he: "נרשם", en: "Signed Up" },
+  "referral.statusPaid": { he: "הפך ללקוח משלם", en: "Paid Customer" },
+
+  // ── Share Modal ──
+  "share.title": { he: "שיתוף", en: "Share" },
+  "share.copyLink": { he: "העתק קישור", en: "Copy Link" },
+  "share.copied": { he: "הועתק!", en: "Copied!" },
+  "share.inviteEmail": { he: "הזמנה באימייל", en: "Invite by email" },
+  "share.emailPlaceholder": { he: "כתובת אימייל...", en: "Email address..." },
+  "share.send": { he: "שלח", en: "Send" },
+  "share.visibility": { he: "נראות", en: "Visibility" },
+  "share.private": { he: "פרטי", en: "Private" },
+  "share.link": { he: "גישה עם קישור", en: "Link access" },
+  "share.public": { he: "ציבורי", en: "Public" },
+  "share.viewer": { he: "צופה", en: "Viewer" },
+  "share.commenter": { he: "מגיב", en: "Commenter" },
+  "share.editor": { he: "עורך", en: "Editor" },
+  "share.permission": { he: "הרשאה", en: "Permission" },
+  "share.errorCreate": { he: "שגיאה ביצירת קישור", en: "Error creating link" },
+  "share.errorInvite": { he: "שגיאה בשליחת הזמנה", en: "Error sending invite" },
+  "share.inviteSent": { he: "הזמנה נשלחה", en: "Invite sent" },
+
+  // ── WhatsApp Modal ──
+  "whatsapp.title": { he: "הוסיפו מספר וואטסאפ", en: "Add Your WhatsApp Number" },
+  "whatsapp.desc": { he: "כדי להשתמש ב-Pixi יש להוסיף מספר וואטסאפ.", en: "To use Pixi, you need to add your WhatsApp number." },
+  "whatsapp.label": { he: "מספר וואטסאפ", en: "WhatsApp Number" },
+  "whatsapp.submit": { he: "שמור והמשך", en: "Save & Continue" },
+  "whatsapp.invalid": { he: "נא להזין מספר וואטסאפ בפורמט בינלאומי", en: "Please enter a valid international WhatsApp number" },
+  "whatsapp.saving": { he: "שומר...", en: "Saving..." },
+
+  // ── Pricing ──
+  "pricing.title": { he: "תוכניות ומחירים", en: "Plans & Pricing" },
+  "pricing.subtitle": { he: "בחרו את החבילה שמתאימה לכם והתחילו ליצור סרטוני AI", en: "Choose the plan that fits you and start creating AI videos" },
+  "pricing.trust": { he: "🎬 הסרטון הראשון חינם — ללא כרטיס אשראי", en: "🎬 First video free — no credit card required" },
+  "pricing.monthly": { he: "חודשי", en: "Monthly" },
+  "pricing.yearly": { he: "שנתי", en: "Yearly" },
+  "pricing.save": { he: "חסכו 20%", en: "Save 20%" },
+  "pricing.cta": { he: "המשיכו לתשלום", en: "Continue to Payment" },
+  "pricing.perMonth": { he: "/ חודש", en: "/ month" },
+  "pricing.perYear": { he: "/ שנה", en: "/ year" },
+  "pricing.popular": { he: "פופולרי", en: "Popular" },
+  "pricing.creditTitle": { he: "איך הקרדיטים עובדים?", en: "How do credits work?" },
+  "pricing.creditText": { he: "כל סרטון שאתם יוצרים משתמש בקרדיט אחד. אם הקרדיטים נגמרים תוכלו לשדרג את החבילה או לרכוש קרדיטים נוספים.", en: "Each video you create uses one credit. If you run out, you can upgrade your plan or purchase additional credits." },
+  "pricing.packTitle": { he: "נגמרו הקרדיטים?", en: "Out of credits?" },
+  "pricing.packSubtitle": { he: "קנו קרדיטים נוספים או שדרגו מסלול", en: "Buy additional credits or upgrade your plan" },
+  "pricing.packCta": { he: "רכישה", en: "Purchase" },
+  "pricing.packNote": { he: "חבילות קרדיטים זמינות למנויים פעילים בלבד.", en: "Credit packs are only available for active subscribers." },
+  "pricing.loginToSee": { he: "התחברו כדי לראות כמה קרדיטים נשארו לכם", en: "Log in to see how many credits you have left" },
+  "pricing.loginToSeeCredits": { he: "התחברו כדי לראות את הקרדיטים שלכם", en: "Log in to see your credits" },
+  "pricing.adminUnlimited": { he: "תוכנית מנהל ללא הגבלה", en: "Admin Unlimited Plan" },
+  "pricing.adminUnlimitedDesc": { he: "סרטונים ללא הגבלה — ללא צורך בשדרוג", en: "Unlimited videos — no upgrade needed" },
+
+  // ── Payment Callback ──
+  "payment.verifying": { he: "מפעיל את המנוי שלכם...", en: "Activating your subscription..." },
+  "payment.success": { he: "התשלום בוצע בהצלחה!", en: "Payment successful!" },
+  "payment.successDesc": { he: "התוכנית שלכם עודכנה. חשבונית תישלח למייל.", en: "Your plan has been updated. An invoice will be sent to your email." },
+  "payment.error": { he: "שגיאה באימות התשלום", en: "Payment verification failed" },
+  "payment.dashboard": { he: "לדשבורד", en: "Go to Dashboard" },
+  "payment.retry": { he: "חזרה לתוכניות", en: "Back to Plans" },
+  "payment.noUser": { he: "לא ניתן לזהות את המשתמש", en: "Could not identify user" },
+  "payment.loginRequired": { he: "יש להתחבר כדי להפעיל את המנוי", en: "Please log in to activate your subscription" },
+  "payment.missingDetails": { he: "פרטי תשלום חסרים", en: "Missing payment details" },
+
+  // ── Shared Page ──
+  "shared.notFound": { he: "הקישור לא נמצא או שפג תוקפו", en: "Link not found or expired" },
+  "shared.noVideo": { he: "אין סרטון זמין", en: "No video available" },
+
+  // ── Not Found ──
+  "notFound.title": { he: "404", en: "404" },
+  "notFound.message": { he: "אופס! העמוד לא נמצא", en: "Oops! Page not found" },
+  "notFound.back": { he: "חזרה לדף הבית", en: "Return to Home" },
+
+  // ── Not Admin ──
+  "notAdmin.title": { he: "אינך מנהל", en: "Not an Admin" },
+  "notAdmin.desc": { he: "אין לך גישה לממשק הניהול של Pixi", en: "You don't have access to the Pixi admin panel" },
+  "notAdmin.back": { he: "חזרה לדף הבית", en: "Back to Home" },
+
+  // ── Admin ──
+  "admin.title": { he: "ניהול Pixi", en: "Pixi Management" },
+  "admin.login.desc": { he: "גישה מוגבלת למנהלים בלבד", en: "Access restricted to admins only" },
+  "admin.login.submit": { he: "כניסה לניהול", en: "Admin Login" },
+  "admin.login.error": { he: "שגיאה", en: "Error" },
+  "admin.login.errorDesc": { he: "אימייל או סיסמה שגויים", en: "Incorrect email or password" },
+  "admin.login.backToSite": { he: "חזרה לאתר", en: "Back to site" },
+  "admin.overview": { he: "סקירה כללית", en: "Overview" },
+  "admin.users": { he: "משתמשים", en: "Users" },
+  "admin.videos": { he: "סרטונים", en: "Videos" },
+  "admin.projects": { he: "פרויקטים", en: "Projects" },
+  "admin.activeTokens": { he: "טוקנים פעילים", en: "Active Tokens" },
+  "admin.commonCategories": { he: "קטגוריות נפוצות", en: "Most Common Categories" },
+  "admin.signOut": { he: "התנתק", en: "Sign Out" },
+  "admin.userManagement": { he: "ניהול משתמשים", en: "User Management" },
+  "admin.email": { he: "אימייל", en: "Email" },
+  "admin.name": { he: "שם", en: "Name" },
+  "admin.plan": { he: "תוכנית", en: "Plan" },
+  "admin.credits": { he: "קרדיטים", en: "Credits" },
+  "admin.role": { he: "תפקיד", en: "Role" },
+  "admin.joined": { he: "הצטרפות", en: "Joined" },
+  "admin.actions": { he: "פעולות", en: "Actions" },
+  "admin.reset": { he: "איפוס", en: "Reset" },
+  "admin.updated": { he: "עודכן בהצלחה", en: "Updated" },
+  "admin.creditsReset": { he: "אופס", en: "Credits reset" },
+  "admin.creditsAdded": { he: "קרדיטים נוספו", en: "Credits added" },
+  "admin.subscriptions": { he: "מנויים", en: "Subscriptions" },
+
+  // ── Admin Referrals ──
+  "admin.referrals.title": { he: "ניהול הפניות", en: "Referral Management" },
+  "admin.referrals.totalSignups": { he: "הרשמות מהפניות", en: "Referral Signups" },
+  "admin.referrals.totalPaid": { he: "המרות בתשלום", en: "Paid Conversions" },
+  "admin.referrals.totalRewards": { he: "קרדיטים שחולקו", en: "Credits Awarded" },
+  "admin.referrals.topReferrers": { he: "מפנים מובילים", en: "Top Referrers" },
+  "admin.referrals.referrer": { he: "מפנה", en: "Referrer" },
+  "admin.referrals.referred": { he: "הופנה", en: "Referred" },
+  "admin.referrals.status": { he: "סטטוס", en: "Status" },
+  "admin.referrals.date": { he: "תאריך", en: "Date" },
+  "admin.referrals.count": { he: "הפניות", en: "Referrals" },
+  "admin.referrals.recent": { he: "הפניות אחרונות", en: "Recent Referrals" },
+  "admin.referrals.clicked": { he: "לחץ", en: "Clicked" },
+  "admin.referrals.signedUp": { he: "נרשם", en: "Signed Up" },
+  "admin.referrals.paidStatus": { he: "שילם", en: "Paid" },
+
+  // ── Admin Layout nav ──
+  "admin.nav.dashboard": { he: "דשבורד", en: "Dashboard" },
+  "admin.nav.users": { he: "משתמשים", en: "Users" },
+  "admin.nav.subscriptions": { he: "מנויים", en: "Subscriptions" },
+  "admin.nav.credits": { he: "קרדיטים", en: "Credits" },
+  "admin.nav.videos": { he: "סרטונים", en: "Videos" },
+  "admin.nav.projects": { he: "פרויקטים", en: "Projects" },
+  "admin.nav.whatsapp": { he: "WhatsApp", en: "WhatsApp" },
+  "admin.nav.referrals": { he: "הפניות", en: "Referrals" },
+
+  // ── Common ──
+  "common.video": { he: "סרטון", en: "Video" },
+  "common.videos": { he: "סרטונים", en: "Videos" },
+  "common.loading": { he: "טוען...", en: "Loading..." },
+  "common.error": { he: "שגיאה", en: "Error" },
+  "common.remaining": { he: "נשארו לכם", en: "remaining" },
+  "common.creditsRemaining": { he: "קרדיטים", en: "credits" },
+} as const;
+
+export type TranslationKey = keyof typeof translations;
+
+export function createTranslator(lang: Lang) {
+  return function t(key: TranslationKey): string {
+    const entry = translations[key];
+    if (!entry) return key;
+    return entry[lang] || entry.he;
+  };
+}
+
+export default translations;
