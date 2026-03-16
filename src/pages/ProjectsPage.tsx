@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, useMemo } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import { Navigate, Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
 import { getVideoPublicUrl } from "@/lib/videoUrl";
@@ -46,6 +46,8 @@ const formatDate = (d: string) =>
 const ProjectsPage = () => {
   const { user, loading: authLoading } = useAuth();
   const { isRTL, t: tr } = useDirection();
+  const { projectId: urlProjectId, videoId: urlVideoId } = useParams();
+  const navigate = useNavigate();
   const {
     projects, isLoading: projectsLoading,
     createProject, renameProject, deleteProject,
@@ -70,9 +72,16 @@ const ProjectsPage = () => {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [moveTarget, setMoveTarget] = useState<{ fileId: string; fileName: string } | null>(null);
 
-  // Navigation state
-  const [selectedProject, setSelectedProject] = useState<ProjectWithContent | null>(null);
-  const [playingVideo, setPlayingVideo] = useState<VideoRecord | null>(null);
+  // Navigation state — derived from URL params
+  const selectedProject = useMemo(() => {
+    if (!urlProjectId || !projects) return null;
+    return projects.find((p) => p.id === urlProjectId) || null;
+  }, [urlProjectId, projects]);
+
+  const playingVideo = useMemo(() => {
+    if (!urlVideoId || !selectedProject) return null;
+    return selectedProject.videos.find((v) => v.id === urlVideoId) || null;
+  }, [urlVideoId, selectedProject]);
   const [shareTarget, setShareTarget] = useState<{ projectId?: string | null; videoId?: string; name?: string } | null>(null);
   const [showVersions, setShowVersions] = useState<VideoRecord | null>(null);
 
@@ -249,13 +258,13 @@ const ProjectsPage = () => {
         <main className="container mx-auto max-w-5xl px-4 py-8">
           {/* Breadcrumbs */}
           <div className="mb-4 flex items-center gap-1 text-sm">
-            <button onClick={() => { setPlayingVideo(null); setSelectedProject(null); }} className="text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={() => navigate("/projects")} className="text-muted-foreground hover:text-foreground transition-colors">
               {t.allProjects}
             </button>
             {selectedProject && (
               <>
                 <ChevronRight className="h-3.5 w-3.5 text-muted-foreground rtl:rotate-180" />
-                <button onClick={() => setPlayingVideo(null)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <button onClick={() => navigate(`/projects/${urlProjectId}`)} className="text-muted-foreground hover:text-foreground transition-colors">
                   {selectedProject.name}
                 </button>
               </>
@@ -320,7 +329,7 @@ const ProjectsPage = () => {
         <VersionHistoryDialog
           video={showVersions}
           onClose={() => setShowVersions(null)}
-          onSelect={(v) => { setPlayingVideo(v); setShowVersions(null); }}
+          onSelect={(v) => { navigate(`/projects/${urlProjectId}/video/${v.id}`); setShowVersions(null); }}
           t={t}
         />
       </div>
@@ -357,7 +366,7 @@ const ProjectsPage = () => {
         <main className="container mx-auto px-4 py-8">
           {/* Breadcrumbs */}
           <div className="mb-4 flex items-center gap-1 text-sm">
-            <button onClick={() => setSelectedProject(null)} className="text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={() => navigate("/projects")} className="text-muted-foreground hover:text-foreground transition-colors">
               {t.allProjects}
             </button>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground rtl:rotate-180" />
@@ -428,7 +437,7 @@ const ProjectsPage = () => {
                     viewMode={viewMode}
                     isRTL={isRTL}
                     t={t}
-                    onPlay={() => vid.video_url && setPlayingVideo(vid)}
+                    onPlay={() => vid.video_url && navigate(`/projects/${selectedProject.id}/video/${vid.id}`)}
                     onShare={() => setShareTarget({ projectId: selectedProject.id, videoId: vid.id, name: vid.title })}
                     onRename={() => setRenameTarget({ id: vid.id, name: vid.title, type: "video" })}
                     onDelete={() => deleteVideo.mutate(vid.id)}
@@ -487,7 +496,7 @@ const ProjectsPage = () => {
         {shareTarget && (
           <ShareModal open onOpenChange={() => setShareTarget(null)} projectId={shareTarget.projectId} videoId={shareTarget.videoId} projectName={shareTarget.name} />
         )}
-        <VersionHistoryDialog video={showVersions} onClose={() => setShowVersions(null)} onSelect={(v) => { setPlayingVideo(v); setShowVersions(null); }} t={t} />
+        <VersionHistoryDialog video={showVersions} onClose={() => setShowVersions(null)} onSelect={(v) => { navigate(`/projects/${urlProjectId}/video/${v.id}`); setShowVersions(null); }} t={t} />
         <MoveToProjectDialog
           moveTarget={moveTarget}
           projects={projects || []}
@@ -593,7 +602,7 @@ const ProjectsPage = () => {
                 <div className={viewMode === "grid" ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3" : "space-y-2"}>
                   {searchResults.projects.map((p) => (
                     <ProjectCard key={p.id} project={p} viewMode={viewMode} t={t} isRTL={isRTL}
-                      onClick={() => { setSelectedProject(p); setSearch(""); }}
+                      onClick={() => { navigate(`/projects/${p.id}`); setSearch(""); }}
                       onShare={() => setShareTarget({ projectId: p.id, name: p.name })}
                       onRename={() => setRenameTarget({ id: p.id, name: p.name, type: "project" })}
                       onDelete={() => deleteProject.mutate(p.id)}
@@ -608,7 +617,7 @@ const ProjectsPage = () => {
                 <div className={viewMode === "grid" ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3" : "space-y-2"}>
                   {searchResults.videos.map((v) => (
                     <VideoCard key={v.id} vid={v} viewMode={viewMode} isRTL={isRTL} t={t}
-                      onPlay={() => { setPlayingVideo(v); setSearch(""); }}
+                      onPlay={() => { navigate(`/projects/${v.project_id}/video/${v.id}`); setSearch(""); }}
                       onShare={() => setShareTarget({ projectId: v.project_id || undefined, videoId: v.id, name: v.title })}
                       onRename={() => setRenameTarget({ id: v.id, name: v.title, type: "video" })}
                       onDelete={() => deleteVideo.mutate(v.id)}
@@ -687,7 +696,7 @@ const ProjectsPage = () => {
                     viewMode={viewMode}
                     t={t}
                     isRTL={isRTL}
-                    onClick={() => setSelectedProject(project)}
+                    onClick={() => navigate(`/projects/${project.id}`)}
                     onShare={() => setShareTarget({ projectId: project.id, name: project.name })}
                     onRename={() => setRenameTarget({ id: project.id, name: project.name, type: "project" })}
                     onDelete={() => deleteProject.mutate(project.id)}
@@ -741,7 +750,7 @@ const ProjectsPage = () => {
         <ShareModal open onOpenChange={() => setShareTarget(null)} projectId={shareTarget.projectId} videoId={shareTarget.videoId} projectName={shareTarget.name} />
       )}
 
-      <VersionHistoryDialog video={showVersions} onClose={() => setShowVersions(null)} onSelect={(v) => { setPlayingVideo(v); setShowVersions(null); }} t={t} />
+      <VersionHistoryDialog video={showVersions} onClose={() => setShowVersions(null)} onSelect={(v) => { navigate(`/projects/${v.project_id}/video/${v.id}`); setShowVersions(null); }} t={t} />
       <MoveToProjectDialog
         moveTarget={moveTarget}
         projects={projects || []}
