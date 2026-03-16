@@ -258,7 +258,7 @@ const ProjectsPage = () => {
         <main className="container mx-auto max-w-5xl px-4 py-8">
           {/* Breadcrumbs */}
           <div className="mb-4 flex items-center gap-1 text-sm">
-            <button onClick={() => { setPlayingVideo(null); setSelectedProject(null); }} className="text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={() => navigate("/projects")} className="text-muted-foreground hover:text-foreground transition-colors">
               {t.allProjects}
             </button>
             {selectedProject && (
