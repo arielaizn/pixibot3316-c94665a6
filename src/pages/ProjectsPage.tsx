@@ -961,11 +961,7 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
                 e.stopPropagation();
                 if (vid.video_url) {
                   const url = getVideoPublicUrl(vid.video_url);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = (vid.title || "video") + ".mp4";
-                  a.target = "_blank";
-                  a.click();
+                  downloadFile(url, (vid.title || "video") + ".mp4");
                 }
               }}>
                 <Download className="me-2 h-3.5 w-3.5" /> {t.download}
