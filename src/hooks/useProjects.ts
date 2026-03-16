@@ -188,12 +188,15 @@ export const useProjects = () => {
       const results: { progress: number }[] = [];
       for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
-        const path = `${user!.id}/${Date.now()}_${sanitizeFileName(file.name)}`;
-        const { error: uploadError } = await supabase.storage
+        const filePath = `${user!.id}/${Date.now()}_${sanitizeFileName(file.name)}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from("user-files")
-          .upload(path, file);
+          .upload(filePath, file);
         if (uploadError) throw uploadError;
-        const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(path);
+        if (!uploadData?.path) throw new Error("Upload succeeded but no storage path was returned");
+
+        const storagePath = uploadData.path;
+        const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(storagePath);
         const { error: dbError } = await supabase.from("user_files").insert({
           user_id: user!.id,
           project_id: projectId,
@@ -204,13 +207,12 @@ export const useProjects = () => {
         });
         if (dbError) throw dbError;
 
-        // If the file is a video, also create a videos row with the storage path
         if (file.type?.startsWith("video/")) {
           const { error: vidError } = await supabase.from("videos").insert({
             user_id: user!.id,
             project_id: projectId,
             title: file.name.replace(/\.[^/.]+$/, ""),
-            video_url: path,
+            video_url: storagePath,
             status: "completed",
           });
           if (vidError) throw vidError;
