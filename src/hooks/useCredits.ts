@@ -39,16 +39,18 @@ export function useCredits() {
     queryKey: ["user-credits", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_credits")
-        .select("*")
-        .eq("user_id", user!.id)
-        .maybeSingle();
+      // Fetch credits and admin role in parallel
+      const [creditsResult, roleResult] = await Promise.all([
+        supabase.from("user_credits").select("*").eq("user_id", user!.id).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", user!.id).eq("role", "admin"),
+      ]);
 
-      if (error) throw error;
+      if (creditsResult.error) throw creditsResult.error;
+      const data = creditsResult.data;
       if (!data) return null;
 
-      const isUnlimited = data.is_unlimited === true;
+      const isAdmin = (roleResult.data && roleResult.data.length > 0) || false;
+      const isUnlimited = data.is_unlimited === true || isAdmin;
       const totalCredits = data.plan_credits + data.extra_credits;
       const remainingCredits = isUnlimited ? Infinity : Math.max(0, totalCredits - data.used_credits);
       const usagePercent = isUnlimited ? 0 : totalCredits > 0 ? (data.used_credits / totalCredits) * 100 : 100;

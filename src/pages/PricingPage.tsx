@@ -273,7 +273,15 @@ const PricingPage = () => {
         </div>
 
         {/* ── USAGE PRESSURE ── */}
-        {user && credits && (
+        {user && credits && credits.isUnlimited && (
+          <div className="mx-auto mb-16 max-w-md rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 shadow-sm dark:bg-primary/[0.06] text-center">
+            <p className="text-lg font-bold text-foreground mb-1">🎬 ∞</p>
+            <p className="text-sm text-muted-foreground">
+              {isRTL ? "תוכנית מנהל ללא הגבלה" : "Admin Unlimited Plan"}
+            </p>
+          </div>
+        )}
+        {user && credits && !credits.isUnlimited && (
           <div className="mx-auto mb-16 max-w-md rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 shadow-sm dark:bg-primary/[0.06]">
             <CreditBar credits={credits} showPlan showWarning />
           </div>

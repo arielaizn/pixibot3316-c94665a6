@@ -44,7 +44,10 @@ const DashboardPage = () => {
     firstVideo: isRTL ? "צור סרטון ראשון" : "Create First Video",
   };
 
-  const plan = credits ? getPlanLabel(credits.plan_type, isRTL) : "...";
+  const isUnlimited = credits?.isUnlimited;
+  const plan = isUnlimited
+    ? (isRTL ? "מנהל" : "Admin")
+    : credits ? getPlanLabel(credits.plan_type, isRTL) : "...";
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,9 +74,11 @@ const DashboardPage = () => {
               </div>
               <div className="h-8 w-px bg-border" />
               <div className="text-right">
-                <p className="text-xs text-muted-foreground">{t.creditsLeft}</p>
+                <p className="text-xs text-muted-foreground">
+                  {isUnlimited ? (isRTL ? "סרטונים" : "Videos") : t.creditsLeft}
+                </p>
                 <p className="font-bold text-primary">
-                  {creditsLoading ? "..." : credits ? (credits.isUnlimited ? "∞" : `${credits.used_credits} / ${credits.totalCredits}`) : "—"}
+                  {creditsLoading ? "..." : credits ? (isUnlimited ? "🎬 ∞" : `${credits.used_credits} / ${credits.totalCredits}`) : "—"}
                 </p>
               </div>
             </div>
