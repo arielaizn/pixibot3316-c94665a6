@@ -404,6 +404,7 @@ export type Database = {
           id: string
           is_deleted: boolean
           is_starred: boolean
+          project_id: string | null
           updated_at: string
           user_id: string
           visibility: string
@@ -418,6 +419,7 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           is_starred?: boolean
+          project_id?: string | null
           updated_at?: string
           user_id: string
           visibility?: string
@@ -432,6 +434,7 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           is_starred?: boolean
+          project_id?: string | null
           updated_at?: string
           user_id?: string
           visibility?: string
@@ -442,6 +445,13 @@ export type Database = {
             columns: ["folder_id"]
             isOneToOne: false
             referencedRelation: "user_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -507,36 +517,49 @@ export type Database = {
           created_at: string
           credits_used: number
           id: string
+          parent_video_id: string | null
           project_id: string | null
           status: string
           thumbnail_url: string | null
           title: string
           user_id: string
+          version_number: number
           video_url: string | null
         }
         Insert: {
           created_at?: string
           credits_used?: number
           id?: string
+          parent_video_id?: string | null
           project_id?: string | null
           status?: string
           thumbnail_url?: string | null
           title?: string
           user_id: string
+          version_number?: number
           video_url?: string | null
         }
         Update: {
           created_at?: string
           credits_used?: number
           id?: string
+          parent_video_id?: string | null
           project_id?: string | null
           status?: string
           thumbnail_url?: string | null
           title?: string
           user_id?: string
+          version_number?: number
           video_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "videos_parent_video_id_fkey"
+            columns: ["parent_video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "videos_project_id_fkey"
             columns: ["project_id"]
