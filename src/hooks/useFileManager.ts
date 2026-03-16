@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeFileName } from "@/lib/sanitizeFileName";
 
 export interface UserFolder {
   id: string;
@@ -129,7 +130,7 @@ export function useFileManager(currentFolderId: string | null) {
   const uploadFiles = useMutation({
     mutationFn: async (files: File[]) => {
       for (const file of files) {
-        const path = `${user!.id}/${Date.now()}_${file.name}`;
+        const path = `${user!.id}/${Date.now()}_${sanitizeFileName(file.name)}`;
         const { error: uploadError } = await supabase.storage
           .from("user-files")
           .upload(path, file);

@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { generateThumbnail } from "@/lib/thumbnailGenerator";
 import { getVideoPublicUrl } from "@/lib/videoUrl";
+import { sanitizeFileName } from "@/lib/sanitizeFileName";
 
 export interface VideoRecord {
   id: string;
@@ -187,7 +188,7 @@ export const useProjects = () => {
       const results: { progress: number }[] = [];
       for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
-        const path = `${user!.id}/${Date.now()}_${file.name}`;
+        const path = `${user!.id}/${Date.now()}_${sanitizeFileName(file.name)}`;
         const { error: uploadError } = await supabase.storage
           .from("user-files")
           .upload(path, file);
