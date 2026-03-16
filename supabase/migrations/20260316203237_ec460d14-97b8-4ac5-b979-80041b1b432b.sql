@@ -1,0 +1,1 @@
+ALTER TABLE public.file_shares ALTER COLUMN share_token SET DEFAULT encode(extensions.gen_random_bytes(32), 'hex'::text);
