@@ -19,6 +19,7 @@ interface VideoData {
   thumbnail_url: string | null;
   created_at: string;
   view_count?: number;
+  status?: string;
 }
 
 interface SharedFileData {
