@@ -295,7 +295,7 @@ const ProjectsPage = () => {
           </div>
 
           <PixiVideoPlayer
-            src={playingVideo.video_url || ""}
+            src={getVideoPublicUrl(playingVideo.video_url)}
             title={playingVideo.title}
             thumbnail={playingVideo.thumbnail_url}
             onShare={() =>
