@@ -277,11 +277,25 @@ serve(async (req) => {
           .eq("used", false)
           .gt("expires_at", new Date().toISOString());
 
+        // Category stats
+        const { data: allVideos } = await adminClient
+          .from("videos")
+          .select("category")
+          .not("category", "is", null);
+
+        const categoryCount: Record<string, number> = {};
+        (allVideos || []).forEach((v: any) => {
+          if (v.category) {
+            categoryCount[v.category] = (categoryCount[v.category] || 0) + 1;
+          }
+        });
+
         result = {
           totalUsers,
           totalVideos: totalVideos || 0,
           totalProjects: totalProjects || 0,
           activeTokens: activeTokens || 0,
+          categoryStats: categoryCount,
         };
         break;
       }

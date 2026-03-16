@@ -10,12 +10,14 @@ import ShareModal from "@/components/ShareModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Loader2, FolderOpen, FolderPlus, Upload, Search, Grid3X3, List, Star, StarOff,
   Trash2, Pencil, MoreVertical, FileText, FileVideo, FileImage, FileAudio, File as FileIcon,
   ChevronRight, X, Eye, Download, ArrowLeft, Video, Share2, Play, Plus, History, FolderInput,
+  Sparkles, Tag, Wand2,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -47,6 +49,7 @@ const ProjectsPage = () => {
     projects, isLoading: projectsLoading,
     createProject, renameProject, deleteProject,
     renameVideo, deleteVideo, uploadToProject, moveFileToProject,
+    classifyVideo, updateVideoTags, updateVideoCategory,
   } = useProjects();
 
   // File manager for standalone files tab
@@ -115,20 +118,23 @@ const ProjectsPage = () => {
     uploading: isRTL ? "מעלה קבצים..." : "Uploading files...",
   };
 
-  /* ── Global search across projects, videos, files ── */
+  /* ── Global search across projects, videos, files — includes tags & categories ── */
   const searchResults = useMemo(() => {
     if (!search.trim()) return null;
     const q = search.toLowerCase();
     const matchedProjects = (projects || []).filter((p) =>
-      p.name.toLowerCase().includes(q) || p.status === "active"
-    ).filter((p) => p.name.toLowerCase().includes(q));
+      p.name.toLowerCase().includes(q)
+    );
 
     const matchedVideos: (VideoRecord & { projectName: string })[] = [];
     const matchedFiles: (ProjectFile & { projectName: string })[] = [];
 
     (projects || []).forEach((p) => {
       p.videos.forEach((v) => {
-        if (v.title.toLowerCase().includes(q)) {
+        const matchTitle = v.title.toLowerCase().includes(q);
+        const matchCategory = v.category?.toLowerCase().includes(q);
+        const matchTags = v.tags?.some((tag) => tag.toLowerCase().includes(q));
+        if (matchTitle || matchCategory || matchTags) {
           matchedVideos.push({ ...v, projectName: p.name });
         }
       });
@@ -139,11 +145,34 @@ const ProjectsPage = () => {
       });
     });
 
-    // Also search standalone files
     const standaloneMatches = allFiles.filter((f) => f.file_name.toLowerCase().includes(q));
 
     return { projects: matchedProjects, videos: matchedVideos, files: matchedFiles, standalone: standaloneMatches };
   }, [search, projects, allFiles]);
+
+  /* ── Suggested folders based on uncategorized videos ── */
+  const suggestedFolders = useMemo(() => {
+    if (!projects) return [];
+    const categoryMap: Record<string, VideoRecord[]> = {};
+    const existingProjectNames = new Set((projects || []).map((p) => p.name.toLowerCase()));
+
+    (projects || []).forEach((p) => {
+      p.videos.forEach((v) => {
+        if (v.category && v.category !== "Other") {
+          const folderName = `${v.category} Videos`;
+          if (!existingProjectNames.has(folderName.toLowerCase())) {
+            if (!categoryMap[folderName]) categoryMap[folderName] = [];
+            categoryMap[folderName].push(v);
+          }
+        }
+      });
+    });
+
+    return Object.entries(categoryMap)
+      .filter(([, vids]) => vids.length >= 1)
+      .map(([name, vids]) => ({ name, videoCount: vids.length, category: vids[0].category! }))
+      .slice(0, 5);
+  }, [projects]);
 
   /* ── Folder navigation ── */
   const navigateToFolder = useCallback((folder: UserFolder) => {
@@ -403,6 +432,7 @@ const ProjectsPage = () => {
                     onRename={() => setRenameTarget({ id: vid.id, name: vid.title, type: "video" })}
                     onDelete={() => deleteVideo.mutate(vid.id)}
                     onVersions={() => setShowVersions(vid)}
+                    onClassify={() => classifyVideo.mutate(vid.id)}
                   />
                 ))}
               </div>
@@ -582,6 +612,7 @@ const ProjectsPage = () => {
                       onRename={() => setRenameTarget({ id: v.id, name: v.title, type: "video" })}
                       onDelete={() => deleteVideo.mutate(v.id)}
                       onVersions={() => setShowVersions(v)}
+                      onClassify={() => classifyVideo.mutate(v.id)}
                       subtitle={v.projectName}
                     />
                   ))}
@@ -600,6 +631,31 @@ const ProjectsPage = () => {
         {/* Main content (no search) */}
         {!searchResults && (
           <>
+            {/* AI Suggested Folders */}
+            {suggestedFolders.length > 0 && (
+              <div className="mb-6">
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  {isRTL ? "תיקיות מוצעות" : "Suggested Folders"}
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {suggestedFolders.map((sf) => (
+                    <button
+                      key={sf.name}
+                      onClick={() => { createProject.mutate(sf.name); }}
+                      className="group flex items-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-2.5 transition-all hover:border-primary hover:bg-primary/10"
+                    >
+                      <Wand2 className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium text-foreground">{sf.name}</span>
+                      <Badge variant="secondary" className="rounded-full text-[10px]">
+                        {sf.videoCount} {isRTL ? "סרטונים" : "videos"}
+                      </Badge>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {projectsLoading ? (
               <div className="flex justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -779,10 +835,10 @@ function ProjectCard({ project, viewMode, t, isRTL, onClick, onShare, onRename, 
   );
 }
 
-function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelete, onVersions, subtitle }: {
+function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelete, onVersions, onClassify, subtitle }: {
   vid: VideoRecord & { projectName?: string }; viewMode: string; isRTL: boolean; t: any;
   onPlay: () => void; onShare: () => void; onRename: () => void; onDelete: () => void;
-  onVersions: () => void; subtitle?: string;
+  onVersions: () => void; onClassify?: () => void; subtitle?: string;
 }) {
   if (viewMode === "list") {
     return (
@@ -796,7 +852,14 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-foreground">{vid.title || "סרטון"}</p>
-          <p className="text-xs text-muted-foreground">{subtitle || formatDate(vid.created_at)}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-xs text-muted-foreground">{subtitle || formatDate(vid.created_at)}</p>
+            {vid.category && (
+              <Badge variant="outline" className="rounded-full text-[9px] px-1.5 py-0 border-primary/30 text-primary">
+                {vid.category}
+              </Badge>
+            )}
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -808,6 +871,9 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(); }}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>
             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onVersions(); }}><History className="me-2 h-3.5 w-3.5" /> {t.versions}</DropdownMenuItem>
             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(); }}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
+            {onClassify && !vid.category && (
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClassify(); }}><Wand2 className="me-2 h-3.5 w-3.5" /> {isRTL ? "סווג אוטומטית" : "Auto-classify"}</DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}><Trash2 className="me-2 h-3.5 w-3.5" /> {t.delete}</DropdownMenuItem>
           </DropdownMenuContent>
@@ -840,28 +906,48 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
           </span>
         )}
       </div>
-      <div className="flex items-center justify-between p-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-medium text-foreground">{vid.title || "סרטון"}</p>
-          <p className="text-xs text-muted-foreground">{subtitle || formatDate(vid.created_at)}</p>
+      <div className="p-3">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium text-foreground">{vid.title || "סרטון"}</p>
+            <p className="text-xs text-muted-foreground">{subtitle || formatDate(vid.created_at)}</p>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <button className="rounded-full p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100">
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(); }}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onVersions(); }}><History className="me-2 h-3.5 w-3.5" /> {t.versions}</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(); }}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); vid.video_url && window.open(vid.video_url); }}>
+                <Download className="me-2 h-3.5 w-3.5" /> {t.download}
+              </DropdownMenuItem>
+              {onClassify && !vid.category && (
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClassify(); }}><Wand2 className="me-2 h-3.5 w-3.5" /> {isRTL ? "סווג אוטומטית" : "Auto-classify"}</DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}><Trash2 className="me-2 h-3.5 w-3.5" /> {t.delete}</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button className="rounded-full p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100">
-              <MoreVertical className="h-4 w-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(); }}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onVersions(); }}><History className="me-2 h-3.5 w-3.5" /> {t.versions}</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(); }}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); vid.video_url && window.open(vid.video_url); }}>
-              <Download className="me-2 h-3.5 w-3.5" /> {t.download}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}><Trash2 className="me-2 h-3.5 w-3.5" /> {t.delete}</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Category & Tags */}
+        {(vid.category || (vid.tags && vid.tags.length > 0)) && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {vid.category && (
+              <Badge variant="outline" className="rounded-full text-[10px] px-2 py-0 border-primary/30 text-primary">
+                {vid.category}
+              </Badge>
+            )}
+            {vid.tags?.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="secondary" className="rounded-full text-[10px] px-2 py-0">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

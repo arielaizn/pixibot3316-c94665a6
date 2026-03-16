@@ -514,12 +514,16 @@ export type Database = {
       }
       videos: {
         Row: {
+          category: string | null
+          content_type: string | null
           created_at: string
           credits_used: number
+          description: string | null
           id: string
           parent_video_id: string | null
           project_id: string | null
           status: string
+          tags: string[] | null
           thumbnail_url: string | null
           title: string
           user_id: string
@@ -527,12 +531,16 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          category?: string | null
+          content_type?: string | null
           created_at?: string
           credits_used?: number
+          description?: string | null
           id?: string
           parent_video_id?: string | null
           project_id?: string | null
           status?: string
+          tags?: string[] | null
           thumbnail_url?: string | null
           title?: string
           user_id: string
@@ -540,12 +548,16 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          category?: string | null
+          content_type?: string | null
           created_at?: string
           credits_used?: number
+          description?: string | null
           id?: string
           parent_video_id?: string | null
           project_id?: string | null
           status?: string
+          tags?: string[] | null
           thumbnail_url?: string | null
           title?: string
           user_id?: string
