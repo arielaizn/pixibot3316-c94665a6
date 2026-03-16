@@ -1004,6 +1004,7 @@ function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onSt
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onPreview}><Eye className="me-2 h-3.5 w-3.5" /> {t.preview}</DropdownMenuItem>
             <DropdownMenuItem onClick={() => downloadFile(file.file_url, file.file_name)}><Download className="me-2 h-3.5 w-3.5" /> {t.download}</DropdownMenuItem>
+            {onShare && <DropdownMenuItem onClick={onShare}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>}
             <DropdownMenuItem onClick={onRename}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
             <DropdownMenuItem onClick={onMove}><FolderInput className="me-2 h-3.5 w-3.5" /> {t.moveTo}</DropdownMenuItem>
             <DropdownMenuSeparator />
