@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useDirection } from "@/contexts/DirectionContext";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
+import { getVideoPublicUrl } from "@/lib/videoUrl";
 import { Loader2 } from "lucide-react";
 
 const SharedPage = () => {
