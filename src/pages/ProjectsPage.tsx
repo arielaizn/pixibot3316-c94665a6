@@ -938,40 +938,20 @@ function RenameDialog({ renameTarget, onClose, onSave, isRTL, t }: {
   renameTarget: { id: string; name: string; type: string } | null;
   onClose: () => void; onSave: (id: string, name: string, type: string) => void; isRTL: boolean; t: any;
 }) {
-  const [name, setName] = useState("");
-  // sync name when target changes
-  if (renameTarget && name === "" && renameTarget.name !== name) {
-    // intentional — initial sync
-  }
+  const [localName, setLocalName] = useState(renameTarget?.name || "");
+
+  // Reset when target changes
+  useMemo(() => {
+    if (renameTarget) setLocalName(renameTarget.name);
+  }, [renameTarget?.id]);
 
   return (
     <Dialog open={!!renameTarget} onOpenChange={onClose}>
       <DialogContent className="rounded-2xl">
         <DialogHeader><DialogTitle>{t.rename}</DialogTitle></DialogHeader>
         {renameTarget && (
-          <form onSubmit={(e) => { e.preventDefault(); onSave(renameTarget.id, renameTarget.name, renameTarget.type); }} className="space-y-4">
-            <Input
-              value={renameTarget.name}
-              onChange={(e) => {
-                // We need the parent to manage renameTarget state
-                // This is a controlled input through renameTarget
-              }}
-              className="rounded-xl"
-              autoFocus
-              // Actually use defaultValue since renameTarget is managed by parent
-              key={renameTarget.id}
-              defaultValue={renameTarget.name}
-              onBlur={(e) => {
-                // Update parent's renameTarget name on blur or submit
-              }}
-              ref={(el) => {
-                if (el) {
-                  el.addEventListener('input', (ev) => {
-                    renameTarget.name = (ev.target as HTMLInputElement).value;
-                  });
-                }
-              }}
-            />
+          <form onSubmit={(e) => { e.preventDefault(); onSave(renameTarget.id, localName, renameTarget.type); }} className="space-y-4">
+            <Input value={localName} onChange={(e) => setLocalName(e.target.value)} className="rounded-xl" autoFocus />
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" className="rounded-xl" onClick={onClose}>{t.cancel}</Button>
               <Button type="submit" className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">{t.save}</Button>
