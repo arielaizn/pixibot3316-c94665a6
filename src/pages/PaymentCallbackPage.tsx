@@ -22,12 +22,38 @@ const PaymentCallbackPage = () => {
       return;
     }
 
-    verifyPayment(paymentId)
-      .then(() => setStatus("success"))
-      .catch((err) => {
+    // Poll payment status — webhook activates it server-side
+    let attempts = 0;
+    const maxAttempts = 20;
+    const pollInterval = 3000;
+
+    const poll = async () => {
+      try {
+        const result = await verifyPayment(paymentId);
+        if (result.status === "completed" || result.status === "already_completed") {
+          setStatus("success");
+          return;
+        }
+        if (result.status === "failed" || result.status === "amount_mismatch") {
+          setStatus("error");
+          setErrorMsg(isRTL ? "התשלום נכשל" : "Payment failed");
+          return;
+        }
+        // Still pending — retry
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, pollInterval);
+        } else {
+          // After ~60s, show success optimistically (webhook may still be processing)
+          setStatus("success");
+        }
+      } catch (err: any) {
         setStatus("error");
         setErrorMsg(err.message);
-      });
+      }
+    };
+
+    poll();
   }, [paymentId]);
 
   const t = {
