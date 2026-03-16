@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDirection } from "@/contexts/DirectionContext";
 import mascot from "@/assets/pixi-mascot.png";
 
 const FloatingMascot = () => {
   const [hovered, setHovered] = useState(false);
   const navigate = useNavigate();
+  const { t } = useDirection();
 
   return (
     <button
@@ -14,7 +16,7 @@ const FloatingMascot = () => {
       onMouseLeave={() => setHovered(false)}
     >
       <div className={`absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background shadow-lg transition-all duration-200 ${hovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"}`}>
-        התחל בחינם
+        {t("mascot.tooltip")}
       </div>
       <img
         src={mascot}

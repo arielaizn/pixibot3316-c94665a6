@@ -31,7 +31,7 @@ const DirectionToggle = () => {
     <button
       onClick={toggleDirection}
       className="relative flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-      aria-label="Toggle direction"
+      aria-label="Toggle language"
     >
       <Globe className="h-[18px] w-[18px]" />
     </button>
@@ -51,7 +51,7 @@ const LangIndicator = () => {
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { user, signOut } = useAuth();
-  const { isRTL } = useDirection();
+  const { t } = useDirection();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -59,38 +59,22 @@ const Navbar = () => {
     navigate("/");
   };
 
-  const guestLinks = isRTL
-    ? [
-        { label: "בית", href: "/" },
-        { label: "מחירים", href: "/pricing" },
-        { label: "התחברות", href: "/login" },
-        { label: "הרשמה", href: "/signup" },
-      ]
-    : [
-        { label: "Home", href: "/" },
-        { label: "Pricing", href: "/pricing" },
-        { label: "Login", href: "/login" },
-        { label: "Sign Up", href: "/signup" },
-      ];
+  const guestLinks = [
+    { label: t("nav.home"), href: "/" },
+    { label: t("nav.pricing"), href: "/pricing" },
+    { label: t("nav.login"), href: "/login" },
+    { label: t("nav.signup"), href: "/signup" },
+  ];
 
-  const authLinks = isRTL
-    ? [
-        { label: "דשבורד", href: "/dashboard", icon: LayoutDashboard },
-        { label: "פרויקטים", href: "/projects", icon: FolderOpen },
-        { label: "שדרוג", href: "/pricing", icon: Sparkles },
-      ]
-    : [
-        { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-        { label: "Projects", href: "/projects", icon: FolderOpen },
-        { label: "Upgrade", href: "/pricing", icon: Sparkles },
-      ];
+  const authLinks = [
+    { label: t("nav.dashboard"), href: "/dashboard", icon: LayoutDashboard },
+    { label: t("nav.projects"), href: "/projects", icon: FolderOpen },
+    { label: t("nav.upgrade"), href: "/pricing", icon: Sparkles },
+  ];
 
   const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "";
   const avatarUrl = user?.user_metadata?.avatar_url || "";
   const initials = userName.charAt(0).toUpperCase() || "U";
-
-  const ctaLabel = isRTL ? "התחל עכשיו" : "Get Started";
-  const logoutLabel = isRTL ? "התנתק" : "Log Out";
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
@@ -126,7 +110,7 @@ const Navbar = () => {
 
           {!user && (
             <Button asChild className="rounded-full bg-primary font-semibold text-primary-foreground hover:bg-primary/90">
-              <Link to="/signup">{ctaLabel}</Link>
+              <Link to="/signup">{t("nav.getStarted")}</Link>
             </Button>
           )}
 
@@ -154,7 +138,7 @@ const Navbar = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer gap-2 text-destructive focus:text-destructive">
                   <LogOut className="h-4 w-4" />
-                  {logoutLabel}
+                  {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -183,7 +167,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <Button asChild className="mt-2 w-full rounded-full bg-primary font-semibold text-primary-foreground">
-                <Link to="/signup" onClick={() => setOpen(false)}>{ctaLabel}</Link>
+                <Link to="/signup" onClick={() => setOpen(false)}>{t("nav.getStarted")}</Link>
               </Button>
             </>
           )}
@@ -208,7 +192,7 @@ const Navbar = () => {
                 className="flex w-full items-center gap-2 py-3 text-sm font-medium text-destructive"
               >
                 <LogOut className="h-4 w-4" />
-                {logoutLabel}
+                {t("nav.logout")}
               </button>
             </>
           )}
