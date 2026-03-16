@@ -108,6 +108,8 @@ const PricingPage = () => {
   const [yearly, setYearly] = useState(false);
   const { user } = useAuth();
   const { credits } = useCredits();
+  const navigate = useNavigate();
+  const { startSubscription, buyCredits, loading: paymentLoading } = usePayment();
 
   const t = {
     title: isRTL ? "תוכניות ומחירים" : "Plans & Pricing",
