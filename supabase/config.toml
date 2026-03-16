@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.pixi-whatsapp]
 verify_jwt = false
+
+[functions.pixi-classify]
+verify_jwt = false
