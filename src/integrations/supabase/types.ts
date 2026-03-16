@@ -41,6 +41,44 @@ export type Database = {
         }
         Relationships: []
       }
+      file_shares: {
+        Row: {
+          created_at: string
+          file_id: string
+          id: string
+          permission: string
+          share_token: string | null
+          shared_by: string
+          shared_with_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_id: string
+          id?: string
+          permission?: string
+          share_token?: string | null
+          shared_by: string
+          shared_with_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_id?: string
+          id?: string
+          permission?: string
+          share_token?: string | null
+          shared_by?: string
+          shared_with_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_shares_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "user_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pixi_handoff_tokens: {
         Row: {
           created_at: string
@@ -199,6 +237,97 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_size: number
+          file_type: string
+          file_url: string
+          folder_id: string | null
+          id: string
+          is_deleted: boolean
+          is_starred: boolean
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_size?: number
+          file_type?: string
+          file_url: string
+          folder_id?: string | null
+          id?: string
+          is_deleted?: boolean
+          is_starred?: boolean
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          folder_id?: string | null
+          id?: string
+          is_deleted?: boolean
+          is_starred?: boolean
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_files_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "user_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_folders: {
+        Row: {
+          created_at: string
+          id: string
+          is_deleted: boolean
+          name: string
+          parent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          name: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          name?: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "user_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
