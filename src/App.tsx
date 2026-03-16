@@ -14,6 +14,8 @@ import WelcomePage from "./pages/WelcomePage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
 import FilePreviewPage from "./pages/FilePreviewPage.tsx";
+import DocumentEditorPage from "./pages/DocumentEditorPage.tsx";
+import SharedFilePage from "./pages/SharedFilePage.tsx";
 import PricingPage from "./pages/PricingPage.tsx";
 import PaymentCallbackPage from "./pages/PaymentCallbackPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -54,6 +56,7 @@ const App = () => (
                 <Route path="/projects/:projectId" element={<ProjectsPage />} />
                 <Route path="/projects/:projectId/video/:videoId" element={<ProjectsPage />} />
                 <Route path="/projects/file/:fileId" element={<FilePreviewPage />} />
+                <Route path="/projects/document/:fileId" element={<DocumentEditorPage />} />
                 <Route path="/payment/callback" element={<PaymentCallbackPage />} />
                 {/* Admin */}
                 <Route path="/admin" element={<AdminLoginPage />} />
@@ -66,6 +69,7 @@ const App = () => (
                 <Route path="/admin/whatsapp" element={<AdminWhatsAppPage />} />
                 <Route path="/admin/referrals" element={<AdminReferralsPage />} />
                 <Route path="/not-admin" element={<NotAdminPage />} />
+                <Route path="/share/file/:token" element={<SharedFilePage />} />
                 <Route path="/share/:type/:token" element={<SharedPage />} />
                 <Route path="/share/:videoId" element={<PublicVideoPage />} />
                 <Route path="/s/:token" element={<SharedPage />} />
