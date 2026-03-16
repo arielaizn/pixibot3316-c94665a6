@@ -159,6 +159,31 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Step 4: Record in user_videos for stats tracking
+    // Get video to find user_id
+    const { data: completedVideo } = await admin
+      .from("videos")
+      .select("user_id, created_at")
+      .eq("id", videoId)
+      .single();
+
+    if (completedVideo) {
+      const startTime = new Date(completedVideo.created_at).getTime();
+      const genTime = Math.round((Date.now() - startTime) / 1000);
+
+      await admin.from("user_videos").upsert(
+        {
+          user_id: completedVideo.user_id,
+          video_id: videoId,
+          status: "completed",
+          generation_time: genTime,
+          file_url: storagePath,
+        },
+        { onConflict: "video_id" }
+      );
+      console.log(`Recorded user_video stats for ${videoId} (${genTime}s)`);
+    }
+
     console.log(`Video ${videoId} completed successfully`);
     return new Response(
       JSON.stringify({
