@@ -208,6 +208,7 @@ export type Database = {
           created_at: string
           extra_credits: number
           id: string
+          is_unlimited: boolean
           plan_credits: number
           plan_type: string
           updated_at: string
@@ -219,6 +220,7 @@ export type Database = {
           created_at?: string
           extra_credits?: number
           id?: string
+          is_unlimited?: boolean
           plan_credits?: number
           plan_type?: string
           updated_at?: string
@@ -230,6 +232,7 @@ export type Database = {
           created_at?: string
           extra_credits?: number
           id?: string
+          is_unlimited?: boolean
           plan_credits?: number
           plan_type?: string
           updated_at?: string
