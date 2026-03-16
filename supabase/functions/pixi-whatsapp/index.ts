@@ -85,7 +85,56 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     console.log("WhatsApp webhook payload:", JSON.stringify(payload));
 
-    // Extract message — supports direct format and Meta webhook format
+    // ── Internal action: post_video (called by video generation system) ──
+    if (payload.action === "post_video") {
+      const { user_id, video_url } = payload;
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "Missing user_id" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: userData } = await admin.auth.admin.getUserById(user_id);
+      const email = userData?.user?.email || "";
+      const isAdmin = ADMIN_EMAILS.includes(email);
+
+      const { data: credits } = await admin
+        .from("user_credits")
+        .select("*")
+        .eq("user_id", user_id)
+        .maybeSingle();
+
+      const { data: profile } = await admin
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", user_id)
+        .maybeSingle();
+
+      const plan = credits?.plan_type || "free";
+      const isUnlimited = credits?.is_unlimited || isAdmin;
+      const remaining = isUnlimited
+        ? -1
+        : Math.max(0, (credits?.plan_credits || 0) + (credits?.extra_credits || 0) - (credits?.used_credits || 0));
+
+      // Detect first video: used_credits was 0 before this one (now 1)
+      const isFirstVideo = plan === "free" && (credits?.used_credits || 0) <= 1;
+
+      const reply = buildPostVideoResponse(
+        user_id,
+        plan,
+        remaining,
+        profile?.full_name?.split(" ")[0] || "",
+        video_url,
+        isFirstVideo
+      );
+
+      return new Response(JSON.stringify({ reply, userId: user_id, plan, creditsRemaining: remaining }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ── Standard WhatsApp message handling ──
     const msg = extractMessage(payload);
     if (!msg) {
       return new Response(JSON.stringify({ status: "no_message" }), {
