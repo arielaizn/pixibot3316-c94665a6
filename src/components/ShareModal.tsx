@@ -18,30 +18,13 @@ interface ShareModalProps {
 }
 
 const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: ShareModalProps) => {
-  const { isRTL } = useDirection();
+  const { t } = useDirection();
   const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [permission, setPermission] = useState("viewer");
   const [visibility, setVisibility] = useState("private");
   const [copied, setCopied] = useState(false);
   const [sending, setSending] = useState(false);
-
-  const t = {
-    title: isRTL ? "שיתוף" : "Share",
-    copyLink: isRTL ? "העתק קישור" : "Copy Link",
-    copied: isRTL ? "הועתק!" : "Copied!",
-    inviteEmail: isRTL ? "הזמנה באימייל" : "Invite by email",
-    emailPlaceholder: isRTL ? "כתובת אימייל..." : "Email address...",
-    send: isRTL ? "שלח" : "Send",
-    visibility: isRTL ? "נראות" : "Visibility",
-    private: isRTL ? "פרטי" : "Private",
-    link: isRTL ? "גישה עם קישור" : "Link access",
-    public: isRTL ? "ציבורי" : "Public",
-    viewer: isRTL ? "צופה" : "Viewer",
-    commenter: isRTL ? "מגיב" : "Commenter",
-    editor: isRTL ? "עורך" : "Editor",
-    permission: isRTL ? "הרשאה" : "Permission",
-  };
 
   const generateShareLink = async () => {
     if (!user) return;
@@ -58,7 +41,7 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
       .single();
 
     if (error || !data) {
-      toast.error(isRTL ? "שגיאה ביצירת קישור" : "Error creating link");
+      toast.error(t("share.errorCreate"));
       return null;
     }
     const base = window.location.origin;
@@ -71,7 +54,7 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
     if (!link) return;
     await navigator.clipboard.writeText(link);
     setCopied(true);
-    toast.success(t.copied);
+    toast.success(t("share.copied"));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -90,9 +73,9 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
       });
     setSending(false);
     if (error) {
-      toast.error(isRTL ? "שגיאה בשליחת הזמנה" : "Error sending invite");
+      toast.error(t("share.errorInvite"));
     } else {
-      toast.success(isRTL ? "הזמנה נשלחה" : "Invite sent");
+      toast.success(t("share.inviteSent"));
       setEmail("");
     }
   };
@@ -102,19 +85,18 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
       <DialogContent className="rounded-2xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            {t.title}{projectName ? ` — ${projectName}` : ""}
+            {t("share.title")}{projectName ? ` — ${projectName}` : ""}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5">
-          {/* Visibility */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">{t.visibility}</label>
+            <label className="text-sm font-medium text-foreground">{t("share.visibility")}</label>
             <div className="flex gap-2">
               {([
-                { v: "private", icon: Lock, label: t.private },
-                { v: "link", icon: Link2, label: t.link },
-                { v: "public", icon: Globe, label: t.public },
+                { v: "private", icon: Lock, label: t("share.private") },
+                { v: "link", icon: Link2, label: t("share.link") },
+                { v: "public", icon: Globe, label: t("share.public") },
               ] as const).map(({ v, icon: Icon, label }) => (
                 <button
                   key={v}
@@ -132,23 +114,21 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
             </div>
           </div>
 
-          {/* Copy link */}
           <Button
             onClick={handleCopyLink}
             className="w-full rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            {copied ? t.copied : t.copyLink}
+            {copied ? t("share.copied") : t("share.copyLink")}
           </Button>
 
-          {/* Invite by email */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">{t.inviteEmail}</label>
+            <label className="text-sm font-medium text-foreground">{t("share.inviteEmail")}</label>
             <div className="flex gap-2">
               <Input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={t.emailPlaceholder}
+                placeholder={t("share.emailPlaceholder")}
                 className="rounded-xl flex-1"
                 type="email"
               />
@@ -157,9 +137,9 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="viewer">{t.viewer}</SelectItem>
-                  <SelectItem value="commenter">{t.commenter}</SelectItem>
-                  <SelectItem value="editor">{t.editor}</SelectItem>
+                  <SelectItem value="viewer">{t("share.viewer")}</SelectItem>
+                  <SelectItem value="commenter">{t("share.commenter")}</SelectItem>
+                  <SelectItem value="editor">{t("share.editor")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -170,7 +150,7 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
               variant="outline"
             >
               <Mail className="h-4 w-4" />
-              {t.send}
+              {t("share.send")}
             </Button>
           </div>
         </div>
