@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { attributeReferralSignup } from "@/hooks/useReferral";
 
 interface AuthContextType {
   session: Session | null;
@@ -33,6 +34,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .from("profiles")
             .update({ whatsapp_number: pending })
             .eq("user_id", session.user.id);
+        }
+
+        // Attribute referral signup
+        const refCode = localStorage.getItem("pixi_referral_code");
+        if (refCode) {
+          localStorage.removeItem("pixi_referral_code");
+          try {
+            await attributeReferralSignup(refCode, session.user.id);
+          } catch (e) {
+            // Silently fail — may be duplicate or self-referral
+            console.log("Referral attribution:", e);
+          }
         }
       }
     });

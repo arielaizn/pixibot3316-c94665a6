@@ -26,6 +26,7 @@ import AdminCreditsPage from "./pages/admin/AdminCreditsPage.tsx";
 import AdminVideosPage from "./pages/admin/AdminVideosPage.tsx";
 import AdminProjectsPage from "./pages/admin/AdminProjectsPage.tsx";
 import AdminWhatsAppPage from "./pages/admin/AdminWhatsAppPage.tsx";
+import AdminReferralsPage from "./pages/admin/AdminReferralsPage.tsx";
 import NotAdminPage from "./pages/admin/NotAdminPage.tsx";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const App = () => (
                 <Route path="/admin/videos" element={<AdminVideosPage />} />
                 <Route path="/admin/projects" element={<AdminProjectsPage />} />
                 <Route path="/admin/whatsapp" element={<AdminWhatsAppPage />} />
+                <Route path="/admin/referrals" element={<AdminReferralsPage />} />
                 <Route path="/not-admin" element={<NotAdminPage />} />
                 <Route path="/share/:type/:token" element={<SharedPage />} />
                 <Route path="*" element={<NotFound />} />

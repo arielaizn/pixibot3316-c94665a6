@@ -4,6 +4,7 @@ import { useCredits, getPlanLabel } from "@/hooks/useCredits";
 import { useDirection } from "@/contexts/DirectionContext";
 import { Button } from "@/components/ui/button";
 import CreditBar from "@/components/CreditBar";
+import ReferralCard from "@/components/ReferralCard";
 import Navbar from "@/components/Navbar";
 import { Loader2, FolderOpen, Plus, Film } from "lucide-react";
 import mascot from "@/assets/pixi-mascot.png";
@@ -115,6 +116,11 @@ const DashboardPage = () => {
               <Link to="/welcome">{t.continueToVideo}</Link>
             </Button>
           </div>
+        </div>
+
+        {/* Referral section */}
+        <div className="mb-8">
+          <ReferralCard />
         </div>
 
         {/* Recent projects — empty state */}
