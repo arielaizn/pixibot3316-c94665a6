@@ -622,7 +622,7 @@ const ProjectsPage = () => {
             {searchResults.projects.length === 0 && searchResults.videos.length === 0 && searchResults.files.length === 0 && searchResults.standalone.length === 0 && (
               <div className="rounded-2xl border border-border bg-card p-12 text-center">
                 <Search className="mx-auto mb-4 h-10 w-10 text-muted-foreground/40" />
-                <p className="text-foreground font-semibold">{isRTL ? "לא נמצאו תוצאות" : "No results found"}</p>
+                <p className="text-foreground font-semibold">{tr("projects.noResults")}</p>
               </div>
             )}
           </div>
