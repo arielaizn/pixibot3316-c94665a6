@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          source: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          source?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          source?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pixi_handoff_tokens: {
         Row: {
           created_at: string
@@ -74,12 +101,85 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          billing_cycle_end: string
+          billing_cycle_start: string
+          created_at: string
+          id: string
+          monthly_credits: number
+          plan_type: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle_end?: string
+          billing_cycle_start?: string
+          created_at?: string
+          id?: string
+          monthly_credits?: number
+          plan_type?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle_end?: string
+          billing_cycle_start?: string
+          created_at?: string
+          id?: string
+          monthly_credits?: number
+          plan_type?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_credits: {
+        Row: {
+          billing_cycle_start: string
+          created_at: string
+          extra_credits: number
+          id: string
+          plan_credits: number
+          plan_type: string
+          updated_at: string
+          used_credits: number
+          user_id: string
+        }
+        Insert: {
+          billing_cycle_start?: string
+          created_at?: string
+          extra_credits?: number
+          id?: string
+          plan_credits?: number
+          plan_type?: string
+          updated_at?: string
+          used_credits?: number
+          user_id: string
+        }
+        Update: {
+          billing_cycle_start?: string
+          created_at?: string
+          extra_credits?: number
+          id?: string
+          plan_credits?: number
+          plan_type?: string
+          updated_at?: string
+          used_credits?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      add_extra_credits: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: Json
+      }
+      consume_credit: { Args: { p_user_id: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never
