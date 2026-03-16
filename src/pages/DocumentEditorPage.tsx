@@ -4,15 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
 import { downloadFile } from "@/lib/downloadFile";
+import { sanitizeFileName } from "@/lib/sanitizeFileName";
 import Navbar from "@/components/Navbar";
-import PixiVideoPlayer from "@/components/PixiVideoPlayer";
-import FileShareModal from "@/components/FileShareModal";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  ChevronRight, Download, ArrowLeft, Music, FileText, File as FileIcon,
-  Loader2, Share2, History, Copy, Check, Pencil,
+  ChevronRight, Download, Save, Copy, Check, History, ArrowLeft,
+  FileText, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,48 +29,39 @@ interface FileData {
   parent_file_id: string | null;
 }
 
-const formatSize = (bytes: number) => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
-
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("he-IL", { year: "numeric", month: "short", day: "numeric" });
 
-const FilePreviewPage = () => {
+const DocumentEditorPage = () => {
   const { fileId } = useParams<{ fileId: string }>();
   const { user, loading: authLoading } = useAuth();
-  const { isRTL, t: tr } = useDirection();
+  const { isRTL } = useDirection();
   const navigate = useNavigate();
 
   const [file, setFile] = useState<FileData | null>(null);
   const [projectName, setProjectName] = useState("");
   const [loading, setLoading] = useState(true);
-  const [contentLoading, setContentLoading] = useState(true);
-  const [textContent, setTextContent] = useState<string | null>(null);
-  const [showShare, setShowShare] = useState(false);
+  const [content, setContent] = useState("");
+  const [originalContent, setOriginalContent] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [showVersions, setShowVersions] = useState(false);
   const [versions, setVersions] = useState<FileData[]>([]);
-  const [copied, setCopied] = useState(false);
+
+  const isDirty = content !== originalContent;
 
   useEffect(() => {
     if (!fileId || !user) return;
-
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("user_files")
         .select("*")
         .eq("id", fileId)
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (error || !data) {
-        setLoading(false);
-        return;
-      }
-
+      if (!data) { setLoading(false); return; }
       setFile(data as FileData);
 
       if (data.project_id) {
@@ -78,17 +69,14 @@ const FilePreviewPage = () => {
         if (proj) setProjectName(proj.name);
       }
 
-      const isText = data.file_type.startsWith("text") || data.file_name.endsWith(".md") || data.file_name.endsWith(".txt");
-      if (isText) {
-        try {
-          const resp = await fetch(data.file_url);
-          const txt = await resp.text();
-          setTextContent(txt);
-        } catch {}
-      }
+      try {
+        const resp = await fetch(data.file_url);
+        const txt = await resp.text();
+        setContent(txt);
+        setOriginalContent(txt);
+      } catch {}
 
       setLoading(false);
-      setTimeout(() => setContentLoading(false), 200);
     })();
   }, [fileId, user]);
 
@@ -106,9 +94,52 @@ const FilePreviewPage = () => {
     setShowVersions(true);
   };
 
-  const handleCopyContent = async () => {
-    if (textContent === null) return;
-    await navigator.clipboard.writeText(textContent);
+  const handleSave = async () => {
+    if (!file || !user || !isDirty) return;
+    setSaving(true);
+
+    try {
+      const blob = new Blob([content], { type: file.file_type || "text/plain" });
+      const newVersion = file.version_number + 1;
+      const path = `${user.id}/${Date.now()}_v${newVersion}_${sanitizeFileName(file.file_name)}`;
+
+      const { error: upErr } = await supabase.storage.from("user-files").upload(path, blob);
+      if (upErr) throw upErr;
+
+      const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(path);
+      const rootId = file.parent_file_id || file.id;
+
+      const { data: newFile, error: dbErr } = await supabase
+        .from("user_files")
+        .insert({
+          user_id: user.id,
+          project_id: file.project_id,
+          folder_id: (file as any).folder_id || null,
+          file_name: file.file_name,
+          file_url: urlData.publicUrl,
+          file_type: file.file_type,
+          file_size: blob.size,
+          version_number: newVersion,
+          parent_file_id: rootId,
+        })
+        .select()
+        .single();
+
+      if (dbErr) throw dbErr;
+
+      setFile(newFile as FileData);
+      setOriginalContent(content);
+      toast.success(isRTL ? `נשמר כגרסה ${newVersion}` : `Saved as version ${newVersion}`);
+      navigate(`/projects/document/${newFile.id}`, { replace: true });
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
     setCopied(true);
     toast.success(isRTL ? "הועתק ללוח" : "Copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
@@ -128,7 +159,7 @@ const FilePreviewPage = () => {
         <Navbar />
         <main className="container mx-auto max-w-5xl px-4 py-8">
           <div className="flex flex-col items-center py-20 text-center">
-            <FileIcon className="mb-4 h-16 w-16 text-muted-foreground/40" />
+            <FileText className="mb-4 h-16 w-16 text-muted-foreground/40" />
             <p className="text-lg font-semibold text-foreground">{isRTL ? "הקובץ לא נמצא" : "File not found"}</p>
             <Button variant="outline" className="mt-4 rounded-xl" onClick={() => navigate(-1)}>
               <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
@@ -140,13 +171,7 @@ const FilePreviewPage = () => {
     );
   }
 
-  const isVideo = file.file_type.startsWith("video");
-  const isImage = file.file_type.startsWith("image");
-  const isAudio = file.file_type.startsWith("audio");
-  const isPdf = file.file_type === "application/pdf";
-  const isText = file.file_type.startsWith("text") || file.file_name.endsWith(".md") || file.file_name.endsWith(".txt");
   const isMd = file.file_name.endsWith(".md");
-  const isEditable = isText;
 
   return (
     <div className="min-h-screen bg-background">
@@ -177,27 +202,24 @@ const FilePreviewPage = () => {
               <p className="text-xs text-muted-foreground">{isRTL ? "גרסה" : "Version"} {file.version_number}</p>
             )}
           </div>
-          <div className="flex gap-2 flex-wrap justify-end">
+          <div className="flex gap-2">
             <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={loadVersions}>
               <History className="h-4 w-4" />
               {isRTL ? "גרסאות" : "Versions"}
             </Button>
-            <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={() => setShowShare(true)}>
-              <Share2 className="h-4 w-4" />
-              {isRTL ? "שתף" : "Share"}
+            <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={handleCopy}>
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {isRTL ? "העתק" : "Copy"}
             </Button>
-            {isText && textContent !== null && (
-              <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={handleCopyContent}>
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {isRTL ? "העתק" : "Copy"}
-              </Button>
-            )}
-            {isEditable && (
-              <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={() => navigate(`/projects/document/${file.id}`)}>
-                <Pencil className="h-4 w-4" />
-                {isRTL ? "ערוך" : "Edit"}
-              </Button>
-            )}
+            <Button
+              size="sm"
+              className="rounded-xl gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+              disabled={!isDirty || saving}
+              onClick={handleSave}
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {isRTL ? "שמור" : "Save"}
+            </Button>
             <Button
               size="sm"
               className="rounded-xl gap-1.5 bg-green-500 hover:bg-green-600 text-white"
@@ -209,74 +231,33 @@ const FilePreviewPage = () => {
           </div>
         </div>
 
-        {/* Preview container */}
+        {/* Editor */}
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-          {contentLoading ? (
-            <div className="p-6">
-              <Skeleton className="aspect-video w-full rounded-xl" />
-            </div>
-          ) : (
-            <>
-              {isVideo && <PixiVideoPlayer src={file.file_url} title={file.file_name} />}
-
-              {isImage && (
-                <div className="flex items-center justify-center bg-muted/30 p-4" style={{ minHeight: "40vh" }}>
-                  <img src={file.file_url} alt={file.file_name} className="max-h-[70vh] w-full rounded-xl object-contain" />
-                </div>
-              )}
-
-              {isAudio && (
-                <div className="flex flex-col items-center justify-center gap-6 py-16 px-6">
-                  <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10">
-                    <Music className="h-14 w-14 text-primary" />
-                  </div>
-                  <audio controls className="w-full max-w-lg">
-                    <source src={file.file_url} type={file.file_type} />
-                  </audio>
-                </div>
-              )}
-
-              {isPdf && <iframe src={file.file_url} className="h-[70vh] w-full" title={file.file_name} />}
-
-              {isText && textContent !== null && (
-                <div className="max-h-[70vh] overflow-auto p-6">
-                  {isMd ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap" dangerouslySetInnerHTML={{
-                      __html: textContent
-                        .replace(/^### (.*$)/gm, "<h3>$1</h3>")
-                        .replace(/^## (.*$)/gm, "<h2>$1</h2>")
-                        .replace(/^# (.*$)/gm, "<h1>$1</h1>")
-                        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                        .replace(/\*(.*?)\*/g, "<em>$1</em>")
-                        .replace(/`(.*?)`/g, "<code>$1</code>")
-                        .replace(/\n/g, "<br/>"),
-                    }} />
-                  ) : (
-                    <pre className="whitespace-pre-wrap text-sm text-foreground font-mono">{textContent}</pre>
-                  )}
-                </div>
-              )}
-
-              {!isVideo && !isImage && !isAudio && !isPdf && !isText && (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <FileIcon className="mb-4 h-16 w-16 text-muted-foreground/40" />
-                  <p className="text-muted-foreground">{isRTL ? "תצוגה מקדימה לא זמינה" : "Preview not available"}</p>
-                </div>
-              )}
-            </>
-          )}
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[60vh] w-full resize-none rounded-none border-0 bg-transparent p-6 font-mono text-sm text-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+            dir="auto"
+          />
         </div>
 
-        {/* File info */}
-        <p className="mt-4 text-sm text-muted-foreground">
-          {formatSize(file.file_size)} · {formatDate(file.created_at)}
-        </p>
+        {/* Preview for markdown */}
+        {isMd && content && (
+          <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <h3 className="mb-4 text-sm font-semibold text-muted-foreground">{isRTL ? "תצוגה מקדימה" : "Preview"}</h3>
+            <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap" dangerouslySetInnerHTML={{
+              __html: content
+                .replace(/^### (.*$)/gm, "<h3>$1</h3>")
+                .replace(/^## (.*$)/gm, "<h2>$1</h2>")
+                .replace(/^# (.*$)/gm, "<h1>$1</h1>")
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replace(/\*(.*?)\*/g, "<em>$1</em>")
+                .replace(/`(.*?)`/g, "<code>$1</code>")
+                .replace(/\n/g, "<br/>"),
+            }} />
+          </div>
+        )}
       </main>
-
-      {/* Share Modal */}
-      {showShare && (
-        <FileShareModal open={showShare} onOpenChange={setShowShare} fileId={file.id} fileName={file.file_name} />
-      )}
 
       {/* Version History Dialog */}
       <Dialog open={showVersions} onOpenChange={setShowVersions}>
@@ -292,8 +273,9 @@ const FilePreviewPage = () => {
                   v.id === file.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
                 }`}
                 onClick={() => {
-                  navigate(`/projects/file/${v.id}`);
+                  navigate(`/projects/document/${v.id}`, { replace: true });
                   setShowVersions(false);
+                  // Reload
                   window.location.reload();
                 }}
               >
@@ -321,4 +303,4 @@ const FilePreviewPage = () => {
   );
 };
 
-export default FilePreviewPage;
+export default DocumentEditorPage;

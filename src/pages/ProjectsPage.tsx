@@ -9,6 +9,7 @@ import { useProjects, ProjectWithContent, VideoRecord, ProjectFile } from "@/hoo
 import Navbar from "@/components/Navbar";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
 import ShareModal from "@/components/ShareModal";
+import FileShareModal from "@/components/FileShareModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -84,6 +85,7 @@ const ProjectsPage = () => {
     return selectedProject.videos.find((v) => v.id === urlVideoId) || null;
   }, [urlVideoId, selectedProject]);
   const [shareTarget, setShareTarget] = useState<{ projectId?: string | null; videoId?: string; name?: string } | null>(null);
+  const [fileShareTarget, setFileShareTarget] = useState<{ fileId: string; fileName: string } | null>(null);
   const [showVersions, setShowVersions] = useState<VideoRecord | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -483,6 +485,7 @@ const ProjectsPage = () => {
                       onDelete={() => deleteFile.mutate(file.id)}
                       onStar={() => toggleStar.mutate({ id: file.id, starred: !file.is_starred })}
                       onMove={() => setMoveTarget({ fileId: file.id, fileName: file.file_name })}
+                      onShare={() => setFileShareTarget({ fileId: file.id, fileName: file.file_name })}
                     />
                   );
                 })}
@@ -510,6 +513,9 @@ const ProjectsPage = () => {
 
         {shareTarget && (
           <ShareModal open onOpenChange={() => setShareTarget(null)} projectId={shareTarget.projectId} videoId={shareTarget.videoId} projectName={shareTarget.name} />
+        )}
+        {fileShareTarget && (
+          <FileShareModal open onOpenChange={() => setFileShareTarget(null)} fileId={fileShareTarget.fileId} fileName={fileShareTarget.fileName} />
         )}
         <VersionHistoryDialog video={showVersions} onClose={() => setShowVersions(null)} onSelect={(v) => { navigate(`/projects/${urlProjectId}/video/${v.id}`); setShowVersions(null); }} t={t} />
         <MoveToProjectDialog
@@ -763,6 +769,9 @@ const ProjectsPage = () => {
       {shareTarget && (
         <ShareModal open onOpenChange={() => setShareTarget(null)} projectId={shareTarget.projectId} videoId={shareTarget.videoId} projectName={shareTarget.name} />
       )}
+      {fileShareTarget && (
+        <FileShareModal open onOpenChange={() => setFileShareTarget(null)} fileId={fileShareTarget.fileId} fileName={fileShareTarget.fileName} />
+      )}
 
       <VersionHistoryDialog video={showVersions} onClose={() => setShowVersions(null)} onSelect={(v) => { navigate(`/projects/${v.project_id}/video/${v.id}`); setShowVersions(null); }} t={t} />
       <MoveToProjectDialog
@@ -983,9 +992,9 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
   );
 }
 
-function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onStar, onMove }: {
+function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onStar, onMove, onShare }: {
   file: ProjectFile; Icon: any; viewMode: string; t: any;
-  onPreview: () => void; onRename: () => void; onDelete: () => void; onStar: () => void; onMove: () => void;
+  onPreview: () => void; onRename: () => void; onDelete: () => void; onStar: () => void; onMove: () => void; onShare?: () => void;
 }) {
   if (viewMode === "list") {
     return (
@@ -1004,6 +1013,7 @@ function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onSt
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onPreview}><Eye className="me-2 h-3.5 w-3.5" /> {t.preview}</DropdownMenuItem>
             <DropdownMenuItem onClick={() => downloadFile(file.file_url, file.file_name)}><Download className="me-2 h-3.5 w-3.5" /> {t.download}</DropdownMenuItem>
+            {onShare && <DropdownMenuItem onClick={onShare}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>}
             <DropdownMenuItem onClick={onRename}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
             <DropdownMenuItem onClick={onMove}><FolderInput className="me-2 h-3.5 w-3.5" /> {t.moveTo}</DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -1059,6 +1069,7 @@ function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onSt
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onPreview}><Eye className="me-2 h-3.5 w-3.5" /> {t.preview}</DropdownMenuItem>
             <DropdownMenuItem onClick={() => downloadFile(file.file_url, file.file_name)}><Download className="me-2 h-3.5 w-3.5" /> {t.download}</DropdownMenuItem>
+            {onShare && <DropdownMenuItem onClick={onShare}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>}
             <DropdownMenuItem onClick={onRename}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
             <DropdownMenuItem onClick={onMove}><FolderInput className="me-2 h-3.5 w-3.5" /> {t.moveTo}</DropdownMenuItem>
             <DropdownMenuSeparator />

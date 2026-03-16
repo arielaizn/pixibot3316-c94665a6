@@ -109,6 +109,7 @@ export type Database = {
           share_token: string | null
           shared_by: string
           shared_with_email: string | null
+          visibility: string
         }
         Insert: {
           created_at?: string
@@ -118,6 +119,7 @@ export type Database = {
           share_token?: string | null
           shared_by: string
           shared_with_email?: string | null
+          visibility?: string
         }
         Update: {
           created_at?: string
@@ -127,6 +129,7 @@ export type Database = {
           share_token?: string | null
           shared_by?: string
           shared_with_email?: string | null
+          visibility?: string
         }
         Relationships: [
           {
@@ -490,9 +493,11 @@ export type Database = {
           id: string
           is_deleted: boolean
           is_starred: boolean
+          parent_file_id: string | null
           project_id: string | null
           updated_at: string
           user_id: string
+          version_number: number
           visibility: string
         }
         Insert: {
@@ -505,9 +510,11 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           is_starred?: boolean
+          parent_file_id?: string | null
           project_id?: string | null
           updated_at?: string
           user_id: string
+          version_number?: number
           visibility?: string
         }
         Update: {
@@ -520,9 +527,11 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           is_starred?: boolean
+          parent_file_id?: string | null
           project_id?: string | null
           updated_at?: string
           user_id?: string
+          version_number?: number
           visibility?: string
         }
         Relationships: [
@@ -531,6 +540,13 @@ export type Database = {
             columns: ["folder_id"]
             isOneToOne: false
             referencedRelation: "user_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_files_parent_file_id_fkey"
+            columns: ["parent_file_id"]
+            isOneToOne: false
+            referencedRelation: "user_files"
             referencedColumns: ["id"]
           },
           {
