@@ -187,7 +187,7 @@ export const useProjects = () => {
       const results: { progress: number }[] = [];
       for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
-        const path = `${user!.id}/${Date.now()}_${file.name}`;
+        const path = `${user!.id}/${Date.now()}_${sanitizeFileName(file.name)}`;
         const { error: uploadError } = await supabase.storage
           .from("user-files")
           .upload(path, file);

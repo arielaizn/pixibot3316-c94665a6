@@ -130,7 +130,7 @@ export function useFileManager(currentFolderId: string | null) {
   const uploadFiles = useMutation({
     mutationFn: async (files: File[]) => {
       for (const file of files) {
-        const path = `${user!.id}/${Date.now()}_${file.name}`;
+        const path = `${user!.id}/${Date.now()}_${sanitizeFileName(file.name)}`;
         const { error: uploadError } = await supabase.storage
           .from("user-files")
           .upload(path, file);
