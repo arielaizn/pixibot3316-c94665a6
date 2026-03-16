@@ -288,16 +288,19 @@ const ProjectsPage = () => {
               <Button
                 size="sm"
                 className="rounded-xl gap-1.5 bg-green-500 hover:bg-green-600 text-white"
-                onClick={() => {
+                onClick={async () => {
                   if (!playingVideo.video_url) return;
                   const url = getVideoPublicUrl(playingVideo.video_url);
+                  const response = await fetch(url);
+                  const blob = await response.blob();
+                  const blobUrl = window.URL.createObjectURL(blob);
                   const a = document.createElement("a");
-                  a.href = url;
+                  a.href = blobUrl;
                   a.download = (playingVideo.title || "video") + ".mp4";
-                  a.target = "_blank";
                   document.body.appendChild(a);
                   a.click();
-                  document.body.removeChild(a);
+                  a.remove();
+                  window.URL.revokeObjectURL(blobUrl);
                 }}
               >
                 <Download className="h-4 w-4" />
