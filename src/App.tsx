@@ -13,6 +13,7 @@ import LoginPage from "./pages/LoginPage.tsx";
 import WelcomePage from "./pages/WelcomePage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
+import FilePreviewPage from "./pages/FilePreviewPage.tsx";
 import PricingPage from "./pages/PricingPage.tsx";
 import PaymentCallbackPage from "./pages/PaymentCallbackPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
