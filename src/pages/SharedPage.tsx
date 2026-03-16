@@ -432,6 +432,11 @@ const SharedPage = () => {
             <div className="overflow-hidden rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] ring-1 ring-border/10">
               {videoUrl ? (
                 <PixiVideoPlayer src={videoUrl} title={video?.title} thumbnail={video?.thumbnail_url} autoPlay />
+              ) : video?.status && video.status !== "completed" && video.status !== "failed" ? (
+                <div className="flex aspect-video flex-col items-center justify-center gap-3 bg-muted">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-muted-foreground">{isRTL ? "הסרטון בעיבוד... העמוד יתעדכן אוטומטית" : "Video is processing... will update automatically"}</p>
+                </div>
               ) : (
                 <div className="flex aspect-video items-center justify-center bg-muted">
                   <p className="text-muted-foreground">{isRTL ? "הסרטון לא זמין" : "Video not available"}</p>
