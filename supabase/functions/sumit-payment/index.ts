@@ -65,8 +65,14 @@ serve(async (req) => {
       const res = await fetch(`${SUMIT_BASE}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        redirect: "manual",
         body: JSON.stringify({ Credentials: credentials, ...body }),
       });
+      // If Sumit returns a redirect, extract the Location header as the payment URL
+      if (res.status >= 300 && res.status < 400) {
+        const location = res.headers.get("Location");
+        return { Data: { PaymentPageURL: location }, Status: true };
+      }
       const data = await res.json();
       if (data.Status === false || data.Error) {
         throw new Error(data.UserErrorMessage || data.ErrorMessage || "Sumit API error");
