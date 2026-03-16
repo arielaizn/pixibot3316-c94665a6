@@ -13,6 +13,7 @@ import LoginPage from "./pages/LoginPage.tsx";
 import WelcomePage from "./pages/WelcomePage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
+import FilePreviewPage from "./pages/FilePreviewPage.tsx";
 import PricingPage from "./pages/PricingPage.tsx";
 import PaymentCallbackPage from "./pages/PaymentCallbackPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -52,6 +53,7 @@ const App = () => (
                 <Route path="/projects" element={<ProjectsPage />} />
                 <Route path="/projects/:projectId" element={<ProjectsPage />} />
                 <Route path="/projects/:projectId/video/:videoId" element={<ProjectsPage />} />
+                <Route path="/projects/file/:fileId" element={<FilePreviewPage />} />
                 <Route path="/payment/callback" element={<PaymentCallbackPage />} />
                 {/* Admin */}
                 <Route path="/admin" element={<AdminLoginPage />} />
