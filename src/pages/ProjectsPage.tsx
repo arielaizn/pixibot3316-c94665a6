@@ -20,7 +20,7 @@ import {
   Loader2, FolderOpen, FolderPlus, Upload, Search, Grid3X3, List, Star, StarOff,
   Trash2, Pencil, MoreVertical, FileText, FileVideo, FileImage, FileAudio, File as FileIcon,
   ChevronRight, X, Eye, Download, ArrowLeft, Video, Share2, Play, Plus, History, FolderInput,
-  Sparkles, Tag, Wand2,
+  Sparkles, Tag, Wand2, Music, FileType,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
