@@ -514,6 +514,9 @@ const ProjectsPage = () => {
         {shareTarget && (
           <ShareModal open onOpenChange={() => setShareTarget(null)} projectId={shareTarget.projectId} videoId={shareTarget.videoId} projectName={shareTarget.name} />
         )}
+        {fileShareTarget && (
+          <FileShareModal open onOpenChange={() => setFileShareTarget(null)} fileId={fileShareTarget.fileId} fileName={fileShareTarget.fileName} />
+        )}
         <VersionHistoryDialog video={showVersions} onClose={() => setShowVersions(null)} onSelect={(v) => { navigate(`/projects/${urlProjectId}/video/${v.id}`); setShowVersions(null); }} t={t} />
         <MoveToProjectDialog
           moveTarget={moveTarget}
