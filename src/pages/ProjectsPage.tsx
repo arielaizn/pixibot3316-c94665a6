@@ -758,7 +758,7 @@ const ProjectsPage = () => {
         setRenameTarget(null);
       }} isRTL={isRTL} t={t} />
 
-      <FilePreviewDialog previewFile={previewFile} onClose={() => setPreviewFile(null)} isRTL={isRTL} t={t} />
+      
 
       {shareTarget && (
         <ShareModal open onOpenChange={() => setShareTarget(null)} projectId={shareTarget.projectId} videoId={shareTarget.videoId} projectName={shareTarget.name} />
