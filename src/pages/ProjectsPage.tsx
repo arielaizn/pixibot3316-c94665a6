@@ -72,7 +72,7 @@ const ProjectsPage = () => {
   // Navigation state
   const [selectedProject, setSelectedProject] = useState<ProjectWithContent | null>(null);
   const [playingVideo, setPlayingVideo] = useState<VideoRecord | null>(null);
-  const [shareTarget, setShareTarget] = useState<{ projectId: string; videoId?: string; name?: string } | null>(null);
+  const [shareTarget, setShareTarget] = useState<{ projectId?: string | null; videoId?: string; name?: string } | null>(null);
   const [showVersions, setShowVersions] = useState<VideoRecord | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
