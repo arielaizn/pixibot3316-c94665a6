@@ -154,6 +154,11 @@ const PricingPage = () => {
           <span className="inline-block rounded-full bg-primary/10 px-5 py-2 text-sm font-semibold text-primary">
             {t.trust}
           </span>
+          {!user && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              {isRTL ? "התחברו כדי לראות כמה קרדיטים נשארו לכם" : "Log in to see how many credits you have left"}
+            </p>
+          )}
         </div>
 
         {/* ── BILLING TOGGLE ── */}
