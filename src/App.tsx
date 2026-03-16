@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DirectionProvider } from "@/contexts/DirectionContext";
+import WhatsAppGate from "@/components/WhatsAppGate";
 import Index from "./pages/Index.tsx";
 import SignupPage from "./pages/SignupPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
