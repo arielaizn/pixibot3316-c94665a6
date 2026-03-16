@@ -69,7 +69,6 @@ Deno.serve(async (req) => {
     if (isAdmin) {
       await adminClient.rpc("ensure_admin_credits", { p_user_id: user.id });
     }
-    }
 
     // Fetch user credits to determine plan and quota
     const { data: userCredits } = await adminClient
