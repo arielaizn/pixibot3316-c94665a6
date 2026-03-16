@@ -241,6 +241,40 @@ export const useProjects = () => {
     });
   };
 
+  // Classify a video via AI
+  const classifyVideo = useMutation({
+    mutationFn: async (videoId: string) => {
+      const { data, error } = await supabase.functions.invoke("pixi-classify", {
+        body: { video_id: videoId },
+      });
+      if (error) throw error;
+      return data as { category: string; tags: string[] };
+    },
+    onSuccess: () => {
+      invalidate();
+      toast({ title: "הסרטון סווג בהצלחה" });
+    },
+    onError: (err: any) => toast({ title: "שגיאה בסיווג", description: err.message, variant: "destructive" }),
+  });
+
+  // Update video tags manually
+  const updateVideoTags = useMutation({
+    mutationFn: async ({ id, tags }: { id: string; tags: string[] }) => {
+      const { error } = await supabase.from("videos").update({ tags } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(),
+  });
+
+  // Update video category manually
+  const updateVideoCategory = useMutation({
+    mutationFn: async ({ id, category }: { id: string; category: string }) => {
+      const { error } = await supabase.from("videos").update({ category } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidate(),
+  });
+
   return {
     ...projectsQuery,
     projects: projectsQuery.data || [],
@@ -252,6 +286,9 @@ export const useProjects = () => {
     uploadToProject,
     moveFileToProject,
     useVideoVersions,
+    classifyVideo,
+    updateVideoTags,
+    updateVideoCategory,
     invalidate,
   };
 };
