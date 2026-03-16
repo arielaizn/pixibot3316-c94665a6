@@ -48,9 +48,10 @@ export function useCredits() {
       if (error) throw error;
       if (!data) return null;
 
+      const isUnlimited = data.is_unlimited === true;
       const totalCredits = data.plan_credits + data.extra_credits;
-      const remainingCredits = Math.max(0, totalCredits - data.used_credits);
-      const usagePercent = totalCredits > 0 ? (data.used_credits / totalCredits) * 100 : 100;
+      const remainingCredits = isUnlimited ? Infinity : Math.max(0, totalCredits - data.used_credits);
+      const usagePercent = isUnlimited ? 0 : totalCredits > 0 ? (data.used_credits / totalCredits) * 100 : 100;
 
       return {
         plan_type: data.plan_type,
@@ -58,11 +59,13 @@ export function useCredits() {
         extra_credits: data.extra_credits,
         used_credits: data.used_credits,
         billing_cycle_start: data.billing_cycle_start,
+        is_unlimited: isUnlimited,
         totalCredits,
         remainingCredits,
         usagePercent,
-        isLow: remainingCredits > 0 && remainingCredits / totalCredits < 0.2,
-        isEmpty: remainingCredits <= 0,
+        isUnlimited,
+        isLow: !isUnlimited && remainingCredits > 0 && remainingCredits / totalCredits < 0.2,
+        isEmpty: !isUnlimited && remainingCredits <= 0,
       };
     },
     staleTime: 30_000,
