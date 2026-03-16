@@ -750,7 +750,7 @@ const ProjectsPage = () => {
         <ShareModal open onOpenChange={() => setShareTarget(null)} projectId={shareTarget.projectId} videoId={shareTarget.videoId} projectName={shareTarget.name} />
       )}
 
-      <VersionHistoryDialog video={showVersions} onClose={() => setShowVersions(null)} onSelect={(v) => { setPlayingVideo(v); setShowVersions(null); }} t={t} />
+      <VersionHistoryDialog video={showVersions} onClose={() => setShowVersions(null)} onSelect={(v) => { navigate(`/projects/${v.project_id}/video/${v.id}`); setShowVersions(null); }} t={t} />
       <MoveToProjectDialog
         moveTarget={moveTarget}
         projects={projects || []}
