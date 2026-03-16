@@ -1,7 +1,7 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import DashboardNavbar from "@/components/DashboardNavbar";
+import Navbar from "@/components/Navbar";
 import { Loader2, FolderOpen, Plus, Film, Clock } from "lucide-react";
 import mascot from "@/assets/pixi-mascot.png";
 
