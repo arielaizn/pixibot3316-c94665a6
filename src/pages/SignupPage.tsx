@@ -4,10 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import mascot from "@/assets/pixi-mascot.png";
+
+const PHONE_REGEX = /^\+\d{10,15}$/;
 
 const SignupPage = () => {
   const { user, loading: authLoading, signUp } = useAuth();
@@ -16,6 +19,8 @@ const SignupPage = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [whatsapp, setWhatsapp] = useState("+972");
+  const [whatsappError, setWhatsappError] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (authLoading) {
@@ -32,15 +37,32 @@ const SignupPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setWhatsappError("");
+
     if (!fullName.trim() || !email.trim() || !password.trim()) return;
+
+    const cleanPhone = whatsapp.trim();
+    if (!PHONE_REGEX.test(cleanPhone)) {
+      setWhatsappError("נא להזין מספר וואטסאפ בפורמט בינלאומי");
+      return;
+    }
+
     setLoading(true);
     const { error } = await signUp(email, password, fullName);
-    setLoading(false);
+
     if (error) {
       toast({ title: "שגיאה בהרשמה", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "נרשמת בהצלחה! 🎉", description: "בדוק את האימייל שלך לאימות החשבון" });
+      setLoading(false);
+      return;
     }
+
+    // Save WhatsApp number after signup - profile is auto-created by trigger,
+    // but we need to wait for the session. We'll save it via the modal if not possible here.
+    // Store in localStorage temporarily for the post-verification save
+    localStorage.setItem("pixi_pending_whatsapp", cleanPhone);
+
+    toast({ title: "נרשמת בהצלחה! 🎉", description: "בדוק את האימייל שלך לאימות החשבון" });
+    setLoading(false);
   };
 
   const handleGoogleSignup = async () => {
@@ -56,15 +78,9 @@ const SignupPage = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      {/* Floating mascot */}
-      <img
-        src={mascot}
-        alt="Pixi"
-        className="fixed bottom-8 left-8 h-16 w-16 animate-float opacity-60 hidden md:block"
-      />
+      <img src={mascot} alt="Pixi" className="fixed bottom-8 left-8 h-16 w-16 animate-float opacity-60 hidden md:block" />
 
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 flex justify-center">
           <Link to="/" className="flex items-center gap-2">
             <img src={mascot} alt="Pixi" className="h-10 w-10" />
@@ -72,14 +88,12 @@ const SignupPage = () => {
           </Link>
         </div>
 
-        {/* Card */}
         <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
           <div className="mb-6 text-center">
             <h1 className="text-2xl font-bold text-foreground">צור חשבון</h1>
             <p className="mt-2 text-sm text-muted-foreground">התחל ליצור סרטוני AI תוך דקות</p>
           </div>
 
-          {/* Google */}
           <Button
             variant="outline"
             className="mb-6 w-full gap-3 rounded-xl border-border py-6 text-base font-medium"
@@ -101,61 +115,42 @@ const SignupPage = () => {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          {/* Email form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">שם מלא</Label>
-              <Input
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="ישראל ישראלי"
-                className="rounded-xl py-5"
-                required
-              />
+              <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="ישראל ישראלי" className="rounded-xl py-5" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">אימייל</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" dir="ltr" className="rounded-xl py-5 text-left" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="whatsapp">מספר וואטסאפ</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="example@email.com"
+                id="whatsapp"
+                type="tel"
+                value={whatsapp}
+                onChange={(e) => { setWhatsapp(e.target.value); setWhatsappError(""); }}
+                placeholder="+972525551234"
                 dir="ltr"
-                className="rounded-xl py-5 text-left"
+                className="rounded-xl py-5 text-left tracking-wide"
                 required
               />
+              {whatsappError && <p className="text-sm text-destructive">{whatsappError}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">סיסמה</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                dir="ltr"
-                className="rounded-xl py-5 text-left"
-                minLength={6}
-                required
-              />
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" dir="ltr" className="rounded-xl py-5 text-left" minLength={6} required />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full rounded-xl bg-primary py-6 text-base font-bold text-primary-foreground hover:bg-primary/90"
-              disabled={loading}
-            >
+            <Button type="submit" className="w-full rounded-xl bg-primary py-6 text-base font-bold text-primary-foreground hover:bg-primary/90" disabled={loading}>
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "הירשם"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             כבר יש לך חשבון?{" "}
-            <Link to="/login" className="font-semibold text-primary hover:underline">
-              התחבר
-            </Link>
+            <Link to="/login" className="font-semibold text-primary hover:underline">התחבר</Link>
           </p>
         </div>
       </div>

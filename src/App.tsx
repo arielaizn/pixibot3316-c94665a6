@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DirectionProvider } from "@/contexts/DirectionContext";
+import WhatsAppGate from "@/components/WhatsAppGate";
 import Index from "./pages/Index.tsx";
 import SignupPage from "./pages/SignupPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
@@ -36,6 +37,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+              <WhatsAppGate>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/signup" element={<SignupPage />} />
@@ -56,6 +58,7 @@ const App = () => (
                 <Route path="/not-admin" element={<NotAdminPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </WhatsAppGate>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
