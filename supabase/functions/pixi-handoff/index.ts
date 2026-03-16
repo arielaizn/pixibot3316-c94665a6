@@ -61,6 +61,25 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
+    const ADMIN_EMAILS = [
+      "pixmindstudio3316@gmail.com",
+      "aa046114609@gmail.com",
+    ];
+    const isAdmin = ADMIN_EMAILS.includes(user.email || "");
+
+    // If admin, ensure their credits reflect unlimited status
+    if (isAdmin) {
+      await adminClient
+        .from("user_credits")
+        .update({
+          is_unlimited: true,
+          plan_type: "enterprise",
+          plan_credits: 80,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", user.id);
+    }
+
     // Fetch user credits to determine plan and quota
     const { data: userCredits } = await adminClient
       .from("user_credits")
@@ -68,8 +87,8 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    const isUnlimited = userCredits?.is_unlimited === true;
-    const plan = userCredits?.plan_type || "free";
+    const isUnlimited = userCredits?.is_unlimited === true || isAdmin;
+    const plan = isUnlimited ? "enterprise" : (userCredits?.plan_type || "free");
     const quota = isUnlimited ? 999999 : Math.max(0, (userCredits?.plan_credits || 0) + (userCredits?.extra_credits || 0) - (userCredits?.used_credits || 0));
 
     // Generate short human-friendly token
