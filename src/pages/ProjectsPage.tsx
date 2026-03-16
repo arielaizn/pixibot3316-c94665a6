@@ -1014,7 +1014,7 @@ function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onSt
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onPreview}><Eye className="me-2 h-3.5 w-3.5" /> {t.preview}</DropdownMenuItem>
-            <DropdownMenuItem asChild><a href={file.file_url} download={file.file_name}><Download className="me-2 h-3.5 w-3.5" /> {t.download}</a></DropdownMenuItem>
+            <DropdownMenuItem onClick={() => downloadFile(file.file_url, file.file_name)}><Download className="me-2 h-3.5 w-3.5" /> {t.download}</DropdownMenuItem>
             <DropdownMenuItem onClick={onRename}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
             <DropdownMenuItem onClick={onMove}><FolderInput className="me-2 h-3.5 w-3.5" /> {t.moveTo}</DropdownMenuItem>
             <DropdownMenuSeparator />
