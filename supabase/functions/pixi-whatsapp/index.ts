@@ -354,7 +354,7 @@ async function handleReturningUser(
   user: { userId: string; email: string; fullName: string | null },
   text: string
 ): Promise<BotResponse> {
-  const isAdmin = ADMIN_EMAILS.includes(user.email);
+  const isAdmin = await checkIsAdmin(admin, user.userId);
 
   const { data: credits } = await admin
     .from("user_credits")
