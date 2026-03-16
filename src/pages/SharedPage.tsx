@@ -62,7 +62,7 @@ const SharedPage = () => {
           .eq("id", share.video_id)
           .single();
         if (vid) {
-          setVideoUrl(vid.video_url || "");
+          setVideoUrl(getVideoPublicUrl(vid.video_url));
           setTitle(vid.title || "");
         }
       } else {
