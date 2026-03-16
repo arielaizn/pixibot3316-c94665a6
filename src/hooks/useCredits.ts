@@ -8,6 +8,7 @@ export interface UserCredits {
   extra_credits: number;
   used_credits: number;
   billing_cycle_start: string;
+  is_unlimited: boolean;
 }
 
 export interface CreditSummary extends UserCredits {
@@ -16,6 +17,7 @@ export interface CreditSummary extends UserCredits {
   usagePercent: number;
   isLow: boolean;
   isEmpty: boolean;
+  isUnlimited: boolean;
 }
 
 const PLAN_LABELS: Record<string, { he: string; en: string }> = {
