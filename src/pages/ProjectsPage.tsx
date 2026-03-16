@@ -286,6 +286,24 @@ const ProjectsPage = () => {
                 {t.versions}
               </Button>
               <Button
+                size="sm"
+                className="rounded-xl gap-1.5 bg-green-500 hover:bg-green-600 text-white"
+                onClick={() => {
+                  if (!playingVideo.video_url) return;
+                  const url = getVideoPublicUrl(playingVideo.video_url);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = (playingVideo.title || "video") + ".mp4";
+                  a.target = "_blank";
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                }}
+              >
+                <Download className="h-4 w-4" />
+                הורדה
+              </Button>
+              <Button
                 variant="outline"
                 size="sm"
                 className="rounded-xl gap-1.5"
