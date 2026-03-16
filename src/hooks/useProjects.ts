@@ -15,6 +15,10 @@ export interface VideoRecord {
   created_at: string;
   version_number: number;
   parent_video_id: string | null;
+  category: string | null;
+  tags: string[] | null;
+  description: string | null;
+  content_type: string | null;
 }
 
 export interface ProjectFile {
