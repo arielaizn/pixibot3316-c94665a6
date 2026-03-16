@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      credit_purchases: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          payment_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits: number
+          id?: string
+          payment_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          payment_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_purchases_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_transactions: {
         Row: {
           amount: number
@@ -38,6 +70,33 @@ export type Database = {
           source?: string | null
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      customers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          sumit_customer_id: string | null
+          user_id: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          sumit_customer_id?: string | null
+          user_id: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          sumit_customer_id?: string | null
+          user_id?: string
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
@@ -78,6 +137,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          billing_cycle: string | null
+          created_at: string
+          credits: number | null
+          currency: string
+          id: string
+          payment_type: string
+          plan_key: string | null
+          status: string
+          sumit_transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          billing_cycle?: string | null
+          created_at?: string
+          credits?: number | null
+          currency?: string
+          id?: string
+          payment_type?: string
+          plan_key?: string | null
+          status?: string
+          sumit_transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          billing_cycle?: string | null
+          created_at?: string
+          credits?: number | null
+          currency?: string
+          id?: string
+          payment_type?: string
+          plan_key?: string | null
+          status?: string
+          sumit_transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       pixi_handoff_tokens: {
         Row: {
