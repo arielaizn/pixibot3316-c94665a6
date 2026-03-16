@@ -36,10 +36,21 @@ const PLAN_PAYMENT_LINKS: Record<string, string> = {
   enterprise: "https://pay.sumit.co.il/sngpsi/solbu2/solbu3/payment/",
 };
 
-const ADMIN_EMAILS = [
-  "pixmindstudio3316@gmail.com",
-  "aa046114609@gmail.com",
-];
+// Admin detection helper — uses DB function instead of hardcoded emails
+async function checkIsAdmin(
+  adminClient: ReturnType<typeof createClient>,
+  userId: string
+): Promise<boolean> {
+  const { data } = await adminClient.rpc("is_admin", { p_user_id: userId });
+  return data === true;
+}
+
+async function ensureAdminCredits(
+  adminClient: ReturnType<typeof createClient>,
+  userId: string
+): Promise<void> {
+  await adminClient.rpc("ensure_admin_credits", { p_user_id: userId });
+}
 
 // ── Token regex ──
 const TOKEN_REGEX = /PX-[A-Z0-9]{6}/;
