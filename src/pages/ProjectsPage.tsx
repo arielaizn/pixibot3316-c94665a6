@@ -463,12 +463,12 @@ const ProjectsPage = () => {
             </div>
           )}
 
-          {/* Files section */}
-          {projectFilesList.length > 0 && (
+          {/* Files section — exclude video files (they're in the Videos section above) */}
+          {projectFilesList.filter(f => !f.file_type?.startsWith("video")).length > 0 && (
             <div>
               <h3 className="mb-4 text-lg font-semibold text-foreground">{t.filesLabel}</h3>
               <div className={viewMode === "grid" ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-4" : "space-y-2"}>
-                {projectFilesList.map((file) => {
+                {projectFilesList.filter(f => !f.file_type?.startsWith("video")).map((file) => {
                   const Icon = getFileIcon(file.file_type);
                   return (
                     <FileCard
@@ -478,16 +478,6 @@ const ProjectsPage = () => {
                       viewMode={viewMode}
                       t={t}
                       onPreview={() => {
-                        // For video files, open in the main project player instead of the modal
-                        if (file.file_type?.startsWith("video") && selectedProject) {
-                          const match = selectedProject.videos.find(v =>
-                            v.video_url && file.file_url.includes(encodeURIComponent(v.video_url).replace(/%2F/g, '/'))
-                          );
-                          if (match) {
-                            navigate(`/projects/${selectedProject.id}/video/${match.id}`);
-                            return;
-                          }
-                        }
                         setPreviewFile(file as any);
                       }}
                       onRename={() => setRenameTarget({ id: file.id, name: file.file_name, type: "file" })}
