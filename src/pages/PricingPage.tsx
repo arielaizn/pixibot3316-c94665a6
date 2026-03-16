@@ -268,13 +268,21 @@ const PricingPage = () => {
                     </ul>
 
                     <Button
+                      disabled={paymentLoading}
+                      onClick={() => {
+                        if (!user) {
+                          navigate("/signup");
+                          return;
+                        }
+                        startSubscription(plan.key, yearly ? "yearly" : "monthly");
+                      }}
                       className={`w-full rounded-xl py-5 text-sm font-bold ${
                         plan.popular
                           ? "bg-primary text-primary-foreground hover:bg-primary/90"
                           : "bg-primary/10 text-primary hover:bg-primary/20"
                       }`}
                     >
-                      {t.cta}
+                      {paymentLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t.cta}
                     </Button>
                   </div>
                 );
