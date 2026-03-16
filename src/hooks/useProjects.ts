@@ -293,7 +293,8 @@ export const useProjects = () => {
 
     for (const v of candidates) {
       generatingRef.current.add(v.id);
-      generateThumbnail(v.id, v.video_url!, user.id).then((url) => {
+      const publicUrl = getVideoPublicUrl(v.video_url!);
+      generateThumbnail(v.id, publicUrl, user.id).then((url) => {
         if (url) invalidate();
       });
     }
