@@ -36,10 +36,21 @@ const PLAN_PAYMENT_LINKS: Record<string, string> = {
   enterprise: "https://pay.sumit.co.il/sngpsi/solbu2/solbu3/payment/",
 };
 
-const ADMIN_EMAILS = [
-  "pixmindstudio3316@gmail.com",
-  "aa046114609@gmail.com",
-];
+// Admin detection helper — uses DB function instead of hardcoded emails
+async function checkIsAdmin(
+  adminClient: ReturnType<typeof createClient>,
+  userId: string
+): Promise<boolean> {
+  const { data } = await adminClient.rpc("is_admin", { p_user_id: userId });
+  return data === true;
+}
+
+async function ensureAdminCredits(
+  adminClient: ReturnType<typeof createClient>,
+  userId: string
+): Promise<void> {
+  await adminClient.rpc("ensure_admin_credits", { p_user_id: userId });
+}
 
 // ── Token regex ──
 const TOKEN_REGEX = /PX-[A-Z0-9]{6}/;
@@ -95,9 +106,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      const { data: userData } = await admin.auth.admin.getUserById(user_id);
-      const email = userData?.user?.email || "";
-      const isAdmin = ADMIN_EMAILS.includes(email);
+      const isAdmin = await checkIsAdmin(admin, user_id);
 
       const { data: credits } = await admin
         .from("user_credits")
@@ -261,21 +270,11 @@ async function handleTokenMessage(
     .eq("user_id", handoff.user_id);
 
   // Fetch user details
-  const { data: userData } = await admin.auth.admin.getUserById(handoff.user_id);
-  const email = userData?.user?.email || "";
-  const isAdmin = ADMIN_EMAILS.includes(email);
+  const isAdmin = await checkIsAdmin(admin, handoff.user_id);
 
-  // If admin, ensure DB reflects unlimited status
+  // If admin, ensure credits reflect unlimited status via DB function
   if (isAdmin) {
-    await admin
-      .from("user_credits")
-      .update({
-        is_unlimited: true,
-        plan_type: "enterprise",
-        plan_credits: 80,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("user_id", handoff.user_id);
+    await ensureAdminCredits(admin, handoff.user_id);
   }
 
   const { data: profile } = await admin
@@ -355,7 +354,7 @@ async function handleReturningUser(
   user: { userId: string; email: string; fullName: string | null },
   text: string
 ): Promise<BotResponse> {
-  const isAdmin = ADMIN_EMAILS.includes(user.email);
+  const isAdmin = await checkIsAdmin(admin, user.userId);
 
   const { data: credits } = await admin
     .from("user_credits")
