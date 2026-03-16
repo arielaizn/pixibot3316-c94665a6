@@ -10,7 +10,7 @@ const PLANS = ["free", "starter", "creator", "pro", "business", "enterprise"];
 const PLAN_CREDITS: Record<string, number> = { free: 1, starter: 3, creator: 7, pro: 15, business: 35, enterprise: 80 };
 
 const AdminUsersPage = () => {
-  const { isRTL } = useDirection();
+  const { t } = useDirection();
   const { toast } = useToast();
   const qc = useQueryClient();
 
@@ -23,7 +23,7 @@ const AdminUsersPage = () => {
     mutationFn: (params: any) => adminAction("update_credits", params),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-users"] });
-      toast({ title: isRTL ? "עודכן בהצלחה" : "Updated" });
+      toast({ title: t("admin.updated") });
     },
   });
 
@@ -31,7 +31,7 @@ const AdminUsersPage = () => {
     mutationFn: (user_id: string) => adminAction("reset_credits", { user_id }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-users"] });
-      toast({ title: isRTL ? "אופס" : "Credits reset" });
+      toast({ title: t("admin.creditsReset") });
     },
   });
 
@@ -40,7 +40,7 @@ const AdminUsersPage = () => {
       adminAction("add_credits", { user_id, amount }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-users"] });
-      toast({ title: isRTL ? "קרדיטים נוספו" : "Credits added" });
+      toast({ title: t("admin.creditsAdded") });
     },
   });
 
@@ -49,7 +49,7 @@ const AdminUsersPage = () => {
   return (
     <AdminLayout>
       <h2 className="mb-6 text-2xl font-bold text-foreground">
-        {isRTL ? "ניהול משתמשים" : "User Management"}
+        {t("admin.userManagement")}
       </h2>
 
       {isLoading ? (
@@ -59,13 +59,13 @@ const AdminUsersPage = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
-                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "אימייל" : "Email"}</th>
-                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "שם" : "Name"}</th>
-                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "תוכנית" : "Plan"}</th>
-                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "קרדיטים" : "Credits"}</th>
-                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "תפקיד" : "Role"}</th>
-                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "הצטרפות" : "Joined"}</th>
-                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "פעולות" : "Actions"}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.email")}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.name")}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.plan")}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.credits")}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.role")}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.joined")}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -120,7 +120,7 @@ const AdminUsersPage = () => {
                           className="h-7 text-xs"
                           onClick={() => resetCredits.mutate(u.id)}
                         >
-                          {isRTL ? "איפוס" : "Reset"}
+                          {t("admin.reset")}
                         </Button>
                       </div>
                     </td>

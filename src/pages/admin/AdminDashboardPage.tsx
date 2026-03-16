@@ -16,7 +16,7 @@ const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: strin
 );
 
 const AdminDashboardPage = () => {
-  const { isRTL } = useDirection();
+  const { t } = useDirection();
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: () => adminAction("dashboard_stats"),
@@ -28,7 +28,7 @@ const AdminDashboardPage = () => {
   return (
     <AdminLayout>
       <h2 className="mb-6 text-2xl font-bold text-foreground">
-        {isRTL ? "סקירה כללית" : "Overview"}
+        {t("admin.overview")}
       </h2>
 
       {isLoading ? (
@@ -38,18 +38,17 @@ const AdminDashboardPage = () => {
       ) : (
         <>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard icon={Users} label={isRTL ? "משתמשים" : "Users"} value={stats?.totalUsers || 0} color="bg-primary/10 text-primary" />
-            <StatCard icon={Film} label={isRTL ? "סרטונים" : "Videos"} value={stats?.totalVideos || 0} color="bg-accent/10 text-accent" />
-            <StatCard icon={FolderOpen} label={isRTL ? "פרויקטים" : "Projects"} value={stats?.totalProjects || 0} color="bg-secondary/50 text-foreground" />
-            <StatCard icon={MessageCircle} label={isRTL ? "טוקנים פעילים" : "Active Tokens"} value={stats?.activeTokens || 0} color="bg-primary/10 text-primary" />
+            <StatCard icon={Users} label={t("admin.users")} value={stats?.totalUsers || 0} color="bg-primary/10 text-primary" />
+            <StatCard icon={Film} label={t("admin.videos")} value={stats?.totalVideos || 0} color="bg-accent/10 text-accent" />
+            <StatCard icon={FolderOpen} label={t("admin.projects")} value={stats?.totalProjects || 0} color="bg-secondary/50 text-foreground" />
+            <StatCard icon={MessageCircle} label={t("admin.activeTokens")} value={stats?.activeTokens || 0} color="bg-primary/10 text-primary" />
           </div>
 
-          {/* Category Stats */}
           {sortedCategories.length > 0 && (
             <div className="mt-8">
               <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
                 <Tag className="h-5 w-5 text-primary" />
-                {isRTL ? "קטגוריות נפוצות" : "Most Common Categories"}
+                {t("admin.commonCategories")}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {sortedCategories.map(([category, count]) => (
