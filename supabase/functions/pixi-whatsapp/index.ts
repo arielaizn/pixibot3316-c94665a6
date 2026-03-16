@@ -263,7 +263,31 @@ async function handleTokenMessage(
     .update({ used: true })
     .eq("id", handoff.id);
 
-  // Link phone number to user profile
+  // Clear phone number from ANY previous profile that had this number
+  // This ensures the user always maps to the latest token's account
+  const normalized = phone.replace(/^\+/, "").replace(/^0+/, "");
+  const { data: existingProfiles } = await admin
+    .from("profiles")
+    .select("user_id, whatsapp_number")
+    .eq("whatsapp_verified", true)
+    .not("whatsapp_number", "is", null);
+
+  if (existingProfiles) {
+    for (const p of existingProfiles) {
+      if (p.user_id === handoff.user_id) continue; // skip the target user
+      const pNorm = (p.whatsapp_number || "").replace(/^\+/, "").replace(/^0+/, "");
+      if (pNorm.length >= 9 && normalized.endsWith(pNorm.slice(-9))) {
+        // This profile had this phone — clear it
+        await admin
+          .from("profiles")
+          .update({ whatsapp_number: null, whatsapp_verified: false })
+          .eq("user_id", p.user_id);
+        console.log(`Cleared phone from previous user ${p.user_id}, now linking to ${handoff.user_id}`);
+      }
+    }
+  }
+
+  // Link phone number to new user profile
   await admin
     .from("profiles")
     .update({ whatsapp_number: phone, whatsapp_verified: true })
