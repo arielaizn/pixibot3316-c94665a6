@@ -91,9 +91,14 @@ const SharedPage = () => {
       setTitle(videoData.title || "");
       if (videoData.video_url) {
         const resolved = getVideoPublicUrl(videoData.video_url);
-        console.log("Resolved video URL:", resolved);
+        console.log("Share page - video_url from DB:", videoData.video_url);
+        console.log("Share page - resolved public URL:", resolved);
         setVideoUrl(resolved);
+      } else {
+        console.warn("Share page - video record found but video_url is null/empty");
       }
+    } else {
+      console.warn("Share page - no video record found for video_id:", share.video_id);
     }
 
     setLoading(false);
