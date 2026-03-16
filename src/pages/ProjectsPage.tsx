@@ -648,7 +648,7 @@ const ProjectsPage = () => {
                       <Wand2 className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium text-foreground">{sf.name}</span>
                       <Badge variant="secondary" className="rounded-full text-[10px]">
-                        {sf.videoCount} {isRTL ? "סרטונים" : "videos"}
+                        {sf.videoCount} {tr("common.videos")}
                       </Badge>
                     </button>
                   ))}
