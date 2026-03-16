@@ -6,7 +6,7 @@ import PixiVideoPlayer from "@/components/PixiVideoPlayer";
 import { Loader2 } from "lucide-react";
 
 const SharedPage = () => {
-  const { token } = useParams<{ type: string; token: string }>();
+  const { type, token } = useParams<{ type: string; token: string }>();
   const { t, direction } = useDirection();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,6 +18,7 @@ const SharedPage = () => {
   useEffect(() => {
     if (!token) return;
     (async () => {
+      // Fetch the share record (anon can read link/public shares)
       const { data: share, error: sErr } = await supabase
         .from("project_shares")
         .select("*")
@@ -30,6 +31,14 @@ const SharedPage = () => {
         return;
       }
 
+      // Check visibility
+      if (share.visibility === "private") {
+        setError(t("shared.notFound"));
+        setLoading(false);
+        return;
+      }
+
+      // Fetch project name
       const { data: project } = await supabase
         .from("projects")
         .select("name")
@@ -37,6 +46,7 @@ const SharedPage = () => {
         .single();
       setProjectName(project?.name || "");
 
+      // Fetch creator name
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
