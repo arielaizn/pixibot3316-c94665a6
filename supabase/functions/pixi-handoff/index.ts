@@ -61,15 +61,21 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Fetch user credits to determine plan and quota
+    const { data: userCredits } = await adminClient
+      .from("user_credits")
+      .select("plan_type, plan_credits, extra_credits, used_credits, is_unlimited")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const isUnlimited = userCredits?.is_unlimited === true;
+    const plan = userCredits?.plan_type || "free";
+    const quota = isUnlimited ? 999999 : Math.max(0, (userCredits?.plan_credits || 0) + (userCredits?.extra_credits || 0) - (userCredits?.used_credits || 0));
+
     // Generate short human-friendly token
     const token = generateShortToken();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-    // TODO: fetch real plan/quota from subscription system
-    const plan = "free";
-    const quota = 1;
-
-    const { error: insertError } = await adminClient
       .from("pixi_handoff_tokens")
       .insert({
         token,
