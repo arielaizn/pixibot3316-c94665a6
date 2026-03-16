@@ -277,6 +277,28 @@ export const useProjects = () => {
     onSuccess: () => invalidate(),
   });
 
+  // Auto-generate thumbnails for completed videos without one
+  const generatingRef = useRef<Set<string>>(new Set());
+  const allVideos = (projectsQuery.data || []).flatMap((p) => p.videos);
+
+  useEffect(() => {
+    if (!user) return;
+    const candidates = allVideos.filter(
+      (v) =>
+        v.video_url &&
+        !v.thumbnail_url &&
+        v.status === "completed" &&
+        !generatingRef.current.has(v.id)
+    );
+
+    for (const v of candidates) {
+      generatingRef.current.add(v.id);
+      generateThumbnail(v.id, v.video_url!, user.id).then((url) => {
+        if (url) invalidate();
+      });
+    }
+  }, [allVideos, user]);
+
   return {
     ...projectsQuery,
     projects: projectsQuery.data || [],
