@@ -153,16 +153,47 @@ const PricingPage = () => {
         </div>
 
         {/* ── BILLING TOGGLE ── */}
-        <div className="mx-auto mb-12 flex items-center justify-center gap-3">
-          <span className={`text-sm font-medium ${!yearly ? "text-foreground" : "text-muted-foreground"}`}>
-            {t.monthly}
-          </span>
-          <Switch checked={yearly} onCheckedChange={setYearly} />
-          <span className={`text-sm font-medium ${yearly ? "text-foreground" : "text-muted-foreground"}`}>
-            {t.yearly}
-          </span>
+        <div className="mx-auto mb-12 flex flex-col items-center gap-3">
+          <div
+            className="relative flex h-12 w-64 cursor-pointer select-none items-center rounded-full border border-border bg-muted p-1"
+            role="radiogroup"
+            aria-label="Billing period"
+          >
+            {/* Sliding indicator */}
+            <div
+              className={`absolute top-1 h-10 w-[calc(50%-4px)] rounded-full bg-primary shadow-lg shadow-primary/25 transition-all duration-300 ease-out ${
+                yearly
+                  ? "start-[calc(50%+2px)]"
+                  : "start-1"
+              }`}
+            />
+            {/* Monthly */}
+            <button
+              role="radio"
+              aria-checked={!yearly}
+              onClick={() => setYearly(false)}
+              className={`relative z-10 flex h-10 flex-1 items-center justify-center rounded-full text-sm font-bold transition-colors duration-200 ${
+                !yearly ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t.monthly}
+            </button>
+            {/* Yearly */}
+            <button
+              role="radio"
+              aria-checked={yearly}
+              onClick={() => setYearly(true)}
+              className={`relative z-10 flex h-10 flex-1 items-center justify-center rounded-full text-sm font-bold transition-colors duration-200 ${
+                yearly ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <span className="flex flex-col items-center leading-tight">
+                <span>{t.yearly}</span>
+              </span>
+            </button>
+          </div>
           {yearly && (
-            <Badge className="animate-scale-in bg-primary/10 text-primary hover:bg-primary/20 border-0">
+            <Badge className="animate-fade-in bg-primary/10 text-primary hover:bg-primary/20 border-0 text-xs">
               {t.save}
             </Badge>
           )}
