@@ -10,6 +10,7 @@ import SignupPage from "./pages/SignupPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import WelcomePage from "./pages/WelcomePage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
+import ProjectsPage from "./pages/ProjectsPage.tsx";
 import PlaceholderPage from "./pages/PlaceholderPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -30,7 +31,7 @@ const App = () => (
             <Route path="/pricing" element={<PlaceholderPage title="מחירים" />} />
               <Route path="/welcome" element={<WelcomePage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/projects" element={<PlaceholderPage title="הפרויקטים שלי" />} />
+              <Route path="/projects" element={<ProjectsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
