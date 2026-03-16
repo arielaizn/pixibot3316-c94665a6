@@ -196,18 +196,10 @@ export const useProjects = () => {
         if (!uploadData?.path) throw new Error("Upload succeeded but no storage path was returned");
 
         const storagePath = uploadData.path;
-        const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(storagePath);
-        const { error: dbError } = await supabase.from("user_files").insert({
-          user_id: user!.id,
-          project_id: projectId,
-          file_name: file.name,
-          file_url: urlData.publicUrl,
-          file_type: file.type || "unknown",
-          file_size: file.size,
-        });
-        if (dbError) throw dbError;
+        const isVideo = file.type?.startsWith("video/");
 
-        if (file.type?.startsWith("video/")) {
+        if (isVideo) {
+          // Video files go ONLY to the videos table
           const { error: vidError } = await supabase.from("videos").insert({
             user_id: user!.id,
             project_id: projectId,
@@ -216,6 +208,18 @@ export const useProjects = () => {
             status: "completed",
           });
           if (vidError) throw vidError;
+        } else {
+          // Non-video files go to the files table
+          const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(storagePath);
+          const { error: dbError } = await supabase.from("user_files").insert({
+            user_id: user!.id,
+            project_id: projectId,
+            file_name: file.name,
+            file_url: urlData.publicUrl,
+            file_type: file.type || "unknown",
+            file_size: file.size,
+          });
+          if (dbError) throw dbError;
         }
         results.push({ progress: ((i + 1) / fileList.length) * 100 });
       }
