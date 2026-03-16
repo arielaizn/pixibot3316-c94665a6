@@ -12,7 +12,7 @@ import LoginPage from "./pages/LoginPage.tsx";
 import WelcomePage from "./pages/WelcomePage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
-import PlaceholderPage from "./pages/PlaceholderPage.tsx";
+import PricingPage from "./pages/PricingPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
