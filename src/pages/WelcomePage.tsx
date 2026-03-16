@@ -1,11 +1,13 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { useWhatsAppHandoff } from "@/hooks/useWhatsAppHandoff";
 import { LayoutDashboard, MessageCircle, Loader2 } from "lucide-react";
 import mascot from "@/assets/pixi-mascot.png";
 
 const WelcomePage = () => {
   const { user, loading } = useAuth();
+  const { initiateHandoff, loading: handoffLoading } = useWhatsAppHandoff();
 
   if (loading) {
     return (
@@ -62,10 +64,12 @@ const WelcomePage = () => {
             שלחו הודעה למספר הייעודי שלנו והתחילו ליצור סרטונים מיד
           </p>
           <p className="mb-6 text-sm font-semibold text-foreground" dir="ltr">+972 52-551-5776</p>
-          <Button asChild className="w-full rounded-xl bg-primary py-5 text-base font-bold text-primary-foreground hover:bg-primary/90">
-            <a href="https://wa.me/972525515776" target="_blank" rel="noopener noreferrer">
-              המשיכו ל-WhatsApp
-            </a>
+          <Button
+            onClick={initiateHandoff}
+            disabled={handoffLoading}
+            className="w-full rounded-xl bg-primary py-5 text-base font-bold text-primary-foreground hover:bg-primary/90"
+          >
+            {handoffLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "המשיכו ל-WhatsApp"}
           </Button>
         </div>
       </div>
