@@ -49,6 +49,7 @@ const ProjectsPage = () => {
     projects, isLoading: projectsLoading,
     createProject, renameProject, deleteProject,
     renameVideo, deleteVideo, uploadToProject, moveFileToProject,
+    classifyVideo, updateVideoTags, updateVideoCategory,
   } = useProjects();
 
   // File manager for standalone files tab
