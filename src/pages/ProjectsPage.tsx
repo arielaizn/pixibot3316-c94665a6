@@ -44,7 +44,7 @@ const formatDate = (d: string) =>
 /* ── component ── */
 const ProjectsPage = () => {
   const { user, loading: authLoading } = useAuth();
-  const { isRTL } = useDirection();
+  const { isRTL, t: tr } = useDirection();
   const {
     projects, isLoading: projectsLoading,
     createProject, renameProject, deleteProject,
@@ -54,7 +54,6 @@ const ProjectsPage = () => {
 
   // File manager for standalone files tab
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
-  const { isRTL, t: tr } = useDirection();
   const [folderPath, setFolderPath] = useState<{ id: string | null; name: string }[]>([
     { id: null, name: isRTL ? "הקבצים שלי" : "My Files" },
   ]);
