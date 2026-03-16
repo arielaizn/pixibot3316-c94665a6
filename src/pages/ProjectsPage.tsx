@@ -10,12 +10,14 @@ import ShareModal from "@/components/ShareModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Loader2, FolderOpen, FolderPlus, Upload, Search, Grid3X3, List, Star, StarOff,
   Trash2, Pencil, MoreVertical, FileText, FileVideo, FileImage, FileAudio, File as FileIcon,
   ChevronRight, X, Eye, Download, ArrowLeft, Video, Share2, Play, Plus, History, FolderInput,
+  Sparkles, Tag, Wand2,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
