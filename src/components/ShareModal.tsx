@@ -12,7 +12,7 @@ import { toast } from "sonner";
 interface ShareModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  projectId: string;
+  projectId?: string | null;
   videoId?: string;
   projectName?: string;
 }
