@@ -636,7 +636,7 @@ const ProjectsPage = () => {
               <div className="mb-6">
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  {isRTL ? "תיקיות מוצעות" : "Suggested Folders"}
+                  {tr("projects.suggestedFolders")}
                 </h3>
                 <div className="flex flex-wrap gap-3">
                   {suggestedFolders.map((sf) => (
