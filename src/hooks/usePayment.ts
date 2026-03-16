@@ -5,6 +5,14 @@ import { useToast } from "@/hooks/use-toast";
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+const PLAN_PAYMENT_LINKS: Record<string, string> = {
+  starter: "https://pay.sumit.co.il/sngpsi/sol9v3/sol9v4/payment/",
+  creator: "https://pay.sumit.co.il/sngpsi/snjfxu/snjfxv/payment/",
+  pro: "https://pay.sumit.co.il/sngpsi/solav9/solava/payment/",
+  business: "https://pay.sumit.co.il/sngpsi/snrb6s/snrb6t/payment/",
+  enterprise: "https://pay.sumit.co.il/sngpsi/solbu2/solbu3/payment/",
+};
+
 async function paymentAction(action: string, params: Record<string, any> = {}) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
@@ -36,17 +44,24 @@ export function usePayment() {
   const startSubscription = async (planKey: string, billingCycle: "monthly" | "yearly") => {
     setLoading(true);
     try {
-      const baseUrl = window.location.origin;
-      const result = await paymentAction("open_terminal", {
-        plan_key: planKey,
-        billing_cycle: billingCycle,
-        success_url: `${baseUrl}/payment/callback`,
-        cancel_url: `${baseUrl}/pricing`,
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("Not authenticated");
 
-      if (result.paymentUrl) {
-        window.location.href = result.paymentUrl;
-      }
+      const paymentLink = PLAN_PAYMENT_LINKS[planKey];
+      if (!paymentLink) throw new Error("Invalid plan");
+
+      const user = session.user;
+      const returnUrl = `${window.location.origin}/payment/callback`;
+
+      // Build URL with user identification params
+      const url = new URL(paymentLink);
+      url.searchParams.set("email", user.email || "");
+      url.searchParams.set("userid", user.id);
+      url.searchParams.set("plan", planKey);
+      url.searchParams.set("cycle", billingCycle);
+      url.searchParams.set("returnurl", returnUrl);
+
+      window.location.href = url.toString();
     } catch (err: any) {
       toast({
         title: "שגיאה",
