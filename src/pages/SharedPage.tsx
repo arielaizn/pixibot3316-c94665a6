@@ -91,9 +91,14 @@ const SharedPage = () => {
       setTitle(videoData.title || "");
       if (videoData.video_url) {
         const resolved = getVideoPublicUrl(videoData.video_url);
-        console.log("Resolved video URL:", resolved);
+        console.log("Share page - video_url from DB:", videoData.video_url);
+        console.log("Share page - resolved public URL:", resolved);
         setVideoUrl(resolved);
+      } else {
+        console.warn("Share page - video record found but video_url is null/empty");
       }
+    } else {
+      console.warn("Share page - no video record found for video_id:", share.video_id);
     }
 
     setLoading(false);
@@ -138,7 +143,7 @@ const SharedPage = () => {
       </header>
       <main className="container mx-auto max-w-4xl px-4 py-8">
         {videoUrl ? (
-          <PixiVideoPlayer src={videoUrl} title={title} />
+          <PixiVideoPlayer src={videoUrl} title={title} autoPlay />
         ) : (
           <div className="rounded-2xl border border-border bg-card p-12 text-center space-y-4">
             <p className="text-muted-foreground">הסרטון לא זמין</p>
