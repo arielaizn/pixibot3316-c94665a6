@@ -1,28 +1,38 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useDirection } from "@/contexts/DirectionContext";
+
+interface HandoffResponse {
+  token: string;
+  expiresAt: string;
+  whatsappUrl: string;
+}
 
 export const useWhatsAppHandoff = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { isRTL } = useDirection();
 
   const initiateHandoff = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("pixi-handoff");
+      const { data, error } = await supabase.functions.invoke<HandoffResponse>(
+        "pixi-handoff",
+        { body: { language: isRTL ? "he" : "en" } }
+      );
 
       if (error) throw error;
+      if (!data?.whatsappUrl) throw new Error("No handoff URL received");
 
-      const token = data?.handoff_token;
-      if (!token) throw new Error("No token received");
-
-      const whatsappUrl = `https://wa.me/972525515776?text=${encodeURIComponent(token)}`;
-      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
     } catch (err) {
       console.error("Handoff failed:", err);
       toast({
-        title: "שגיאה",
-        description: "לא הצלחנו ליצור קישור מאובטח. נסו שוב.",
+        title: isRTL ? "שגיאה" : "Error",
+        description: isRTL
+          ? "לא הצלחנו ליצור קישור מאובטח. נסו שוב."
+          : "We couldn't create a secure link. Please try again.",
         variant: "destructive",
       });
     } finally {

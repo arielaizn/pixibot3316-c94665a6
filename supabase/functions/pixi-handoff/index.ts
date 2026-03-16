@@ -6,6 +6,19 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const WHATSAPP_NUMBER = "972525515776";
+
+function generateShortToken(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  const arr = new Uint8Array(6);
+  crypto.getRandomValues(arr);
+  for (const byte of arr) {
+    code += chars[byte % chars.length];
+  }
+  return `PX-${code}`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -20,12 +33,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verify the user via their JWT
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // User client to verify auth
+    // Verify user
     const userClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -38,22 +50,29 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Admin client to insert token
+    // Parse optional body for language preference
+    let language = "he";
+    try {
+      const body = await req.json();
+      if (body?.language === "en") language = "en";
+    } catch {
+      // No body or invalid JSON — default to Hebrew
+    }
+
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Generate token
-    const tokenUuid = crypto.randomUUID();
-    const handoffToken = `pixi:handoff:${tokenUuid}`;
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 min
+    // Generate short human-friendly token
+    const token = generateShortToken();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-    // TODO: fetch real plan/quota from your subscription system
+    // TODO: fetch real plan/quota from subscription system
     const plan = "free";
     const quota = 1;
 
     const { error: insertError } = await adminClient
       .from("pixi_handoff_tokens")
       .insert({
-        token: handoffToken,
+        token,
         user_id: user.id,
         plan,
         quota,
@@ -68,10 +87,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ handoff_token: handoffToken }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Build WhatsApp message based on language
+    const message = language === "en"
+      ? `Hi Pixi! My access code is ${token}`
+      : `היי Pixi! קוד ההתחברות שלי הוא ${token}`;
+
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+
+    return new Response(
+      JSON.stringify({
+        token,
+        expiresAt,
+        whatsappUrl,
+      }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   } catch (err) {
     console.error("Handoff error:", err);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
