@@ -4,6 +4,7 @@ import { useCredits, getPlanLabel } from "@/hooks/useCredits";
 import { useDirection } from "@/contexts/DirectionContext";
 import { Button } from "@/components/ui/button";
 import CreditBar from "@/components/CreditBar";
+import ReferralCard from "@/components/ReferralCard";
 import Navbar from "@/components/Navbar";
 import { Loader2, FolderOpen, Plus, Film } from "lucide-react";
 import mascot from "@/assets/pixi-mascot.png";
