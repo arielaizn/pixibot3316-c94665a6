@@ -26,6 +26,7 @@ import AdminCreditsPage from "./pages/admin/AdminCreditsPage.tsx";
 import AdminVideosPage from "./pages/admin/AdminVideosPage.tsx";
 import AdminProjectsPage from "./pages/admin/AdminProjectsPage.tsx";
 import AdminWhatsAppPage from "./pages/admin/AdminWhatsAppPage.tsx";
+import AdminReferralsPage from "./pages/admin/AdminReferralsPage.tsx";
 import NotAdminPage from "./pages/admin/NotAdminPage.tsx";
 
 const queryClient = new QueryClient();
