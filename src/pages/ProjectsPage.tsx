@@ -72,7 +72,7 @@ const ProjectsPage = () => {
   // Navigation state
   const [selectedProject, setSelectedProject] = useState<ProjectWithContent | null>(null);
   const [playingVideo, setPlayingVideo] = useState<VideoRecord | null>(null);
-  const [shareTarget, setShareTarget] = useState<{ projectId: string; videoId?: string; name?: string } | null>(null);
+  const [shareTarget, setShareTarget] = useState<{ projectId?: string | null; videoId?: string; name?: string } | null>(null);
   const [showVersions, setShowVersions] = useState<VideoRecord | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -281,7 +281,7 @@ const ProjectsPage = () => {
                 className="rounded-xl gap-1.5"
                 onClick={() =>
                   setShareTarget({
-                    projectId: playingVideo.project_id || "",
+                    projectId: playingVideo.project_id,
                     videoId: playingVideo.id,
                     name: playingVideo.title,
                   })
@@ -299,7 +299,7 @@ const ProjectsPage = () => {
             thumbnail={playingVideo.thumbnail_url}
             onShare={() =>
               setShareTarget({
-                projectId: playingVideo.project_id || "",
+                projectId: playingVideo.project_id,
                 videoId: playingVideo.id,
                 name: playingVideo.title,
               })
@@ -608,7 +608,7 @@ const ProjectsPage = () => {
                   {searchResults.videos.map((v) => (
                     <VideoCard key={v.id} vid={v} viewMode={viewMode} isRTL={isRTL} t={t}
                       onPlay={() => { setPlayingVideo(v); setSearch(""); }}
-                      onShare={() => setShareTarget({ projectId: v.project_id || "", videoId: v.id, name: v.title })}
+                      onShare={() => setShareTarget({ projectId: v.project_id || undefined, videoId: v.id, name: v.title })}
                       onRename={() => setRenameTarget({ id: v.id, name: v.title, type: "video" })}
                       onDelete={() => deleteVideo.mutate(v.id)}
                       onVersions={() => setShowVersions(v)}

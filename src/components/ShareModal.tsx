@@ -12,14 +12,16 @@ import { toast } from "sonner";
 interface ShareModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  projectId: string;
+  projectId?: string | null;
   videoId?: string;
   projectName?: string;
 }
 
-const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: ShareModalProps) => {
+const ShareModal = ({ open, onOpenChange, projectId: rawProjectId, videoId, projectName }: ShareModalProps) => {
   const { t } = useDirection();
   const { user } = useAuth();
+  // Normalize empty string to null so UUID columns don't receive ""
+  const projectId = rawProjectId || null;
   const [email, setEmail] = useState("");
   const [permission, setPermission] = useState("viewer");
   const [visibility, setVisibility] = useState("private");
@@ -31,21 +33,29 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
   // Load existing share state when modal opens
   useEffect(() => {
     if (!open || !user) return;
+    // Need either a projectId or videoId to look up shares
+    if (!projectId && !videoId) {
+      setLoadingState(false);
+      return;
+    }
     setLoadingState(true);
     (async () => {
-      const query = supabase
+      let query = supabase
         .from("project_shares")
         .select("*")
-        .eq("project_id", projectId)
         .eq("shared_by", user.id)
         .is("shared_with_email", null)
         .order("created_at", { ascending: false })
         .limit(1);
 
+      if (projectId) {
+        query = query.eq("project_id", projectId);
+      }
+
       if (videoId) {
-        query.eq("video_id", videoId);
+        query = query.eq("video_id", videoId);
       } else {
-        query.is("video_id", null);
+        query = query.is("video_id", null);
       }
 
       const { data } = await query;
@@ -74,6 +84,12 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
       const base = window.location.origin;
       const type = videoId ? "video" : "project";
       return `${base}/share/${type}/${existingShareToken}`;
+    }
+
+    // Must have at least a projectId to create a share record
+    if (!projectId) {
+      toast.error(t("share.errorCreate"));
+      return null;
     }
 
     const { data, error } = await supabase
@@ -121,6 +137,11 @@ const ShareModal = ({ open, onOpenChange, projectId, videoId, projectName }: Sha
   const handleInvite = async () => {
     if (!email.trim() || !user) return;
     setSending(true);
+    if (!projectId) {
+      toast.error(t("share.errorInvite"));
+      setSending(false);
+      return;
+    }
     const { error } = await supabase
       .from("project_shares")
       .insert({
