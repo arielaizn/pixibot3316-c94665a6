@@ -4,22 +4,33 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDirection } from "@/contexts/DirectionContext";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
 import { getVideoPublicUrl } from "@/lib/videoUrl";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, Download, Eye, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface VideoData {
+  id: string;
+  title: string;
+  video_url: string | null;
+  thumbnail_url: string | null;
+  created_at: string;
+  view_count?: number;
+}
 
 const SharedPage = () => {
   const { token } = useParams<{ token: string }>();
-  const { direction } = useDirection();
+  const { direction, isRTL } = useDirection();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
-  const [title, setTitle] = useState("");
+  const [video, setVideo] = useState<VideoData | null>(null);
   const [projectName, setProjectName] = useState("");
   const [creatorName, setCreatorName] = useState("");
+  const [viewCount, setViewCount] = useState(0);
 
   const loadShare = async () => {
     if (!token) {
-      setError("קישור לא תקין");
+      setError(isRTL ? "קישור לא תקין" : "Invalid link");
       setLoading(false);
       return;
     }
@@ -28,7 +39,7 @@ const SharedPage = () => {
     setError("");
     setVideoUrl("");
 
-    // 1. Fetch share record by token
+    // 1. Fetch share record
     const { data: share, error: sErr } = await supabase
       .from("project_shares")
       .select("*")
@@ -36,19 +47,18 @@ const SharedPage = () => {
       .maybeSingle();
 
     if (sErr || !share) {
-      console.error("Share fetch error:", sErr);
-      setError("הקישור לא נמצא");
+      setError(isRTL ? "הקישור לא נמצא" : "Link not found");
       setLoading(false);
       return;
     }
 
     if (share.visibility === "private") {
-      setError("הקישור לא נמצא");
+      setError(isRTL ? "הקישור לא נמצא" : "Link not found");
       setLoading(false);
       return;
     }
 
-    // 2. Fetch project name (optional, for display)
+    // 2. Fetch project name
     const { data: project } = await supabase
       .from("projects")
       .select("name")
@@ -56,7 +66,7 @@ const SharedPage = () => {
       .maybeSingle();
     setProjectName(project?.name || "");
 
-    // 3. Fetch creator name (optional, for display)
+    // 3. Fetch creator name
     const { data: profile } = await supabase
       .from("profiles")
       .select("full_name")
@@ -64,41 +74,35 @@ const SharedPage = () => {
       .maybeSingle();
     setCreatorName(profile?.full_name || "Pixi User");
 
-    // 4. Fetch the video
-    let videoData = null;
+    // 4. Fetch video
+    let videoData: VideoData | null = null;
 
     if (share.video_id) {
-      const { data: vid, error: vidErr } = await supabase
+      const { data: vid } = await supabase
         .from("videos")
         .select("*")
         .eq("id", share.video_id)
         .maybeSingle();
-      if (vidErr) console.error("Video fetch error:", vidErr);
       videoData = vid;
     } else {
-      // Fallback: get latest video in the project
-      const { data: vids, error: vidsErr } = await supabase
+      const { data: vids } = await supabase
         .from("videos")
         .select("*")
         .eq("project_id", share.project_id)
         .order("created_at", { ascending: false })
         .limit(1);
-      if (vidsErr) console.error("Videos fetch error:", vidsErr);
       videoData = vids?.[0] || null;
     }
 
     if (videoData) {
-      setTitle(videoData.title || "");
+      setVideo(videoData);
+      setViewCount((videoData.view_count || 0) + 1);
       if (videoData.video_url) {
-        const resolved = getVideoPublicUrl(videoData.video_url);
-        console.log("Share page - video_url from DB:", videoData.video_url);
-        console.log("Share page - resolved public URL:", resolved);
-        setVideoUrl(resolved);
-      } else {
-        console.warn("Share page - video record found but video_url is null/empty");
+        setVideoUrl(getVideoPublicUrl(videoData.video_url));
       }
-    } else {
-      console.warn("Share page - no video record found for video_id:", share.video_id);
+
+      // 5. Increment view count (fire and forget)
+      supabase.rpc("increment_view_count" as never, { p_video_id: videoData.id } as never).then(() => {});
     }
 
     setLoading(false);
@@ -108,52 +112,188 @@ const SharedPage = () => {
     loadShare();
   }, [token]);
 
+  const handleDownload = () => {
+    if (!videoUrl || !video) return;
+    const a = document.createElement("a");
+    a.href = videoUrl;
+    a.download = (video.title || "video") + ".mp4";
+    a.target = "_blank";
+    a.click();
+  };
+
+  const formatDate = (d: string) => {
+    return new Date(d).toLocaleDateString(isRTL ? "he-IL" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Loading state
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-3"
+        >
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm font-medium text-muted-foreground">
+            {isRTL ? "טוען סרטון..." : "Loading video..."}
+          </p>
+        </motion.div>
       </div>
     );
   }
 
+  // Error state
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-4">
-        <p className="text-xl font-bold text-foreground">{error}</p>
-        <Button variant="outline" onClick={() => window.location.reload()} className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          נסה שוב
-        </Button>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <ExternalLink className="h-7 w-7 text-muted-foreground" />
+          </div>
+          <p className="text-xl font-bold text-foreground">{error}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {isRTL ? "הקישור שחיפשת לא זמין" : "The link you're looking for isn't available"}
+          </p>
+        </motion.div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background" dir={direction}>
-      <header className="border-b border-border px-6 py-4">
-        <div className="container mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-foreground">{title || projectName}</h1>
-            <p className="text-sm text-muted-foreground">
-              {creatorName} · Pixi
-            </p>
-          </div>
-          <span className="text-2xl font-extrabold text-primary">Pixi</span>
-        </div>
-      </header>
-      <main className="container mx-auto max-w-4xl px-4 py-8">
-        {videoUrl ? (
-          <PixiVideoPlayer src={videoUrl} title={title} autoPlay />
-        ) : (
-          <div className="rounded-2xl border border-border bg-card p-12 text-center space-y-4">
-            <p className="text-muted-foreground">הסרטון לא זמין</p>
-            <Button variant="outline" onClick={loadShare} className="gap-2">
-              <RefreshCw className="h-4 w-4" />
-              נסה שוב
+      {/* Header */}
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-50"
+      >
+        <div className="container mx-auto flex items-center justify-between px-6 py-3">
+          <a href="/" className="flex items-center gap-2 group">
+            <span className="text-2xl font-extrabold text-primary transition-transform group-hover:scale-105">
+              Pixi
+            </span>
+          </a>
+          {videoUrl && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl gap-2 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all"
+              onClick={handleDownload}
+            >
+              <Download className="h-4 w-4" />
+              {isRTL ? "הורדה" : "Download"}
             </Button>
-          </div>
-        )}
+          )}
+        </div>
+      </motion.header>
+
+      {/* Main content */}
+      <main className="container mx-auto max-w-[900px] px-4 py-8 md:py-12">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="player"
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            {/* Player container */}
+            <div className="overflow-hidden rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] ring-1 ring-border/10">
+              {videoUrl ? (
+                <PixiVideoPlayer
+                  src={videoUrl}
+                  title={video?.title}
+                  thumbnail={video?.thumbnail_url}
+                  autoPlay
+                />
+              ) : (
+                <div className="flex aspect-video items-center justify-center bg-muted">
+                  <p className="text-muted-foreground">
+                    {isRTL ? "הסרטון לא זמין" : "Video not available"}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Video info */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="mt-6 space-y-4"
+            >
+              {/* Title + meta */}
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-1">
+                  <h1 className="text-xl font-bold text-foreground md:text-2xl">
+                    {video?.title || projectName}
+                  </h1>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <span>{creatorName}</span>
+                    {video?.created_at && (
+                      <>
+                        <span className="text-border">·</span>
+                        <span>{formatDate(video.created_at)}</span>
+                      </>
+                    )}
+                    <span className="text-border">·</span>
+                    <span className="flex items-center gap-1">
+                      <Eye className="h-3.5 w-3.5" />
+                      {viewCount} {isRTL ? "צפיות" : "views"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Download button (desktop) */}
+                {videoUrl && (
+                  <Button
+                    onClick={handleDownload}
+                    className="hidden sm:flex rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30"
+                  >
+                    <Download className="h-4 w-4" />
+                    {isRTL ? "הורד סרטון" : "Download Video"}
+                  </Button>
+                )}
+              </div>
+
+              {/* Mobile download */}
+              {videoUrl && (
+                <Button
+                  onClick={handleDownload}
+                  className="sm:hidden w-full rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+                >
+                  <Download className="h-4 w-4" />
+                  {isRTL ? "הורד סרטון" : "Download Video"}
+                </Button>
+              )}
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       </main>
+
+      {/* Footer branding */}
+      <motion.footer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="border-t border-border/30 py-6 text-center"
+      >
+        <a href="/" className="inline-flex flex-col items-center gap-1 group">
+          <span className="text-lg font-extrabold text-primary">Pixi</span>
+          <span className="text-xs text-muted-foreground transition-colors group-hover:text-foreground">
+            {isRTL ? "נוצר עם Pixi AI Video Studio" : "Created with Pixi AI Video Studio"}
+          </span>
+        </a>
+      </motion.footer>
     </div>
   );
 };
