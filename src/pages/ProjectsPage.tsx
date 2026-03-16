@@ -696,7 +696,7 @@ const ProjectsPage = () => {
                     viewMode={viewMode}
                     t={t}
                     isRTL={isRTL}
-                    onClick={() => setSelectedProject(project)}
+                    onClick={() => navigate(`/projects/${project.id}`)}
                     onShare={() => setShareTarget({ projectId: project.id, name: project.name })}
                     onRename={() => setRenameTarget({ id: project.id, name: project.name, type: "project" })}
                     onDelete={() => deleteProject.mutate(project.id)}
