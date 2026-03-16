@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index.tsx";
+import PlaceholderPage from "./pages/PlaceholderPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -18,6 +19,11 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/pricing" element={<PlaceholderPage title="מחירים" />} />
+            <Route path="/login" element={<PlaceholderPage title="התחברות" />} />
+            <Route path="/signup" element={<PlaceholderPage title="הרשמה" />} />
+            <Route path="/dashboard" element={<PlaceholderPage title="לוח בקרה" />} />
+            <Route path="/projects" element={<PlaceholderPage title="הפרויקטים שלי" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
