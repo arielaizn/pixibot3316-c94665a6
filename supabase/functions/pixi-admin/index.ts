@@ -91,12 +91,13 @@ serve(async (req) => {
 
       // ── UPDATE USER CREDITS ──
       case "update_credits": {
-        const { user_id, plan_type, plan_credits, extra_credits, used_credits } = params;
+        const { user_id, plan_type, plan_credits, extra_credits, used_credits, is_unlimited } = params;
         const updates: any = {};
         if (plan_type !== undefined) updates.plan_type = plan_type;
         if (plan_credits !== undefined) updates.plan_credits = plan_credits;
         if (extra_credits !== undefined) updates.extra_credits = extra_credits;
         if (used_credits !== undefined) updates.used_credits = used_credits;
+        if (is_unlimited !== undefined) updates.is_unlimited = is_unlimited;
         updates.updated_at = new Date().toISOString();
 
         const { data, error } = await adminClient

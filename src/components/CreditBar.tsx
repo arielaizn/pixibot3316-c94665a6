@@ -23,7 +23,27 @@ const CreditBar = ({ credits, showPlan = false, showWarning = true }: CreditBarP
     upgrade: isRTL ? "שדרגו תוכנית" : "Upgrade Plan",
     buy: isRTL ? "רכשו קרדיטים נוספים" : "Buy More Credits",
     currentPlan: isRTL ? "התוכנית הנוכחית" : "Current Plan",
+    unlimited: isRTL ? "קרדיטים ללא הגבלה" : "Unlimited credits",
+    unlimitedPlan: isRTL ? "תוכנית מנהל ללא הגבלה" : "Admin Unlimited Plan",
   };
+
+  if (credits.isUnlimited) {
+    return (
+      <div className="space-y-3">
+        {showPlan && (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">{t.currentPlan}:</span>
+            <span className="font-bold text-foreground">{t.unlimitedPlan}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-3">
+          <Film className="h-5 w-5 shrink-0 text-primary" />
+          <span className="text-lg font-extrabold text-foreground">🎬 ∞</span>
+          <span className="text-sm text-muted-foreground">{t.unlimited}</span>
+        </div>
+      </div>
+    );
+  }
 
   const progressColor = credits.isEmpty
     ? "bg-destructive"
@@ -51,7 +71,6 @@ const CreditBar = ({ credits, showPlan = false, showWarning = true }: CreditBarP
       <Progress
         value={Math.min(credits.usagePercent, 100)}
         className="h-2.5 bg-muted"
-        // Override indicator color via style
       />
 
       <p className="text-sm text-muted-foreground">{t.remaining(credits.remainingCredits)}</p>
