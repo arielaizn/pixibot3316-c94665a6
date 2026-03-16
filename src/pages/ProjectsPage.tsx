@@ -983,9 +983,9 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
   );
 }
 
-function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onStar, onMove }: {
+function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onStar, onMove, onShare }: {
   file: ProjectFile; Icon: any; viewMode: string; t: any;
-  onPreview: () => void; onRename: () => void; onDelete: () => void; onStar: () => void; onMove: () => void;
+  onPreview: () => void; onRename: () => void; onDelete: () => void; onStar: () => void; onMove: () => void; onShare?: () => void;
 }) {
   if (viewMode === "list") {
     return (
