@@ -437,7 +437,7 @@ const ProjectsPage = () => {
                     viewMode={viewMode}
                     isRTL={isRTL}
                     t={t}
-                    onPlay={() => vid.video_url && setPlayingVideo(vid)}
+                    onPlay={() => vid.video_url && navigate(`/projects/${selectedProject.id}/video/${vid.id}`)}
                     onShare={() => setShareTarget({ projectId: selectedProject.id, videoId: vid.id, name: vid.title })}
                     onRename={() => setRenameTarget({ id: vid.id, name: vid.title, type: "video" })}
                     onDelete={() => deleteVideo.mutate(vid.id)}
