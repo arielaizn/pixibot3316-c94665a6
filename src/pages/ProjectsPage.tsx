@@ -904,28 +904,48 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
           </span>
         )}
       </div>
-      <div className="flex items-center justify-between p-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-medium text-foreground">{vid.title || "סרטון"}</p>
-          <p className="text-xs text-muted-foreground">{subtitle || formatDate(vid.created_at)}</p>
+      <div className="p-3">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium text-foreground">{vid.title || "סרטון"}</p>
+            <p className="text-xs text-muted-foreground">{subtitle || formatDate(vid.created_at)}</p>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <button className="rounded-full p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100">
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(); }}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onVersions(); }}><History className="me-2 h-3.5 w-3.5" /> {t.versions}</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(); }}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); vid.video_url && window.open(vid.video_url); }}>
+                <Download className="me-2 h-3.5 w-3.5" /> {t.download}
+              </DropdownMenuItem>
+              {onClassify && !vid.category && (
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClassify(); }}><Wand2 className="me-2 h-3.5 w-3.5" /> {isRTL ? "סווג אוטומטית" : "Auto-classify"}</DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}><Trash2 className="me-2 h-3.5 w-3.5" /> {t.delete}</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button className="rounded-full p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100">
-              <MoreVertical className="h-4 w-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(); }}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onVersions(); }}><History className="me-2 h-3.5 w-3.5" /> {t.versions}</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(); }}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); vid.video_url && window.open(vid.video_url); }}>
-              <Download className="me-2 h-3.5 w-3.5" /> {t.download}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}><Trash2 className="me-2 h-3.5 w-3.5" /> {t.delete}</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Category & Tags */}
+        {(vid.category || (vid.tags && vid.tags.length > 0)) && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {vid.category && (
+              <Badge variant="outline" className="rounded-full text-[10px] px-2 py-0 border-primary/30 text-primary">
+                {vid.category}
+              </Badge>
+            )}
+            {vid.tags?.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="secondary" className="rounded-full text-[10px] px-2 py-0">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
