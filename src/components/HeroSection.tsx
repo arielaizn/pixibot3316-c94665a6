@@ -76,12 +76,7 @@ const HeroSection = () => {
                 </div>
               </div>
 
-              {/* Mascot floating near chat */}
-              <img
-                src={mascot}
-                alt="Pixi Mascot"
-                className="absolute -bottom-6 -left-6 h-20 w-20 animate-float drop-shadow-lg hidden md:block"
-              />
+
             </div>
           </div>
         </div>
