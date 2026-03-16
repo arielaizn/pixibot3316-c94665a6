@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { generateThumbnail } from "@/lib/thumbnailGenerator";
 import { getVideoPublicUrl } from "@/lib/videoUrl";
+import { sanitizeFileName } from "@/lib/sanitizeFileName";
 
 export interface VideoRecord {
   id: string;
