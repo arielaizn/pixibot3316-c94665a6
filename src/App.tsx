@@ -69,6 +69,7 @@ const App = () => (
                 <Route path="/admin/projects" element={<AdminProjectsPage />} />
                 <Route path="/admin/whatsapp" element={<AdminWhatsAppPage />} />
                 <Route path="/admin/referrals" element={<AdminReferralsPage />} />
+                <Route path="/admin/user-stats" element={<AdminUserStatsPage />} />
                 <Route path="/not-admin" element={<NotAdminPage />} />
                 <Route path="/share/file/:token" element={<SharedFilePage />} />
                 <Route path="/share/:type/:token" element={<SharedPage />} />
