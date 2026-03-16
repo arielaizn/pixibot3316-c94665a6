@@ -850,7 +850,14 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-foreground">{vid.title || "סרטון"}</p>
-          <p className="text-xs text-muted-foreground">{subtitle || formatDate(vid.created_at)}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-xs text-muted-foreground">{subtitle || formatDate(vid.created_at)}</p>
+            {vid.category && (
+              <Badge variant="outline" className="rounded-full text-[9px] px-1.5 py-0 border-primary/30 text-primary">
+                {vid.category}
+              </Badge>
+            )}
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
