@@ -51,15 +51,19 @@ export function usePayment() {
       if (!paymentLink) throw new Error("Invalid plan");
 
       const user = session.user;
-      const returnUrl = `${window.location.origin}/payment/callback`;
 
-      // Build URL with user identification params
+      // Build the success return URL with user identification
+      const successUrl = new URL(`${window.location.origin}/payment/callback`);
+      successUrl.searchParams.set("pixi_user_id", user.id);
+      successUrl.searchParams.set("plan", planKey);
+      successUrl.searchParams.set("cycle", billingCycle);
+      successUrl.searchParams.set("email", user.email || "");
+
+      // Append params to the Sumit hosted payment link
       const url = new URL(paymentLink);
       url.searchParams.set("email", user.email || "");
-      url.searchParams.set("userid", user.id);
-      url.searchParams.set("plan", planKey);
-      url.searchParams.set("cycle", billingCycle);
-      url.searchParams.set("returnurl", returnUrl);
+      url.searchParams.set("pixi_user_id", user.id);
+      url.searchParams.set("successUrl", successUrl.toString());
 
       window.location.href = url.toString();
     } catch (err: any) {

@@ -1,67 +1,135 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { usePayment } from "@/hooks/usePayment";
 import { useDirection } from "@/contexts/DirectionContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
+const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+const PLAN_CREDITS: Record<string, number> = {
+  starter: 3,
+  creator: 7,
+  pro: 15,
+  business: 35,
+  enterprise: 80,
+};
+
 const PaymentCallbackPage = () => {
   const [searchParams] = useSearchParams();
-  const { verifyPayment } = usePayment();
   const { isRTL } = useDirection();
+  const { user } = useAuth();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const paymentId = searchParams.get("payment_id");
+  // Params from Sumit redirect back
+  const pixiUserId = searchParams.get("pixi_user_id");
+  const plan = searchParams.get("plan");
+  const cycle = searchParams.get("cycle");
+  const paymentId = searchParams.get("payment_id"); // legacy support
 
   useEffect(() => {
-    if (!paymentId) {
-      setStatus("error");
-      setErrorMsg(isRTL ? "מזהה תשלום חסר" : "Missing payment ID");
-      return;
-    }
-
-    // Poll payment status — webhook activates it server-side
-    let attempts = 0;
-    const maxAttempts = 20;
-    const pollInterval = 3000;
-
-    const poll = async () => {
+    const activate = async () => {
       try {
-        const result = await verifyPayment(paymentId);
-        if (result.status === "completed" || result.status === "already_completed") {
-          setStatus("success");
-          return;
-        }
-        if (result.status === "failed" || result.status === "amount_mismatch") {
+        // Determine user ID: from URL param or from current session
+        const userId = pixiUserId || user?.id;
+        if (!userId) {
           setStatus("error");
-          setErrorMsg(isRTL ? "התשלום נכשל" : "Payment failed");
+          setErrorMsg(isRTL ? "לא ניתן לזהות את המשתמש" : "Could not identify user");
           return;
         }
-        // Still pending — retry
-        attempts++;
-        if (attempts < maxAttempts) {
-          setTimeout(poll, pollInterval);
-        } else {
-          // After ~60s, show success optimistically (webhook may still be processing)
+
+        // If we have a plan from Sumit redirect, call the activation endpoint
+        if (plan) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            setStatus("error");
+            setErrorMsg(isRTL ? "יש להתחבר כדי להפעיל את המנוי" : "Please log in to activate your subscription");
+            return;
+          }
+
+          const res = await fetch(
+            `https://${PROJECT_ID}.supabase.co/functions/v1/sumit-payment`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+                apikey: ANON_KEY,
+              },
+              body: JSON.stringify({
+                action: "activate_plan",
+                plan_key: plan,
+                billing_cycle: cycle || "monthly",
+                pixi_user_id: userId,
+              }),
+            }
+          );
+
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || "Activation failed");
+
           setStatus("success");
+          return;
         }
+
+        // Legacy: poll payment_id status
+        if (paymentId) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            setStatus("error");
+            setErrorMsg(isRTL ? "יש להתחבר" : "Please log in");
+            return;
+          }
+
+          let attempts = 0;
+          const poll = async () => {
+            const res = await fetch(
+              `https://${PROJECT_ID}.supabase.co/functions/v1/sumit-payment`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`,
+                  apikey: ANON_KEY,
+                },
+                body: JSON.stringify({ action: "verify_payment", payment_id: paymentId }),
+              }
+            );
+            const result = await res.json();
+            if (result.status === "completed" || result.status === "already_completed") {
+              setStatus("success");
+              return;
+            }
+            attempts++;
+            if (attempts < 15) setTimeout(poll, 3000);
+            else setStatus("success"); // optimistic after timeout
+          };
+          poll();
+          return;
+        }
+
+        // No plan or payment_id — can't proceed
+        setStatus("error");
+        setErrorMsg(isRTL ? "פרטי תשלום חסרים" : "Missing payment details");
       } catch (err: any) {
         setStatus("error");
         setErrorMsg(err.message);
       }
     };
 
-    poll();
-  }, [paymentId]);
+    activate();
+  }, [pixiUserId, plan, cycle, paymentId, user?.id]);
 
   const t = {
-    verifying: isRTL ? "מאמת את התשלום..." : "Verifying payment...",
+    verifying: isRTL ? "מפעיל את המנוי שלכם..." : "Activating your subscription...",
     success: isRTL ? "התשלום בוצע בהצלחה!" : "Payment successful!",
     successDesc: isRTL
-      ? "התוכנית שלכם עודכנה. חשבונית נשלחה למייל."
-      : "Your plan has been updated. An invoice has been sent to your email.",
+      ? "התוכנית שלכם עודכנה. חשבונית תישלח למייל."
+      : "Your plan has been updated. An invoice will be sent to your email.",
     error: isRTL ? "שגיאה באימות התשלום" : "Payment verification failed",
     dashboard: isRTL ? "לדשבורד" : "Go to Dashboard",
     retry: isRTL ? "חזרה לתוכניות" : "Back to Plans",
