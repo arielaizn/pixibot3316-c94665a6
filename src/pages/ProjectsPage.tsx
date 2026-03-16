@@ -432,6 +432,7 @@ const ProjectsPage = () => {
                     onRename={() => setRenameTarget({ id: vid.id, name: vid.title, type: "video" })}
                     onDelete={() => deleteVideo.mutate(vid.id)}
                     onVersions={() => setShowVersions(vid)}
+                    onClassify={() => classifyVideo.mutate(vid.id)}
                   />
                 ))}
               </div>
