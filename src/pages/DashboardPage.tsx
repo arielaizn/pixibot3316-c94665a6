@@ -73,7 +73,7 @@ const DashboardPage = () => {
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">{t.creditsLeft}</p>
                 <p className="font-bold text-primary">
-                  {creditsLoading ? "..." : credits ? `${credits.used_credits} / ${credits.totalCredits}` : "—"}
+                  {creditsLoading ? "..." : credits ? (credits.isUnlimited ? "∞" : `${credits.used_credits} / ${credits.totalCredits}`) : "—"}
                 </p>
               </div>
             </div>
