@@ -17,6 +17,7 @@ import PricingPage from "./pages/PricingPage.tsx";
 import PaymentCallbackPage from "./pages/PaymentCallbackPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SharedPage from "./pages/SharedPage.tsx";
+import PublicVideoPage from "./pages/PublicVideoPage.tsx";
 // Admin pages
 import AdminLoginPage from "./pages/admin/AdminLoginPage.tsx";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage.tsx";
