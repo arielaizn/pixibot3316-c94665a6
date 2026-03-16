@@ -869,6 +869,9 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(); }}><Share2 className="me-2 h-3.5 w-3.5" /> {t.share}</DropdownMenuItem>
             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onVersions(); }}><History className="me-2 h-3.5 w-3.5" /> {t.versions}</DropdownMenuItem>
             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(); }}><Pencil className="me-2 h-3.5 w-3.5" /> {t.rename}</DropdownMenuItem>
+            {onClassify && !vid.category && (
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onClassify(); }}><Wand2 className="me-2 h-3.5 w-3.5" /> {isRTL ? "סווג אוטומטית" : "Auto-classify"}</DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}><Trash2 className="me-2 h-3.5 w-3.5" /> {t.delete}</DropdownMenuItem>
           </DropdownMenuContent>
