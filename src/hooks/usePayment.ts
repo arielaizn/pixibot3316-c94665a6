@@ -37,7 +37,7 @@ export function usePayment() {
     setLoading(true);
     try {
       const baseUrl = window.location.origin;
-      const result = await paymentAction("start_payment", {
+      const result = await paymentAction("open_terminal", {
         plan_key: planKey,
         billing_cycle: billingCycle,
         success_url: `${baseUrl}/payment/callback`,
@@ -62,9 +62,9 @@ export function usePayment() {
     setLoading(true);
     try {
       const baseUrl = window.location.origin;
-      const result = await paymentAction("buy_credits", {
-        credits,
-        price,
+      const result = await paymentAction("open_terminal", {
+        pack_credits: credits,
+        pack_price: price,
         success_url: `${baseUrl}/payment/callback`,
         cancel_url: `${baseUrl}/pricing`,
       });
