@@ -14,6 +14,7 @@ import WelcomePage from "./pages/WelcomePage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
 import PricingPage from "./pages/PricingPage.tsx";
+import PaymentCallbackPage from "./pages/PaymentCallbackPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 // Admin pages
 import AdminLoginPage from "./pages/admin/AdminLoginPage.tsx";
@@ -46,6 +47,7 @@ const App = () => (
                 <Route path="/welcome" element={<WelcomePage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/payment/callback" element={<PaymentCallbackPage />} />
                 {/* Admin */}
                 <Route path="/admin" element={<AdminLoginPage />} />
                 <Route path="/admin/dashboard" element={<AdminDashboardPage />} />

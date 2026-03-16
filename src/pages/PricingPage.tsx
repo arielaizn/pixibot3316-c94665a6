@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,8 @@ import CreditBar from "@/components/CreditBar";
 import { useCredits } from "@/hooks/useCredits";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
-import { Check, Zap, Star, Crown, Building2, Rocket, Package, AlertCircle } from "lucide-react";
+import { usePayment } from "@/hooks/usePayment";
+import { Check, Zap, Star, Crown, Building2, Rocket, Package, AlertCircle, Loader2 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /*  DATA                                                               */
@@ -107,6 +108,8 @@ const PricingPage = () => {
   const [yearly, setYearly] = useState(false);
   const { user } = useAuth();
   const { credits } = useCredits();
+  const navigate = useNavigate();
+  const { startSubscription, buyCredits, loading: paymentLoading } = usePayment();
 
   const t = {
     title: isRTL ? "תוכניות ומחירים" : "Plans & Pricing",
@@ -265,13 +268,21 @@ const PricingPage = () => {
                     </ul>
 
                     <Button
+                      disabled={paymentLoading}
+                      onClick={() => {
+                        if (!user) {
+                          navigate("/signup");
+                          return;
+                        }
+                        startSubscription(plan.key, yearly ? "yearly" : "monthly");
+                      }}
                       className={`w-full rounded-xl py-5 text-sm font-bold ${
                         plan.popular
                           ? "bg-primary text-primary-foreground hover:bg-primary/90"
                           : "bg-primary/10 text-primary hover:bg-primary/20"
                       }`}
                     >
-                      {t.cta}
+                      {paymentLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t.cta}
                     </Button>
                   </div>
                 );
@@ -327,8 +338,19 @@ const PricingPage = () => {
                     <p className="mb-5 flex-1 text-center text-sm text-muted-foreground">
                       {isRTL ? pack.descHe : pack.descEn}
                     </p>
-                    <Button variant="outline" className="w-full rounded-xl border-accent py-4 text-accent hover:bg-accent hover:text-accent-foreground">
-                      {t.packCta}
+                    <Button
+                      variant="outline"
+                      disabled={paymentLoading}
+                      onClick={() => {
+                        if (!user) {
+                          navigate("/signup");
+                          return;
+                        }
+                        buyCredits(pack.videos, pack.price);
+                      }}
+                      className="w-full rounded-xl border-accent py-4 text-accent hover:bg-accent hover:text-accent-foreground"
+                    >
+                      {paymentLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t.packCta}
                     </Button>
                   </div>
                 ))}
