@@ -16,12 +16,21 @@ const SignupPage = () => {
   const { user, loading: authLoading, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("+972");
   const [whatsappError, setWhatsappError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Capture referral code from URL and store in localStorage
+  useEffect(() => {
+    const refCode = searchParams.get("ref");
+    if (refCode) {
+      localStorage.setItem("pixi_referral_code", refCode);
+    }
+  }, [searchParams]);
 
   if (authLoading) {
     return (
