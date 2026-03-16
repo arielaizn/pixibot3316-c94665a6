@@ -602,7 +602,7 @@ const ProjectsPage = () => {
                 <div className={viewMode === "grid" ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3" : "space-y-2"}>
                   {searchResults.projects.map((p) => (
                     <ProjectCard key={p.id} project={p} viewMode={viewMode} t={t} isRTL={isRTL}
-                      onClick={() => { setSelectedProject(p); setSearch(""); }}
+                      onClick={() => { navigate(`/projects/${p.id}`); setSearch(""); }}
                       onShare={() => setShareTarget({ projectId: p.id, name: p.name })}
                       onRename={() => setRenameTarget({ id: p.id, name: p.name, type: "project" })}
                       onDelete={() => deleteProject.mutate(p.id)}
