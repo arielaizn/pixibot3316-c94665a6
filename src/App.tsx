@@ -37,6 +37,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+              <WhatsAppGate>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/signup" element={<SignupPage />} />
