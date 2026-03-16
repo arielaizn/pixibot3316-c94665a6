@@ -106,9 +106,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      const { data: userData } = await admin.auth.admin.getUserById(user_id);
-      const email = userData?.user?.email || "";
-      const isAdmin = ADMIN_EMAILS.includes(email);
+      const isAdmin = await checkIsAdmin(admin, user_id);
 
       const { data: credits } = await admin
         .from("user_credits")
