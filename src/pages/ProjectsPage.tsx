@@ -833,10 +833,10 @@ function ProjectCard({ project, viewMode, t, isRTL, onClick, onShare, onRename, 
   );
 }
 
-function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelete, onVersions, subtitle }: {
+function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelete, onVersions, onClassify, subtitle }: {
   vid: VideoRecord & { projectName?: string }; viewMode: string; isRTL: boolean; t: any;
   onPlay: () => void; onShare: () => void; onRename: () => void; onDelete: () => void;
-  onVersions: () => void; subtitle?: string;
+  onVersions: () => void; onClassify?: () => void; subtitle?: string;
 }) {
   if (viewMode === "list") {
     return (
