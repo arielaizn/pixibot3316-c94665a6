@@ -9,7 +9,8 @@ Admin detection system — DB-driven, no hardcoded emails
 ## Initial Admins
 - pixmindstudio3316@gmail.com
 - aa046114609@gmail.com
-- Both have admin role in user_roles + unlimited credits in user_credits
+- wsop202122@gmail.com
+- All have admin role in user_roles + unlimited credits in user_credits
 
 ## Adding New Admins
 - Insert into user_roles: `INSERT INTO user_roles (user_id, role) VALUES (uid, 'admin')`
