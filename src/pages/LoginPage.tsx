@@ -97,7 +97,12 @@ const LoginPage = () => {
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" dir="ltr" className="rounded-xl py-5 text-left" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">{t("login.password")}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{t("login.password")}</Label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                  {isRTL ? "שכחת סיסמה?" : "Forgot password?"}
+                </Link>
+              </div>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" dir="ltr" className="rounded-xl py-5 text-left" required />
             </div>
             <Button type="submit" className="w-full rounded-xl bg-primary py-6 text-base font-bold text-primary-foreground hover:bg-primary/90" disabled={loading}>
