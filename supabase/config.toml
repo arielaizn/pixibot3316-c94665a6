@@ -11,6 +11,12 @@ project_id = "hjgfdrurmdbpwcwzuret"
     verify_jwt = false
   [functions.pixi-whatsapp]
     verify_jwt = false
+  [functions.pixi-admin]
+    verify_jwt = false
+  [functions.pixi-handoff]
+    verify_jwt = false
+  [functions.sumit-payment]
+    verify_jwt = false
   [functions.process-email-queue]
     verify_jwt = true
   [functions.sumit-webhook]
