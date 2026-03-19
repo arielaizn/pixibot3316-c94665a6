@@ -48,7 +48,7 @@ serve(async (req) => {
 
     // Check admin role via DB function
     const adminClient = createClient(supabaseUrl, serviceKey);
-    const { data: isAdmin } = await adminClient.rpc("is_admin", { p_user_id: user.id });
+    const { data: isAdmin } = await adminClient.rpc("is_admin", { p_user_id: userId });
 
     if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
