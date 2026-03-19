@@ -31,21 +31,24 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify JWT with anon client
+    // Verify JWT using getClaims (works with ES256 signing keys)
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: authError } = await userClient.auth.getUser();
-    if (authError || !user) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const userId = claimsData.claims.sub as string;
+    const userEmail = (claimsData.claims.email as string) || "";
 
     // Check admin role via DB function
     const adminClient = createClient(supabaseUrl, serviceKey);
-    const { data: isAdmin } = await adminClient.rpc("is_admin", { p_user_id: user.id });
+    const { data: isAdmin } = await adminClient.rpc("is_admin", { p_user_id: userId });
 
     if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
@@ -139,7 +142,7 @@ serve(async (req) => {
       // ── SET USER ROLE ──
       case "set_role": {
         const { user_id, role } = params;
-        if (!ADMIN_EMAILS.includes(user.email || "")) {
+        if (!ADMIN_EMAILS.includes(userEmail)) {
           // Only hardcoded admins can set roles
           return new Response(JSON.stringify({ error: "Only super admins can set roles" }), {
             status: 403,
