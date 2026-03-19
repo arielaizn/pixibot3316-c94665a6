@@ -554,6 +554,39 @@ export type Database = {
         }
         Relationships: []
       }
+      updates: {
+        Row: {
+          created_at: string
+          description: string
+          end_date: string
+          id: string
+          is_active: boolean
+          start_date: string
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           billing_cycle_start: string
