@@ -12,7 +12,7 @@ import mascot from "@/assets/pixi-mascot.png";
 
 const LoginPage = () => {
   const { user, loading: authLoading, signIn } = useAuth();
-  const { t } = useDirection();
+  const { t, isRTL } = useDirection();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
