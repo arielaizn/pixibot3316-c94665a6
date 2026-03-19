@@ -1,0 +1,252 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import AdminLayout from "@/components/admin/AdminLayout";
+import { useDirection } from "@/contexts/DirectionContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Plus, Trash2, Pencil } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+interface UpdateItem {
+  id: string;
+  title: string;
+  description: string;
+  video_url: string | null;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+const AdminUpdatesPage = () => {
+  const { t, isRTL } = useDirection();
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<UpdateItem | null>(null);
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [isActive, setIsActive] = useState(true);
+
+  const { data: updates, isLoading } = useQuery({
+    queryKey: ["admin-updates"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("updates" as any)
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as unknown as UpdateItem[];
+    },
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        title,
+        description,
+        video_url: videoUrl || null,
+        start_date: new Date(startDate).toISOString(),
+        end_date: new Date(endDate).toISOString(),
+        is_active: isActive,
+      };
+      if (editing) {
+        const { error } = await supabase
+          .from("updates" as any)
+          .update(payload)
+          .eq("id", editing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("updates" as any)
+          .insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-updates"] });
+      toast({ title: isRTL ? "נשמר בהצלחה" : "Saved successfully" });
+      closeDialog();
+    },
+    onError: (e: any) => {
+      toast({ title: isRTL ? "שגיאה" : "Error", description: e.message, variant: "destructive" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("updates" as any).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-updates"] });
+      toast({ title: isRTL ? "נמחק" : "Deleted" });
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
+      const { error } = await supabase
+        .from("updates" as any)
+        .update({ is_active: active })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-updates"] }),
+  });
+
+  const openCreate = () => {
+    setEditing(null);
+    setTitle("");
+    setDescription("");
+    setVideoUrl("");
+    const now = new Date();
+    setStartDate(now.toISOString().slice(0, 16));
+    const week = new Date(now.getTime() + 7 * 86400000);
+    setEndDate(week.toISOString().slice(0, 16));
+    setIsActive(true);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (u: UpdateItem) => {
+    setEditing(u);
+    setTitle(u.title);
+    setDescription(u.description);
+    setVideoUrl(u.video_url || "");
+    setStartDate(new Date(u.start_date).toISOString().slice(0, 16));
+    setEndDate(new Date(u.end_date).toISOString().slice(0, 16));
+    setIsActive(u.is_active);
+    setDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setEditing(null);
+  };
+
+  return (
+    <AdminLayout>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-foreground">
+          {isRTL ? "ניהול עדכונים" : "Updates Management"}
+        </h2>
+        <Button onClick={openCreate} className="gap-2">
+          <Plus className="h-4 w-4" />
+          {isRTL ? "עדכון חדש" : "New Update"}
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "כותרת" : "Title"}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "התחלה" : "Start"}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "סיום" : "End"}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "פעיל" : "Active"}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "פעולות" : "Actions"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(updates || []).map((u) => (
+                <tr key={u.id} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3 text-foreground font-medium">{u.title}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">
+                    {new Date(u.start_date).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">
+                    {new Date(u.end_date).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Switch
+                      checked={u.is_active}
+                      onCheckedChange={(v) => toggleMutation.mutate({ id: u.id, active: v })}
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1">
+                      <Button size="sm" variant="ghost" onClick={() => openEdit(u)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteMutation.mutate(u.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {(!updates || updates.length === 0) && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                    {isRTL ? "אין עדכונים" : "No updates yet"}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {editing ? (isRTL ? "עריכת עדכון" : "Edit Update") : (isRTL ? "עדכון חדש" : "New Update")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{isRTL ? "כותרת" : "Title"}</Label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>{isRTL ? "תיאור" : "Description"}</Label>
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+            </div>
+            <div className="space-y-2">
+              <Label>{isRTL ? "קישור לסרטון" : "Video URL"}</Label>
+              <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} dir="ltr" placeholder="https://..." />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{isRTL ? "תאריך התחלה" : "Start Date"}</Label>
+                <Input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} dir="ltr" />
+              </div>
+              <div className="space-y-2">
+                <Label>{isRTL ? "תאריך סיום" : "End Date"}</Label>
+                <Input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} dir="ltr" />
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={isActive} onCheckedChange={setIsActive} />
+              <Label>{isRTL ? "פעיל" : "Active"}</Label>
+            </div>
+            <Button
+              className="w-full"
+              onClick={() => saveMutation.mutate()}
+              disabled={!title.trim() || !startDate || !endDate || saveMutation.isPending}
+            >
+              {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (isRTL ? "שמור" : "Save")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </AdminLayout>
+  );
+};
+
+export default AdminUpdatesPage;

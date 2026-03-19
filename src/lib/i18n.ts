@@ -316,6 +316,8 @@ const translations = {
   "admin.nav.whatsapp": { he: "WhatsApp", en: "WhatsApp" },
   "admin.nav.referrals": { he: "הפניות", en: "Referrals" },
   "admin.nav.userStats": { he: "סטטיסטיקות סרטונים", en: "Video Stats" },
+  "admin.nav.updates": { he: "עדכונים", en: "Updates" },
+  "admin.nav.admins": { he: "מנהלים", en: "Admins" },
 
   // ── Common ──
   "common.video": { he: "סרטון", en: "Video" },
