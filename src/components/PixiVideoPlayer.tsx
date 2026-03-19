@@ -41,6 +41,8 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
   const [showControls, setShowControls] = useState(true);
   const [started, setStarted] = useState(autoPlay);
   const [error, setError] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const hasAttemptedLoad = useRef(false);
   const hideTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const video = videoRef.current;
@@ -122,23 +124,36 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
       });
   }, [src, title, onDownload]);
 
+  // Track when src actually starts loading
+  useEffect(() => {
+    if (started && src) {
+      hasAttemptedLoad.current = true;
+    }
+  }, [started, src]);
+
   // Time updates
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     const onTime = () => setCurrentTime(v.currentTime);
-    const onMeta = () => setDuration(v.duration);
+    const onMeta = () => { setDuration(v.duration); setIsReady(true); };
     const onEnd = () => setPlaying(false);
-    const onError = () => setError(true);
+    const onError = () => {
+      // Only show error if we actually tried to load a real src
+      if (hasAttemptedLoad.current) setError(true);
+    };
+    const onLoadedData = () => setIsReady(true);
     v.addEventListener("timeupdate", onTime);
     v.addEventListener("loadedmetadata", onMeta);
     v.addEventListener("ended", onEnd);
     v.addEventListener("error", onError);
+    v.addEventListener("loadeddata", onLoadedData);
     return () => {
       v.removeEventListener("timeupdate", onTime);
       v.removeEventListener("loadedmetadata", onMeta);
       v.removeEventListener("ended", onEnd);
       v.removeEventListener("error", onError);
+      v.removeEventListener("loadeddata", onLoadedData);
     };
   }, [started]);
 
