@@ -7,6 +7,7 @@ import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 import FloatingMascot from "@/components/FloatingMascot";
 import PageTransition from "@/components/motion/PageTransition";
+import UpdatePopup from "@/components/UpdatePopup";
 
 const Index = () => {
   return (
@@ -20,6 +21,7 @@ const Index = () => {
         <FinalCTA />
         <Footer />
         <FloatingMascot />
+        <UpdatePopup />
       </div>
     </PageTransition>
   );

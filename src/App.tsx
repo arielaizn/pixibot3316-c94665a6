@@ -74,7 +74,11 @@ const App = () => (
                 <Route path="/admin/whatsapp" element={<AdminWhatsAppPage />} />
                 <Route path="/admin/referrals" element={<AdminReferralsPage />} />
                 <Route path="/admin/user-stats" element={<AdminUserStatsPage />} />
+                <Route path="/admin/updates" element={<AdminUpdatesPage />} />
+                <Route path="/admin/admins" element={<AdminAdminsPage />} />
                 <Route path="/not-admin" element={<NotAdminPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/share/file/:token" element={<SharedFilePage />} />
                 <Route path="/share/:type/:token" element={<SharedPage />} />
                 <Route path="/share/:videoId" element={<PublicVideoPage />} />

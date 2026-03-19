@@ -316,6 +316,41 @@ serve(async (req) => {
         break;
       }
 
+      // ── PROMOTE ADMIN ──
+      case "promote_admin": {
+        const { user_id: targetId } = params;
+        const { error } = await adminClient
+          .from("user_roles")
+          .upsert({ user_id: targetId, role: "admin" }, { onConflict: "user_id,role" });
+        if (error) throw error;
+        result = { success: true };
+        break;
+      }
+
+      // ── DEMOTE ADMIN ──
+      case "demote_admin": {
+        const { user_id: targetId } = params;
+        // Prevent removing the only admin
+        const { data: adminRoles } = await adminClient
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "admin");
+        if ((adminRoles || []).length <= 1 && (adminRoles || [])[0]?.user_id === targetId) {
+          return new Response(JSON.stringify({ error: "Cannot remove the only admin" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const { error } = await adminClient
+          .from("user_roles")
+          .delete()
+          .eq("user_id", targetId)
+          .eq("role", "admin");
+        if (error) throw error;
+        result = { success: true };
+        break;
+      }
+
       default:
         return new Response(JSON.stringify({ error: "Unknown action" }), {
           status: 400,
