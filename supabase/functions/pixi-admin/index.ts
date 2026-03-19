@@ -142,7 +142,7 @@ serve(async (req) => {
       // ── SET USER ROLE ──
       case "set_role": {
         const { user_id, role } = params;
-        if (!ADMIN_EMAILS.includes(user.email || "")) {
+        if (!ADMIN_EMAILS.includes(userEmail)) {
           // Only hardcoded admins can set roles
           return new Response(JSON.stringify({ error: "Only super admins can set roles" }), {
             status: 403,
