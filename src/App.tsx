@@ -32,7 +32,11 @@ import AdminProjectsPage from "./pages/admin/AdminProjectsPage.tsx";
 import AdminWhatsAppPage from "./pages/admin/AdminWhatsAppPage.tsx";
 import AdminReferralsPage from "./pages/admin/AdminReferralsPage.tsx";
 import AdminUserStatsPage from "./pages/admin/AdminUserStatsPage.tsx";
+import AdminUpdatesPage from "./pages/admin/AdminUpdatesPage.tsx";
+import AdminAdminsPage from "./pages/admin/AdminAdminsPage.tsx";
 import NotAdminPage from "./pages/admin/NotAdminPage.tsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 
 const queryClient = new QueryClient();
 
