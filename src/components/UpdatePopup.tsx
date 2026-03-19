@@ -72,7 +72,7 @@ const UpdatePopup = () => {
             </button>
 
             {/* Video */}
-            {update.video_url && (
+            {update.video_url && update.video_url.trim() !== "" && (
               <div className="w-full">
                 <PixiVideoPlayer src={update.video_url} title={update.title} />
               </div>
