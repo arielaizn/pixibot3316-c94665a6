@@ -41,6 +41,8 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
   const [showControls, setShowControls] = useState(true);
   const [started, setStarted] = useState(autoPlay);
   const [error, setError] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const hasAttemptedLoad = useRef(false);
   const hideTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const video = videoRef.current;
