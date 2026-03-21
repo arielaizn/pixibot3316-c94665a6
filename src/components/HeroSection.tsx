@@ -13,10 +13,10 @@ const ChatBubble = ({ isUser, children, delay }: { isUser?: boolean; children: R
     animate={{ opacity: 1, y: 0, scale: 1 }}
     transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
   >
-    <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
+    <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-luxury-md ${
       isUser
-        ? "rounded-bl-md bg-primary text-primary-foreground"
-        : "rounded-br-md bg-card text-card-foreground border border-border"
+        ? "rounded-bl-md bg-gradient-to-br from-primary to-primary/80 text-primary-foreground"
+        : "rounded-br-md glass-morphism text-card-foreground"
     }`}>
       {children}
     </div>
@@ -27,8 +27,10 @@ const HeroSection = () => {
   const { t } = useDirection();
 
   return (
-    <section className="relative overflow-hidden py-16 md:py-24">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-gradient-drift" />
+    <section className="relative overflow-hidden py-20 md:py-28">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/8 animate-gradient-drift" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-luxury-purple/3 to-luxury-gold/3" />
       <FloatingParticles count={15} />
 
       <div className="container relative mx-auto px-4">
@@ -39,10 +41,10 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-tight text-foreground md:text-5xl lg:text-6xl">
-              {t("hero.title1")}
+            <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl">
+              <span className="text-foreground">{t("hero.title1")}</span>
               <br />
-              <span className="text-primary">{t("hero.title2")}</span>
+              <span className="gradient-text">{t("hero.title2")}</span>
             </h1>
             <motion.p
               className="mb-8 text-lg text-muted-foreground md:text-xl"
@@ -58,7 +60,7 @@ const HeroSection = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Button asChild size="lg" className="btn-press rounded-full bg-primary px-8 text-lg font-bold text-primary-foreground shadow-lg hover:bg-primary/90">
+              <Button asChild size="lg" variant="luxury" className="rounded-full px-10 text-lg">
                 <Link to="/signup">{t("hero.cta")}</Link>
               </Button>
             </motion.div>
@@ -79,12 +81,15 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="relative w-full max-w-sm">
-              <div className="rounded-3xl border border-border bg-muted/50 p-4 shadow-2xl backdrop-blur">
-                <div className="mb-4 flex items-center gap-3 rounded-xl bg-primary/10 px-3 py-2">
+              {/* Glow behind card */}
+              <div className="absolute -inset-4 rounded-[32px] bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 blur-2xl opacity-60" />
+              
+              <div className="relative rounded-luxury-xl border-2 border-border/50 bg-card/95 p-4 shadow-luxury-xl backdrop-blur-sm">
+                <div className="mb-4 flex items-center gap-3 rounded-luxury-lg bg-gradient-to-r from-primary/15 to-accent/10 px-3 py-2">
                   <motion.img
                     src={mascot}
                     alt="Pixi"
-                    className="h-8 w-8"
+                    className="h-8 w-8 animate-float"
                     animate={{ rotate: [0, -5, 5, 0] }}
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   />
@@ -103,9 +108,9 @@ const HeroSection = () => {
                   </ChatBubble>
                   <ChatBubble delay={1.6}>
                     <p className="mb-2">{t("hero.chatBot2")}</p>
-                    <div className="relative overflow-hidden rounded-xl bg-foreground/5 aspect-video flex items-center justify-center border border-border">
+                    <div className="relative overflow-hidden rounded-luxury-lg bg-foreground/5 aspect-video flex items-center justify-center border border-border/50">
                       <motion.div
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/90 text-primary-foreground shadow-lg"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-luxury-lg"
                         whileHover={{ scale: 1.15 }}
                         whileTap={{ scale: 0.95 }}
                       >
