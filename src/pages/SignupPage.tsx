@@ -74,13 +74,14 @@ const SignupPage = () => {
 
   const handleGoogleSignup = async () => {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
+    const { data, error } = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
-    if (result.error) {
-      toast({ title: t("login.error"), description: String(result.error), variant: "destructive" });
+    if (error) {
+      toast({ title: t("login.error"), description: error.message, variant: "destructive" });
       setLoading(false);
     }
+    // OAuth will redirect, so no need to handle success here
   };
 
   return (
