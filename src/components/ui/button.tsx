@@ -15,12 +15,48 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        luxury: `relative overflow-hidden
+          bg-gradient-to-br from-primary via-primary to-primary-dark
+          text-primary-foreground font-bold
+          shadow-lg shadow-primary/25
+          border border-primary-glow/20
+          hover:shadow-xl hover:shadow-primary/35
+          hover:scale-[1.02]
+          active:scale-[0.98]
+          transition-all duration-300 ease-out
+          before:absolute before:inset-0
+          before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent
+          before:translate-x-[-200%]
+          hover:before:translate-x-[200%]
+          before:transition-transform before:duration-700`,
+        "luxury-outline": `relative overflow-hidden
+          bg-card/50 backdrop-blur-sm
+          text-primary font-semibold
+          border-2 border-primary/30
+          shadow-lg shadow-primary/10
+          hover:border-primary/60 hover:bg-primary/5
+          hover:shadow-xl hover:shadow-primary/20
+          hover:scale-[1.02]
+          active:scale-[0.98]
+          transition-all duration-300 ease-out`,
+        "luxury-glass": `relative overflow-hidden
+          bg-card/30 backdrop-blur-md
+          text-foreground font-semibold
+          border border-border/50
+          shadow-luxury-md
+          hover:bg-card/50 hover:border-primary/30
+          hover:shadow-luxury-lg
+          hover:-translate-y-0.5
+          active:translate-y-0
+          transition-all duration-300 ease-out`,
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        luxury: "h-14 px-10 py-4 text-base rounded-luxury",
+        "luxury-lg": "h-16 px-12 py-5 text-lg rounded-luxury-lg",
       },
     },
     defaultVariants: {

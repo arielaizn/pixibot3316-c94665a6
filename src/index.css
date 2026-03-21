@@ -32,12 +32,47 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 145 63% 49%;
+
+    /* Premium color variants */
+    --primary-glow: 145 80% 60%;
+    --primary-dark: 145 63% 35%;
+
+    /* Gradient system */
+    --gradient-from: 145 70% 55%;
+    --gradient-via: 170 45% 48%;
+    --gradient-to: 239 84% 67%;
+
+    /* Multi-layer luxury shadows */
+    --shadow-luxury-sm:
+      0 2px 8px -2px hsl(var(--primary) / 0.08),
+      0 4px 16px -4px hsl(var(--foreground) / 0.04),
+      0 1px 0 0 hsl(var(--border));
+
+    --shadow-luxury-md:
+      0 4px 16px -4px hsl(var(--primary) / 0.12),
+      0 8px 32px -8px hsl(var(--foreground) / 0.08),
+      0 1px 0 0 hsl(var(--border)),
+      inset 0 1px 0 0 hsl(var(--card) / 0.4);
+
+    --shadow-luxury-lg:
+      0 8px 32px -8px hsl(var(--primary) / 0.16),
+      0 16px 64px -16px hsl(var(--foreground) / 0.12),
+      0 2px 0 0 hsl(var(--border)),
+      inset 0 1px 0 0 hsl(var(--card) / 0.6);
+
+    /* Glow effects */
+    --glow-primary: 0 0 24px hsl(var(--primary) / 0.4);
+    --glow-primary-strong: 0 0 40px hsl(var(--primary) / 0.6),
+                            0 0 80px hsl(var(--primary) / 0.3);
+
+    /* Noise texture */
+    --noise-opacity: 0.015;
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 222 47% 8%;
     --foreground: 210 40% 98%;
-    --card: 215 28% 17%;
+    --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
@@ -62,6 +97,31 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 33% 17%;
     --sidebar-ring: 145 63% 49%;
+
+    /* Premium shadows for dark mode */
+    --shadow-luxury-sm:
+      0 2px 8px -2px hsl(var(--primary) / 0.15),
+      0 4px 16px -4px rgba(0, 0, 0, 0.4),
+      0 1px 0 0 hsl(var(--primary) / 0.1);
+
+    --shadow-luxury-md:
+      0 4px 16px -4px hsl(var(--primary) / 0.2),
+      0 8px 32px -8px rgba(0, 0, 0, 0.6),
+      0 1px 0 0 hsl(var(--primary) / 0.15),
+      inset 0 1px 0 0 hsl(var(--card) / 0.1);
+
+    --shadow-luxury-lg:
+      0 8px 32px -8px hsl(var(--primary) / 0.25),
+      0 16px 64px -16px rgba(0, 0, 0, 0.8),
+      0 2px 0 0 hsl(var(--primary) / 0.2),
+      inset 0 1px 0 0 hsl(var(--card) / 0.15);
+
+    /* Stronger glow for dark mode */
+    --glow-primary: 0 0 32px hsl(var(--primary) / 0.6);
+    --glow-primary-strong: 0 0 48px hsl(var(--primary) / 0.8),
+                            0 0 96px hsl(var(--primary) / 0.4);
+
+    --noise-opacity: 0.025;
   }
 }
 
@@ -104,6 +164,102 @@
   100% { transform: scale(1.4); opacity: 0; }
 }
 
+/* ── Premium animations ── */
+@keyframes gradient-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes gradient-mesh {
+  0%, 100% { background-position: 0% 0%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+}
+
+@keyframes luxury-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes luxury-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: var(--glow-primary);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: var(--glow-primary-strong);
+    filter: brightness(1.1);
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% center;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 200% center;
+    opacity: 0;
+  }
+}
+
+@keyframes border-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float-luxury {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-12px) rotate(1deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+}
+
+@keyframes mesh-drift {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+  33% {
+    transform: translate(20px, -20px) scale(1.05);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+    opacity: 0.9;
+  }
+}
+
+/* ── Animation utility classes ── */
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -124,6 +280,36 @@
 
 .animate-pulse-ring {
   animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-gradient-flow {
+  background-size: 200% auto;
+  animation: gradient-flow 8s ease-in-out infinite;
+}
+
+.animate-gradient-mesh {
+  background-size: 400% 400%;
+  animation: gradient-mesh 20s ease infinite;
+}
+
+.animate-luxury-fade-up {
+  animation: luxury-fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-luxury-fade-in {
+  animation: luxury-fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-float-luxury {
+  animation: float-luxury 4s ease-in-out infinite;
+}
+
+.animate-mesh-drift {
+  animation: mesh-drift 15s ease-in-out infinite;
 }
 
 /* ── Premium card hover ── */
@@ -165,5 +351,43 @@
   /* Glow badge */
   .glow-badge {
     box-shadow: 0 0 12px hsl(var(--primary) / 0.3);
+  }
+
+  /* Premium gradient text */
+  .text-gradient-premium {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--accent)) 50%,
+      hsl(var(--primary)) 100%
+    );
+    background-size: 200% auto;
+    animation: gradient-flow 6s ease-in-out infinite;
+  }
+
+  /* Noise texture overlay */
+  .texture-noise {
+    @apply relative;
+  }
+  .texture-noise::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: var(--noise-opacity);
+    z-index: 1;
+  }
+
+  /* Premium typography */
+  h1, .text-display {
+    @apply font-display tracking-tight;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  h2 {
+    @apply tracking-tight;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 }

@@ -14,6 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
+        display: ["Cal Sans", "SF Pro Display", "Heebo", "sans-serif"],
+        body: ["Inter", "Heebo", "sans-serif"],
         heebo: ["Heebo", "sans-serif"],
         inter: ["Inter", "sans-serif"],
       },
@@ -62,10 +64,25 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      spacing: {
+        'luxury-xs': '0.75rem',
+        'luxury-sm': '1.5rem',
+        'luxury-md': '2.5rem',
+        'luxury-lg': '4rem',
+        'luxury-xl': '6rem',
+        'luxury-2xl': '8rem',
+      },
+      maxWidth: {
+        'premium': '1440px',
+        'premium-narrow': '960px',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        'luxury': '1.5rem',
+        'luxury-lg': '2rem',
+        'luxury-xl': '2.5rem',
       },
       keyframes: {
         "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Moon, Sun, Globe, ChevronDown, LogOut, LayoutDashboard, FolderOpen, Sparkles } from "lucide-react";
+import { Menu, X, Moon, Sun, Globe, ChevronDown, LogOut, LayoutDashboard, FolderOpen, Sparkles, Film } from "lucide-react";
+import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -77,12 +78,18 @@ const Navbar = () => {
   const initials = userName.charAt(0).toUpperCase() || "U";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <img src={mascot} alt="Pixi" className="h-10 w-10" />
-          <span className="text-xl font-bold text-foreground">Pixi</span>
+    <nav className="sticky top-0 z-50 border-b border-border/30 bg-background/70 backdrop-blur-2xl shadow-luxury-sm">
+      <div className="container mx-auto flex h-20 items-center justify-between px-6">
+        {/* Logo with animation */}
+        <Link to="/" className="flex items-center gap-3 group">
+          <motion.img
+            src={mascot}
+            alt="Pixi"
+            className="h-12 w-12 transition-transform group-hover:scale-110"
+            whileHover={{ rotate: [0, -5, 5, 0] }}
+            transition={{ duration: 0.5 }}
+          />
+          <span className="text-2xl font-bold text-foreground">Pixi</span>
         </Link>
 
         {/* Desktop */}
@@ -109,7 +116,7 @@ const Navbar = () => {
           </div>
 
           {!user && (
-            <Button asChild className="rounded-full bg-primary font-semibold text-primary-foreground hover:bg-primary/90">
+            <Button asChild variant="luxury" size="default" className="rounded-full">
               <Link to="/signup">{t("nav.getStarted")}</Link>
             </Button>
           )}
@@ -117,7 +124,7 @@ const Navbar = () => {
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+                <button className="flex items-center gap-3 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-card/70 hover:border-primary/30 hover:shadow-luxury-sm">
                   <Avatar className="h-7 w-7">
                     <AvatarImage src={avatarUrl} alt={userName} />
                     <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">{initials}</AvatarFallback>
@@ -126,7 +133,7 @@ const Navbar = () => {
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 rounded-xl">
+              <DropdownMenuContent align="end" className="w-56 rounded-luxury border-border/50 bg-card/90 backdrop-blur-xl shadow-luxury-lg">
                 {authLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild className="cursor-pointer gap-2">
                     <Link to={link.href}>
