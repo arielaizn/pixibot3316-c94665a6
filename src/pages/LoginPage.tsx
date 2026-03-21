@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
-import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import mascot from "@/assets/pixi-mascot.png";
@@ -43,14 +43,17 @@ const LoginPage = () => {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    const { data, error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
     });
     if (error) {
       toast({ title: t("login.error"), description: error.message, variant: "destructive" });
       setLoading(false);
     }
-    // OAuth will redirect, so no need to handle success here
+    // OAuth will redirect to Google, so no need to handle success here
   };
 
   return (
