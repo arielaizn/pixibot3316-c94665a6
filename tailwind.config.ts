@@ -51,6 +51,8 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "luxury-gold": "hsl(var(--luxury-gold))",
+        "luxury-purple": "hsl(var(--luxury-purple))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -66,6 +68,13 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "luxury-lg": "16px",
+        "luxury-xl": "24px",
+      },
+      boxShadow: {
+        "luxury-md": "0 4px 20px -4px hsl(var(--foreground) / 0.06), 0 2px 8px -2px hsl(var(--primary) / 0.08)",
+        "luxury-lg": "0 10px 40px -8px hsl(var(--primary) / 0.15), 0 4px 16px -4px hsl(var(--foreground) / 0.08)",
+        "luxury-xl": "0 20px 60px -12px hsl(var(--primary) / 0.2), 0 8px 24px -8px hsl(var(--foreground) / 0.1)",
       },
       keyframes: {
         "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
