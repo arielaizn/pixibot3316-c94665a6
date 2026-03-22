@@ -14,6 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
+        display: ["Cal Sans", "SF Pro Display", "Heebo", "sans-serif"],
+        body: ["Inter", "Heebo", "sans-serif"],
         heebo: ["Heebo", "sans-serif"],
         inter: ["Inter", "sans-serif"],
       },
@@ -51,8 +53,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "luxury-gold": "hsl(var(--luxury-gold))",
-        "luxury-purple": "hsl(var(--luxury-purple))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -64,17 +64,25 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      spacing: {
+        'luxury-xs': '0.75rem',
+        'luxury-sm': '1.5rem',
+        'luxury-md': '2.5rem',
+        'luxury-lg': '4rem',
+        'luxury-xl': '6rem',
+        'luxury-2xl': '8rem',
+      },
+      maxWidth: {
+        'premium': '1440px',
+        'premium-narrow': '960px',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        "luxury-lg": "16px",
-        "luxury-xl": "24px",
-      },
-      boxShadow: {
-        "luxury-md": "0 4px 20px -4px hsl(var(--foreground) / 0.06), 0 2px 8px -2px hsl(var(--primary) / 0.08)",
-        "luxury-lg": "0 10px 40px -8px hsl(var(--primary) / 0.15), 0 4px 16px -4px hsl(var(--foreground) / 0.08)",
-        "luxury-xl": "0 20px 60px -12px hsl(var(--primary) / 0.2), 0 8px 24px -8px hsl(var(--foreground) / 0.1)",
+        'luxury': '1.5rem',
+        'luxury-lg': '2rem',
+        'luxury-xl': '2.5rem',
       },
       keyframes: {
         "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },

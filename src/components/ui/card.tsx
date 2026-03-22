@@ -2,9 +2,68 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)} {...props} />
-));
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: "default" | "luxury" | "glass" | "glow";
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant = "default", ...props }, ref) => {
+    const variants = {
+      default: "rounded-lg border bg-card text-card-foreground shadow-sm",
+
+      luxury: `
+        rounded-luxury border border-border/50
+        bg-gradient-to-br from-card via-card to-card/80
+        text-card-foreground
+        shadow-luxury-md
+        relative
+        before:absolute before:inset-0 before:rounded-luxury
+        before:border before:border-primary/10
+        before:opacity-0 hover:before:opacity-100
+        before:transition-opacity before:duration-300
+        hover:shadow-luxury-lg
+        hover:-translate-y-1
+        transition-all duration-300 ease-out
+      `,
+
+      glass: `
+        rounded-luxury-lg border border-border/30
+        bg-card/40 backdrop-blur-xl
+        text-card-foreground
+        shadow-luxury-lg
+        hover:bg-card/60 hover:border-primary/20
+        hover:shadow-luxury-xl
+        hover:-translate-y-0.5
+        transition-all duration-300 ease-out
+      `,
+
+      glow: `
+        rounded-luxury border-2 border-primary/30
+        bg-gradient-to-br from-card via-primary/5 to-card
+        text-card-foreground
+        shadow-luxury-md shadow-primary/20
+        relative
+        before:absolute before:inset-0 before:rounded-luxury
+        before:bg-gradient-to-br before:from-primary/10 before:to-transparent
+        before:opacity-0 hover:before:opacity-100
+        before:transition-opacity before:duration-500
+        hover:shadow-luxury-lg hover:shadow-primary/30
+        hover:border-primary/50
+        hover:-translate-y-1 hover:scale-[1.01]
+        transition-all duration-300 ease-out
+        animate-glow-pulse
+      `,
+    };
+
+    return (
+      <div
+        ref={ref}
+        className={cn(variants[variant], className)}
+        {...props}
+      />
+    );
+  }
+);
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
