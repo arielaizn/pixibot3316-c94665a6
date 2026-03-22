@@ -3,6 +3,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { adminAction } from "@/hooks/useAdminAuth";
 import { useDirection } from "@/contexts/DirectionContext";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -48,15 +49,16 @@ const AdminUsersPage = () => {
 
   return (
     <AdminLayout>
-      <h2 className="mb-6 text-2xl font-bold text-foreground">
+      <h2 className="mb-6 text-3xl font-cal-sans text-foreground">
         {t("admin.userManagement")}
       </h2>
 
       {isLoading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-sm">
+        <Card variant="glass" className="overflow-hidden shadow-luxury-md">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.email")}</th>
@@ -108,7 +110,7 @@ const AdminUsersPage = () => {
                       <div className="flex gap-1">
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="luxury-outline"
                           className="h-7 text-xs"
                           onClick={() => addCredits.mutate({ user_id: u.id, amount: 3 })}
                         >
@@ -116,7 +118,7 @@ const AdminUsersPage = () => {
                         </Button>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="luxury-outline"
                           className="h-7 text-xs"
                           onClick={() => resetCredits.mutate(u.id)}
                         >
@@ -129,7 +131,8 @@ const AdminUsersPage = () => {
               })}
             </tbody>
           </table>
-        </div>
+          </div>
+        </Card>
       )}
     </AdminLayout>
   );

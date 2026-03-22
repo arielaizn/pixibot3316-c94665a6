@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
 import FileShareModal from "@/components/FileShareModal";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -149,9 +150,12 @@ const FilePreviewPage = () => {
   const isEditable = isText;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
+
       <Navbar />
-      <main className="container mx-auto max-w-5xl px-4 py-8">
+      <main className="container mx-auto max-w-5xl px-4 py-8 relative z-10">
         {/* Breadcrumbs */}
         <div className="mb-4 flex items-center gap-1 text-sm">
           <button onClick={() => navigate("/projects")} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -169,48 +173,49 @@ const FilePreviewPage = () => {
           <span className="font-semibold text-foreground">{file.file_name}</span>
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Header with glassmorphism toolbar */}
+        <Card variant="glass" className="flex items-center justify-between mb-6 p-4 shadow-luxury-md">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">{file.file_name}</h2>
+            <h2 className="text-2xl font-cal-sans text-foreground">{file.file_name}</h2>
             {file.version_number > 1 && (
               <p className="text-xs text-muted-foreground">{isRTL ? "גרסה" : "Version"} {file.version_number}</p>
             )}
           </div>
           <div className="flex gap-2 flex-wrap justify-end">
-            <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={loadVersions}>
+            <Button variant="luxury-outline" size="sm" onClick={loadVersions}>
               <History className="h-4 w-4" />
               {isRTL ? "גרסאות" : "Versions"}
             </Button>
-            <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={() => setShowShare(true)}>
+            <Button variant="luxury-outline" size="sm" onClick={() => setShowShare(true)}>
               <Share2 className="h-4 w-4" />
               {isRTL ? "שתף" : "Share"}
             </Button>
             {isText && textContent !== null && (
-              <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={handleCopyContent}>
+              <Button variant="luxury-outline" size="sm" onClick={handleCopyContent}>
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {isRTL ? "העתק" : "Copy"}
               </Button>
             )}
             {isEditable && (
-              <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={() => navigate(`/projects/document/${file.id}`)}>
+              <Button variant="luxury-outline" size="sm" onClick={() => navigate(`/projects/document/${file.id}`)}>
                 <Pencil className="h-4 w-4" />
                 {isRTL ? "ערוך" : "Edit"}
               </Button>
             )}
             <Button
+              variant="luxury"
               size="sm"
-              className="rounded-xl gap-1.5 bg-green-500 hover:bg-green-600 text-white"
+              className="bg-green-500 hover:bg-green-600"
               onClick={() => downloadFile(file.file_url, file.file_name)}
             >
               <Download className="h-4 w-4" />
               {isRTL ? "הורדה" : "Download"}
             </Button>
           </div>
-        </div>
+        </Card>
 
         {/* Preview container */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <Card variant="glass" className="overflow-hidden shadow-luxury-lg rounded-luxury-xl">
           {contentLoading ? (
             <div className="p-6">
               <Skeleton className="aspect-video w-full rounded-xl" />
@@ -221,14 +226,14 @@ const FilePreviewPage = () => {
 
               {isImage && (
                 <div className="flex items-center justify-center bg-muted/30 p-4" style={{ minHeight: "40vh" }}>
-                  <img src={file.file_url} alt={file.file_name} className="max-h-[70vh] w-full rounded-xl object-contain" />
+                  <img src={file.file_url} alt={file.file_name} className="max-h-[70vh] w-full rounded-luxury-xl object-contain" />
                 </div>
               )}
 
               {isAudio && (
                 <div className="flex flex-col items-center justify-center gap-6 py-16 px-6">
                   <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary/10">
-                    <Music className="h-14 w-14 text-primary" />
+                    <Music className="h-14 w-14 text-primary animate-float" />
                   </div>
                   <audio controls className="w-full max-w-lg">
                     <source src={file.file_url} type={file.file_type} />
@@ -239,7 +244,7 @@ const FilePreviewPage = () => {
               {isPdf && <iframe src={file.file_url} className="h-[70vh] w-full" title={file.file_name} />}
 
               {isText && textContent !== null && (
-                <div className="max-h-[70vh] overflow-auto p-6">
+                <div className="max-h-[70vh] overflow-auto p-8">
                   {isMd ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap" dangerouslySetInnerHTML={{
                       __html: textContent
@@ -265,12 +270,14 @@ const FilePreviewPage = () => {
               )}
             </>
           )}
-        </div>
+        </Card>
 
         {/* File info */}
-        <p className="mt-4 text-sm text-muted-foreground">
-          {formatSize(file.file_size)} · {formatDate(file.created_at)}
-        </p>
+        <Card variant="glass" className="mt-4 p-4 shadow-luxury-sm">
+          <p className="text-sm text-muted-foreground">
+            {formatSize(file.file_size)} · {formatDate(file.created_at)}
+          </p>
+        </Card>
       </main>
 
       {/* Share Modal */}

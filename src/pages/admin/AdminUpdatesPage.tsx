@@ -4,6 +4,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { useDirection } from "@/contexts/DirectionContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -136,10 +137,10 @@ const AdminUpdatesPage = () => {
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-foreground">
+        <h2 className="text-3xl font-cal-sans text-foreground">
           {isRTL ? "ניהול עדכונים" : "Updates Management"}
         </h2>
-        <Button onClick={openCreate} className="gap-2">
+        <Button variant="luxury" onClick={openCreate} className="gap-2 shadow-luxury-md">
           <Plus className="h-4 w-4" />
           {isRTL ? "עדכון חדש" : "New Update"}
         </Button>
@@ -147,11 +148,12 @@ const AdminUpdatesPage = () => {
 
       {isLoading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-sm">
+        <Card variant="glass" className="overflow-hidden shadow-luxury-md">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "כותרת" : "Title"}</th>
@@ -179,10 +181,10 @@ const AdminUpdatesPage = () => {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(u)}>
+                      <Button size="sm" variant="luxury-outline" onClick={() => openEdit(u)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteMutation.mutate(u.id)}>
+                      <Button size="sm" variant="luxury-outline" className="text-destructive hover:text-destructive" onClick={() => deleteMutation.mutate(u.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -198,7 +200,8 @@ const AdminUpdatesPage = () => {
               )}
             </tbody>
           </table>
-        </div>
+          </div>
+        </Card>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -211,7 +214,7 @@ const AdminUpdatesPage = () => {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>{isRTL ? "כותרת" : "Title"}</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+              <Input variant="luxury" value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>{isRTL ? "תיאור" : "Description"}</Label>
@@ -219,16 +222,16 @@ const AdminUpdatesPage = () => {
             </div>
             <div className="space-y-2">
               <Label>{isRTL ? "קישור לסרטון" : "Video URL"}</Label>
-              <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} dir="ltr" placeholder="https://..." />
+              <Input variant="luxury" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} dir="ltr" placeholder="https://..." />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{isRTL ? "תאריך התחלה" : "Start Date"}</Label>
-                <Input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} dir="ltr" />
+                <Input variant="luxury" type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} dir="ltr" />
               </div>
               <div className="space-y-2">
                 <Label>{isRTL ? "תאריך סיום" : "End Date"}</Label>
-                <Input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} dir="ltr" />
+                <Input variant="luxury" type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} dir="ltr" />
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -236,7 +239,8 @@ const AdminUpdatesPage = () => {
               <Label>{isRTL ? "פעיל" : "Active"}</Label>
             </div>
             <Button
-              className="w-full"
+              variant="luxury"
+              className="w-full shadow-luxury-md"
               onClick={() => saveMutation.mutate()}
               disabled={!title.trim() || !startDate || !endDate || saveMutation.isPending}
             >

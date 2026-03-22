@@ -7,6 +7,7 @@ import { downloadFile } from "@/lib/downloadFile";
 import { sanitizeFileName } from "@/lib/sanitizeFileName";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -174,9 +175,12 @@ const DocumentEditorPage = () => {
   const isMd = file.file_name.endsWith(".md");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
+
       <Navbar />
-      <main className="container mx-auto max-w-5xl px-4 py-8">
+      <main className="container mx-auto max-w-5xl px-4 py-8 relative z-10">
         {/* Breadcrumbs */}
         <div className="mb-4 flex items-center gap-1 text-sm">
           <button onClick={() => navigate("/projects")} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -194,26 +198,26 @@ const DocumentEditorPage = () => {
           <span className="font-semibold text-foreground">{file.file_name}</span>
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Header with glassmorphism toolbar */}
+        <Card variant="glass" className="flex items-center justify-between mb-6 p-4 shadow-luxury-md">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">{file.file_name}</h2>
+            <h2 className="text-2xl font-cal-sans text-foreground">{file.file_name}</h2>
             {file.version_number > 1 && (
               <p className="text-xs text-muted-foreground">{isRTL ? "גרסה" : "Version"} {file.version_number}</p>
             )}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={loadVersions}>
+            <Button variant="luxury-outline" size="sm" onClick={loadVersions}>
               <History className="h-4 w-4" />
               {isRTL ? "גרסאות" : "Versions"}
             </Button>
-            <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={handleCopy}>
+            <Button variant="luxury-outline" size="sm" onClick={handleCopy}>
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {isRTL ? "העתק" : "Copy"}
             </Button>
             <Button
+              variant="luxury"
               size="sm"
-              className="rounded-xl gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={!isDirty || saving}
               onClick={handleSave}
             >
@@ -221,29 +225,30 @@ const DocumentEditorPage = () => {
               {isRTL ? "שמור" : "Save"}
             </Button>
             <Button
+              variant="luxury"
               size="sm"
-              className="rounded-xl gap-1.5 bg-green-500 hover:bg-green-600 text-white"
+              className="bg-green-500 hover:bg-green-600"
               onClick={() => downloadFile(file.file_url, file.file_name)}
             >
               <Download className="h-4 w-4" />
               {isRTL ? "הורדה" : "Download"}
             </Button>
           </div>
-        </div>
+        </Card>
 
         {/* Editor */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <Card variant="glass" className="overflow-hidden shadow-luxury-lg rounded-luxury-lg">
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[60vh] w-full resize-none rounded-none border-0 bg-transparent p-6 font-mono text-sm text-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="min-h-[60vh] w-full resize-none rounded-none border-0 bg-transparent p-8 font-mono text-sm text-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
             dir="auto"
           />
-        </div>
+        </Card>
 
         {/* Preview for markdown */}
         {isMd && content && (
-          <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <Card variant="glass" className="mt-6 p-8 shadow-luxury-md">
             <h3 className="mb-4 text-sm font-semibold text-muted-foreground">{isRTL ? "תצוגה מקדימה" : "Preview"}</h3>
             <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap" dangerouslySetInnerHTML={{
               __html: content
@@ -255,7 +260,7 @@ const DocumentEditorPage = () => {
                 .replace(/`(.*?)`/g, "<code>$1</code>")
                 .replace(/\n/g, "<br/>"),
             }} />
-          </div>
+          </Card>
         )}
       </main>
 

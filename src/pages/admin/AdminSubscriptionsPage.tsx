@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminAction } from "@/hooks/useAdminAuth";
 import { useDirection } from "@/contexts/DirectionContext";
+import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
 const AdminSubscriptionsPage = () => {
@@ -15,17 +16,20 @@ const AdminSubscriptionsPage = () => {
 
   return (
     <AdminLayout>
-      <h2 className="mb-6 text-2xl font-bold text-foreground">
+      <h2 className="mb-6 text-3xl font-cal-sans text-foreground">
         {isRTL ? "ניהול מנויים" : "Subscriptions"}
       </h2>
 
       {isLoading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>
       ) : subs.length === 0 ? (
-        <p className="py-12 text-center text-muted-foreground">{isRTL ? "אין מנויים" : "No subscriptions"}</p>
+        <Card variant="glass" className="p-12 text-center shadow-luxury-md">
+          <p className="text-lg text-muted-foreground">{isRTL ? "אין מנויים" : "No subscriptions"}</p>
+        </Card>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-sm">
+        <Card variant="glass" className="overflow-hidden shadow-luxury-md">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="px-4 py-3 text-start font-semibold text-foreground">User ID</th>
@@ -53,7 +57,8 @@ const AdminSubscriptionsPage = () => {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </Card>
       )}
     </AdminLayout>
   );

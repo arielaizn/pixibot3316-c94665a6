@@ -1,17 +1,18 @@
 import { useDirection } from "@/contexts/DirectionContext";
 import { useAdminReferralStats } from "@/hooks/useReferral";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Users, CreditCard, Gift, Trophy } from "lucide-react";
 
 const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: string; value: number | string; color: string }) => (
-  <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-    <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ${color}`}>
+  <Card variant="glow" className="p-6 shadow-luxury-md hover:shadow-luxury-lg transition-all duration-300">
+    <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ${color} animate-float`}>
       <Icon className="h-5 w-5" />
     </div>
     <p className="text-sm text-muted-foreground">{label}</p>
     <p className="text-3xl font-extrabold text-foreground">{value}</p>
-  </div>
+  </Card>
 );
 
 const AdminReferralsPage = () => {
@@ -26,11 +27,11 @@ const AdminReferralsPage = () => {
 
   return (
     <AdminLayout>
-      <h2 className="mb-6 text-2xl font-bold text-foreground">{t("admin.referrals.title")}</h2>
+      <h2 className="mb-6 text-3xl font-cal-sans text-foreground">{t("admin.referrals.title")}</h2>
 
       {isLoading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       ) : (
         <>
@@ -43,12 +44,12 @@ const AdminReferralsPage = () => {
           {data?.topReferrers?.length > 0 && (
             <div className="mb-8">
               <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
-                <Trophy className="h-5 w-5 text-primary" />
+                <Trophy className="h-5 w-5 text-primary animate-float" />
                 {t("admin.referrals.topReferrers")}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {data.topReferrers.map((ref: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-sm">
+                  <Card key={i} variant="glass" className="flex items-center justify-between p-4 shadow-luxury-sm hover:shadow-luxury-md transition-all duration-300">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                         {i + 1}
@@ -58,7 +59,7 @@ const AdminReferralsPage = () => {
                     <Badge variant="secondary" className="rounded-full shrink-0">
                       {ref.count} {t("admin.referrals.count")}
                     </Badge>
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>
@@ -67,8 +68,9 @@ const AdminReferralsPage = () => {
           {data?.referrals?.length > 0 && (
             <div>
               <h3 className="mb-4 text-lg font-bold text-foreground">{t("admin.referrals.recent")}</h3>
-              <div className="overflow-x-auto rounded-xl border border-border">
-                <table className="w-full text-sm">
+              <Card variant="glass" className="overflow-hidden shadow-luxury-md">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/50">
                       <th className="px-4 py-3 text-start font-semibold text-foreground">{t("admin.referrals.referrer")}</th>
@@ -99,7 +101,8 @@ const AdminReferralsPage = () => {
                     ))}
                   </tbody>
                 </table>
-              </div>
+                </div>
+              </Card>
             </div>
           )}
         </>

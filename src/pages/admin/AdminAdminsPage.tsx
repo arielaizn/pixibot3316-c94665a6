@@ -3,6 +3,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { adminAction } from "@/hooks/useAdminAuth";
 import { useDirection } from "@/contexts/DirectionContext";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShieldCheck, ShieldOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -46,23 +47,24 @@ const AdminAdminsPage = () => {
 
   return (
     <AdminLayout>
-      <h2 className="mb-6 text-2xl font-bold text-foreground">
+      <h2 className="mb-6 text-3xl font-cal-sans text-foreground">
         {isRTL ? "ניהול מנהלים" : "Admin Management"}
       </h2>
 
       {isLoading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       ) : (
         <div className="space-y-8">
           {/* Current Admins */}
           <div>
             <h3 className="mb-3 text-lg font-semibold text-foreground flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
+              <ShieldCheck className="h-5 w-5 text-primary animate-float" />
               {isRTL ? "מנהלים נוכחיים" : "Current Admins"} ({admins.length})
             </h3>
-            <div className="overflow-x-auto rounded-xl border border-border">
+            <Card variant="glass" className="overflow-hidden shadow-luxury-md">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
@@ -82,8 +84,8 @@ const AdminAdminsPage = () => {
                         <td className="px-4 py-3">
                           <Button
                             size="sm"
-                            variant="outline"
-                            className="gap-2 text-destructive"
+                            variant="luxury-outline"
+                            className="gap-2 text-destructive hover:text-destructive"
                             disabled={isSelf && isOnlyAdmin}
                             onClick={() => demoteMutation.mutate(u.id)}
                           >
@@ -101,7 +103,8 @@ const AdminAdminsPage = () => {
                   })}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </Card>
           </div>
 
           {/* All Users */}
@@ -109,8 +112,9 @@ const AdminAdminsPage = () => {
             <h3 className="mb-3 text-lg font-semibold text-foreground">
               {isRTL ? "משתמשים" : "Users"} ({nonAdmins.length})
             </h3>
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <table className="w-full text-sm">
+            <Card variant="glass" className="overflow-hidden shadow-luxury-md">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
                     <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "אימייל" : "Email"}</th>
@@ -130,7 +134,7 @@ const AdminAdminsPage = () => {
                       <td className="px-4 py-3">
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="luxury-outline"
                           className="gap-2"
                           onClick={() => promoteMutation.mutate(u.id)}
                         >
@@ -142,7 +146,8 @@ const AdminAdminsPage = () => {
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </Card>
           </div>
         </div>
       )}

@@ -3,6 +3,7 @@ import { Link, useNavigate, Navigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,10 +87,13 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <img src={mascot} alt="Pixi" className="fixed bottom-8 left-8 h-16 w-16 animate-float opacity-60 hidden md:block" />
+    <div className="flex min-h-screen items-center justify-center bg-background relative overflow-hidden px-4 py-12">
+      {/* Gradient Mesh Background */}
+      <div className="absolute inset-0 animate-gradient-mesh bg-gradient-to-br from-primary/10 via-background to-accent/10" />
 
-      <div className="w-full max-w-md">
+      <img src={mascot} alt="Pixi" className="fixed bottom-8 left-8 h-16 w-16 animate-float opacity-60 hidden md:block z-10" />
+
+      <div className="w-full max-w-md relative z-10">
         <div className="mb-8 flex justify-center">
           <Link to="/" className="flex items-center gap-2">
             <img src={mascot} alt="Pixi" className="h-10 w-10" />
@@ -97,15 +101,15 @@ const SignupPage = () => {
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
+        <Card variant="glass" className="p-8 shadow-luxury-lg rounded-luxury-lg animate-luxury-fade-up">
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-foreground">{t("signup.title")}</h1>
+            <h1 className="text-3xl font-cal-sans text-foreground">{t("signup.title")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">{t("signup.subtitle")}</p>
           </div>
 
           <Button
-            variant="outline"
-            className="mb-6 w-full gap-3 rounded-xl border-border py-6 text-base font-medium"
+            variant="luxury-outline"
+            className="mb-6 w-full gap-3 py-6 text-base font-medium"
             onClick={handleGoogleSignup}
             disabled={loading}
           >
@@ -127,32 +131,33 @@ const SignupPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">{t("signup.fullName")}</Label>
-              <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={t("signup.fullNamePlaceholder")} className="rounded-xl py-5" required />
+              <Input variant="luxury" id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={t("signup.fullNamePlaceholder")} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">{t("signup.email")}</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" dir="ltr" className="rounded-xl py-5 text-left" required />
+              <Input variant="luxury" id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" dir="ltr" className="text-left" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="whatsapp">{t("signup.whatsapp")}</Label>
               <Input
+                variant="luxury"
                 id="whatsapp"
                 type="tel"
                 value={whatsapp}
                 onChange={(e) => { setWhatsapp(e.target.value); setWhatsappError(""); }}
                 placeholder="+972525551234"
                 dir="ltr"
-                className="rounded-xl py-5 text-left tracking-wide"
+                className="text-left tracking-wide"
                 required
               />
               {whatsappError && <p className="text-sm text-destructive">{whatsappError}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t("signup.password")}</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" dir="ltr" className="rounded-xl py-5 text-left" minLength={6} required />
+              <Input variant="luxury" id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" dir="ltr" className="text-left" minLength={6} required />
             </div>
 
-            <Button type="submit" className="w-full rounded-xl bg-primary py-6 text-base font-bold text-primary-foreground hover:bg-primary/90" disabled={loading}>
+            <Button variant="luxury" type="submit" className="w-full py-6 text-base font-bold shadow-luxury-md" disabled={loading}>
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t("signup.submit")}
             </Button>
           </form>
@@ -161,7 +166,7 @@ const SignupPage = () => {
             {t("signup.hasAccount")}{" "}
             <Link to="/login" className="font-semibold text-primary hover:underline">{t("signup.loginLink")}</Link>
           </p>
-        </div>
+        </Card>
       </div>
     </div>
   );

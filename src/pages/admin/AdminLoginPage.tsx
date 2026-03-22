@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +24,7 @@ const AdminLoginPage = () => {
   if (authLoading || adminLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
@@ -58,20 +59,23 @@ const AdminLoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+    <div className="flex min-h-screen items-center justify-center bg-background relative overflow-hidden px-4">
+      {/* Gradient Mesh Background */}
+      <div className="absolute inset-0 animate-gradient-mesh bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="mb-8 flex flex-col items-center gap-3 animate-luxury-fade-up">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 animate-float">
             <Shield className="h-7 w-7 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Pixi Admin</h1>
+          <h1 className="text-3xl font-cal-sans text-foreground">Pixi Admin</h1>
           <p className="text-sm text-muted-foreground">{t("admin.login.desc")}</p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
+        <Card variant="glass" className="p-8 shadow-luxury-lg rounded-luxury-lg animate-luxury-fade-up">
           <Button
-            variant="outline"
-            className="mb-6 w-full gap-3 rounded-xl border-border py-6 text-base font-medium"
+            variant="luxury-outline"
+            className="mb-6 w-full gap-3 py-6 text-base font-medium"
             onClick={handleGoogleLogin}
             disabled={loading}
           >
@@ -93,17 +97,17 @@ const AdminLoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">{t("login.email")}</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@pixi.com" dir="ltr" className="rounded-xl py-5 text-left" required />
+              <Input variant="luxury" id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@pixi.com" dir="ltr" className="text-left" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t("login.password")}</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" dir="ltr" className="rounded-xl py-5 text-left" required />
+              <Input variant="luxury" id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" dir="ltr" className="text-left" required />
             </div>
-            <Button type="submit" className="w-full rounded-xl bg-primary py-6 text-base font-bold text-primary-foreground hover:bg-primary/90" disabled={loading}>
+            <Button variant="luxury" type="submit" className="w-full py-6 text-base font-bold shadow-luxury-md" disabled={loading}>
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t("admin.login.submit")}
             </Button>
           </form>
-        </div>
+        </Card>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           <Link to="/" className="hover:underline">{t("admin.login.backToSite")}</Link>

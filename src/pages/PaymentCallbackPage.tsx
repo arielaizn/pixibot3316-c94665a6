@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
@@ -112,23 +113,26 @@ const PaymentCallbackPage = () => {
   }, [pixiUserId, plan, cycle, paymentId, user?.id]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Gradient Mesh Background */}
+      <div className="absolute inset-0 animate-gradient-mesh bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+
       <Navbar />
-      <main className="container mx-auto flex min-h-[60vh] items-center justify-center px-4">
-        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+      <main className="container mx-auto flex min-h-[60vh] items-center justify-center px-4 relative z-10">
+        <Card variant="glass" className="w-full max-w-md p-10 text-center shadow-luxury-lg rounded-luxury-lg animate-luxury-fade-up">
           {status === "loading" && (
             <>
-              <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
-              <p className="text-lg font-semibold text-foreground">{t("payment.verifying")}</p>
+              <Loader2 className="mx-auto mb-4 h-16 w-16 animate-spin text-primary" />
+              <p className="text-xl font-semibold text-foreground">{t("payment.verifying")}</p>
             </>
           )}
 
           {status === "success" && (
             <>
-              <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-primary" />
-              <h2 className="mb-2 text-2xl font-extrabold text-foreground">{t("payment.success")}</h2>
-              <p className="mb-6 text-sm text-muted-foreground">{t("payment.successDesc")}</p>
-              <Button asChild className="rounded-xl bg-primary px-8 py-5 text-base font-bold text-primary-foreground hover:bg-primary/90">
+              <CheckCircle2 className="mx-auto mb-6 h-20 w-20 text-primary animate-float" />
+              <h2 className="mb-3 text-3xl font-cal-sans text-foreground">{t("payment.success")}</h2>
+              <p className="mb-8 text-base text-muted-foreground">{t("payment.successDesc")}</p>
+              <Button variant="luxury" size="lg" asChild className="px-10 shadow-luxury-md">
                 <Link to="/dashboard">{t("payment.dashboard")}</Link>
               </Button>
             </>
@@ -136,15 +140,15 @@ const PaymentCallbackPage = () => {
 
           {status === "error" && (
             <>
-              <XCircle className="mx-auto mb-4 h-12 w-12 text-destructive" />
-              <h2 className="mb-2 text-2xl font-extrabold text-foreground">{t("payment.error")}</h2>
-              <p className="mb-6 text-sm text-muted-foreground">{errorMsg}</p>
-              <Button asChild variant="outline" className="rounded-xl px-8 py-5">
+              <XCircle className="mx-auto mb-6 h-20 w-20 text-destructive animate-float" />
+              <h2 className="mb-3 text-3xl font-cal-sans text-foreground">{t("payment.error")}</h2>
+              <p className="mb-8 text-base text-muted-foreground">{errorMsg}</p>
+              <Button variant="luxury-outline" size="lg" asChild className="px-10">
                 <Link to="/pricing">{t("payment.retry")}</Link>
               </Button>
             </>
           )}
-        </div>
+        </Card>
       </main>
     </div>
   );

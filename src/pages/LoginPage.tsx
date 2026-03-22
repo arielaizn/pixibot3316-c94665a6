@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDirection } from "@/contexts/DirectionContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,10 +57,13 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <img src={mascot} alt="Pixi" className="fixed bottom-8 left-8 h-16 w-16 animate-float opacity-60 hidden md:block" />
+    <div className="flex min-h-screen items-center justify-center bg-background relative overflow-hidden px-4 py-12">
+      {/* Gradient Mesh Background */}
+      <div className="absolute inset-0 animate-gradient-mesh bg-gradient-to-br from-primary/10 via-background to-accent/10" />
 
-      <div className="w-full max-w-md">
+      <img src={mascot} alt="Pixi" className="fixed bottom-8 left-8 h-16 w-16 animate-float opacity-60 hidden md:block z-10" />
+
+      <div className="w-full max-w-md relative z-10">
         <div className="mb-8 flex justify-center">
           <Link to="/" className="flex items-center gap-2">
             <img src={mascot} alt="Pixi" className="h-10 w-10" />
@@ -67,15 +71,15 @@ const LoginPage = () => {
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
+        <Card variant="glass" className="p-8 shadow-luxury-lg rounded-luxury-lg animate-luxury-fade-up">
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-foreground">{t("login.title")}</h1>
+            <h1 className="text-3xl font-cal-sans text-foreground">{t("login.title")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">{t("login.subtitle")}</p>
           </div>
 
           <Button
-            variant="outline"
-            className="mb-6 w-full gap-3 rounded-xl border-border py-6 text-base font-medium"
+            variant="luxury-outline"
+            className="mb-6 w-full gap-3 py-6 text-base font-medium"
             onClick={handleGoogleLogin}
             disabled={loading}
           >
@@ -97,7 +101,7 @@ const LoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">{t("login.email")}</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" dir="ltr" className="rounded-xl py-5 text-left" required />
+              <Input variant="luxury" id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" dir="ltr" className="text-left" required />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -106,9 +110,9 @@ const LoginPage = () => {
                   {isRTL ? "שכחת סיסמה?" : "Forgot password?"}
                 </Link>
               </div>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" dir="ltr" className="rounded-xl py-5 text-left" required />
+              <Input variant="luxury" id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" dir="ltr" className="text-left" required />
             </div>
-            <Button type="submit" className="w-full rounded-xl bg-primary py-6 text-base font-bold text-primary-foreground hover:bg-primary/90" disabled={loading}>
+            <Button variant="luxury" type="submit" className="w-full py-6 text-base font-bold shadow-luxury-md" disabled={loading}>
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t("login.submit")}
             </Button>
           </form>
@@ -117,7 +121,7 @@ const LoginPage = () => {
             {t("login.noAccount")}{" "}
             <Link to="/signup" className="font-semibold text-primary hover:underline">{t("login.signupLink")}</Link>
           </p>
-        </div>
+        </Card>
       </div>
     </div>
   );
