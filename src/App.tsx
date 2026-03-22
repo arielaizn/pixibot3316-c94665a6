@@ -37,6 +37,7 @@ import AdminAdminsPage from "./pages/admin/AdminAdminsPage.tsx";
 import NotAdminPage from "./pages/admin/NotAdminPage.tsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
+import EditPage from "./pages/EditPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/welcome" element={<WelcomePage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/edit" element={<EditPage />} />
                 <Route path="/projects" element={<ProjectsPage />} />
                 <Route path="/projects/:projectId" element={<ProjectsPage />} />
                 <Route path="/projects/:projectId/video/:videoId" element={<ProjectsPage />} />
