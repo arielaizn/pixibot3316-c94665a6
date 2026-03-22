@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Moon, Sun, Globe, ChevronDown, LogOut, LayoutDashboard, FolderOpen, Sparkles, Film } from "lucide-react";
-import { motion } from "framer-motion";
+import { Menu, X, Moon, Sun, Globe, ChevronDown, LogOut, LayoutDashboard, FolderOpen, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -17,7 +16,7 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="relative flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="relative flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-all hover:bg-primary/10 hover:text-foreground"
       aria-label="Toggle theme"
     >
       {isDark ? <Moon className="h-[18px] w-[18px]" /> : <Sun className="h-[18px] w-[18px]" />}
@@ -31,7 +30,7 @@ const DirectionToggle = () => {
   return (
     <button
       onClick={toggleDirection}
-      className="relative flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="relative flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-all hover:bg-primary/10 hover:text-foreground"
       aria-label="Toggle language"
     >
       <Globe className="h-[18px] w-[18px]" />
@@ -43,7 +42,7 @@ const LangIndicator = () => {
   const { isRTL } = useDirection();
 
   return (
-    <span className="flex h-9 min-w-9 items-center justify-center rounded-full bg-muted px-2 text-xs font-bold text-muted-foreground">
+    <span className="flex h-9 min-w-9 items-center justify-center rounded-full bg-primary/10 px-2 text-xs font-bold text-primary">
       {isRTL ? "HE" : "EN"}
     </span>
   );
@@ -78,18 +77,12 @@ const Navbar = () => {
   const initials = userName.charAt(0).toUpperCase() || "U";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/30 bg-background/70 backdrop-blur-2xl shadow-luxury-sm">
-      <div className="container mx-auto flex h-20 items-center justify-between px-6">
-        {/* Logo with animation */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <motion.img
-            src={mascot}
-            alt="Pixi"
-            className="h-12 w-12 transition-transform group-hover:scale-110"
-            whileHover={{ rotate: [0, -5, 5, 0] }}
-            transition={{ duration: 0.5 }}
-          />
-          <span className="text-2xl font-bold text-foreground">Pixi</span>
+    <nav className="sticky top-0 z-50 border-b border-border/30 bg-background/80 backdrop-blur-md shadow-luxury-md">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2 group">
+          <img src={mascot} alt="Pixi" className="h-10 w-10 transition-transform duration-300 group-hover:scale-110" />
+          <span className="text-xl font-extrabold gradient-text">Pixi</span>
         </Link>
 
         {/* Desktop */}
@@ -108,15 +101,15 @@ const Navbar = () => {
               </Link>
             ))}
 
-          {/* Controls group: 🌙 | 🌐 | EN */}
-          <div className="flex items-center gap-1 border-s border-border ps-3">
+          {/* Controls group */}
+          <div className="flex items-center gap-1 border-s border-border/30 ps-3">
             <ThemeToggle />
             <DirectionToggle />
             <LangIndicator />
           </div>
 
           {!user && (
-            <Button asChild variant="luxury" size="default" className="rounded-full">
+            <Button asChild variant="luxury" className="rounded-full px-6">
               <Link to="/signup">{t("nav.getStarted")}</Link>
             </Button>
           )}
@@ -124,16 +117,16 @@ const Navbar = () => {
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-card/70 hover:border-primary/30 hover:shadow-luxury-sm">
-                  <Avatar className="h-7 w-7">
+                <button className="flex items-center gap-2 rounded-full border-2 border-border/50 bg-card/95 backdrop-blur-sm px-3 py-1.5 text-sm font-medium text-foreground transition-all hover:border-primary/30 hover:shadow-luxury-md">
+                  <Avatar className="h-7 w-7 ring-2 ring-primary/20">
                     <AvatarImage src={avatarUrl} alt={userName} />
-                    <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">{initials}</AvatarFallback>
+                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-xs font-bold text-primary">{initials}</AvatarFallback>
                   </Avatar>
                   <span className="max-w-[100px] truncate">{userName}</span>
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-luxury border-border/50 bg-card/90 backdrop-blur-xl shadow-luxury-lg">
+              <DropdownMenuContent align="end" className="w-48 rounded-luxury-lg border-2 border-border/50 shadow-luxury-lg">
                 {authLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild className="cursor-pointer gap-2">
                     <Link to={link.href}>
@@ -165,7 +158,7 @@ const Navbar = () => {
 
       {/* Mobile drawer */}
       {open && (
-        <div className="border-t border-border bg-background px-4 pb-4 md:hidden">
+        <div className="border-t border-border/30 bg-background/95 backdrop-blur-md px-4 pb-4 md:hidden">
           {!user && (
             <>
               {guestLinks.map((link) => (
@@ -173,7 +166,7 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <Button asChild className="mt-2 w-full rounded-full bg-primary font-semibold text-primary-foreground">
+              <Button asChild variant="luxury" className="mt-2 w-full rounded-full">
                 <Link to="/signup" onClick={() => setOpen(false)}>{t("nav.getStarted")}</Link>
               </Button>
             </>
@@ -181,10 +174,10 @@ const Navbar = () => {
 
           {user && (
             <>
-              <div className="flex items-center gap-3 border-b border-border py-3">
-                <Avatar className="h-9 w-9">
+              <div className="flex items-center gap-3 border-b border-border/30 py-3">
+                <Avatar className="h-9 w-9 ring-2 ring-primary/20">
                   <AvatarImage src={avatarUrl} alt={userName} />
-                  <AvatarFallback className="bg-primary/10 text-sm font-bold text-primary">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-sm font-bold text-primary">{initials}</AvatarFallback>
                 </Avatar>
                 <span className="truncate font-medium text-foreground">{userName}</span>
               </div>
