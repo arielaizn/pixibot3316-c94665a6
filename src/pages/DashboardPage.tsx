@@ -6,6 +6,7 @@ import { useProjects } from "@/hooks/useProjects";
 import PageTransition from "@/components/motion/PageTransition";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import CreditBar from "@/components/CreditBar";
 import ReferralCard from "@/components/ReferralCard";
 import Navbar from "@/components/Navbar";
@@ -69,15 +70,15 @@ const DashboardPage = () => {
 
       <main className="container mx-auto px-4 py-8">
         {/* Welcome section */}
-        <div className="mb-8 rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
+        <Card variant="glass" className="mb-8 p-6 shadow-luxury-md animate-luxury-fade-up md:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl font-extrabold text-foreground md:text-3xl">
+              <h1 className="text-2xl font-cal-sans text-foreground md:text-3xl">
                 {isRTL ? `שלום, ${userName} 👋` : `Hello, ${userName} 👋`}
               </h1>
               <p className="mt-1 text-muted-foreground">{t("dash.welcome")}</p>
             </div>
-            <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 px-5 py-3">
+            <div className="flex items-center gap-3 rounded-luxury bg-card/50 backdrop-blur-sm px-5 py-3 shadow-luxury-sm">
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">{t("dash.currentPlan")}</p>
                 <p className="font-bold text-foreground">{plan}</p>
@@ -99,31 +100,31 @@ const DashboardPage = () => {
               <CreditBar credits={credits} />
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Quick actions */}
         <div className="mb-8 grid gap-6 md:grid-cols-2">
-          <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:p-8">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent">
+          <Card variant="glass" className="flex flex-col p-6 shadow-luxury-md transition-all duration-300 hover:-translate-y-1 hover:shadow-luxury-lg animate-luxury-fade-up md:p-8">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent animate-float">
               <FolderOpen className="h-6 w-6" />
             </div>
-            <h2 className="mb-2 text-xl font-bold text-foreground">{t("dash.myProjects")}</h2>
+            <h2 className="mb-2 text-xl font-cal-sans text-foreground">{t("dash.myProjects")}</h2>
             <p className="mb-6 flex-1 text-sm text-muted-foreground">{t("dash.myProjectsDesc")}</p>
-            <Button asChild variant="outline" className="w-full rounded-xl border-accent py-5 text-accent hover:bg-accent hover:text-accent-foreground">
+            <Button asChild variant="luxury-outline" className="w-full py-5 shadow-luxury-sm">
               <Link to="/projects">{t("dash.openProjects")}</Link>
             </Button>
-          </div>
+          </Card>
 
-          <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:p-8">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Card variant="glass" className="flex flex-col p-6 shadow-luxury-md transition-all duration-300 hover:-translate-y-1 hover:shadow-luxury-lg animate-luxury-fade-up md:p-8">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary animate-float">
               <Plus className="h-6 w-6" />
             </div>
-            <h2 className="mb-2 text-xl font-bold text-foreground">{t("dash.newVideo")}</h2>
+            <h2 className="mb-2 text-xl font-cal-sans text-foreground">{t("dash.newVideo")}</h2>
             <p className="mb-6 flex-1 text-sm text-muted-foreground">{t("dash.newVideoDesc")}</p>
-            <Button asChild className="w-full rounded-xl bg-primary py-5 text-base font-bold text-primary-foreground hover:bg-primary/90">
+            <Button asChild variant="luxury" className="w-full py-5 text-base font-bold shadow-luxury-md">
               <Link to="/welcome">{t("dash.continueToVideo")}</Link>
             </Button>
-          </div>
+          </Card>
         </div>
 
         {/* Referral section */}
@@ -132,11 +133,11 @@ const DashboardPage = () => {
         </div>
 
         {/* Recent Projects */}
-        <div className="mb-8 rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
+        <Card variant="glass" className="mb-8 p-6 shadow-luxury-md animate-luxury-fade-up md:p-8">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-foreground">{t("dash.recentTitle")}</h2>
+            <h2 className="text-xl font-cal-sans text-foreground">{t("dash.recentTitle")}</h2>
             {recentProjects.length > 0 && (
-              <Button asChild variant="ghost" size="sm" className="gap-1 text-primary">
+              <Button asChild variant="luxury-outline" size="sm" className="gap-1">
                 <Link to="/projects">
                   {t("dash.viewAll")} <ExternalLink className="h-3.5 w-3.5" />
                 </Link>
@@ -154,10 +155,10 @@ const DashboardPage = () => {
                 <Link
                   key={project.id}
                   to="/projects"
-                  className="group flex flex-col rounded-xl border border-border bg-muted/30 p-4 transition-all hover:border-primary/40 hover:shadow-md"
+                  className="group flex flex-col rounded-luxury bg-card/50 backdrop-blur-sm p-4 transition-all hover:shadow-luxury-sm border border-border/50"
                 >
                   <div className="mb-3 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary animate-float">
                       <FolderOpen className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -178,23 +179,23 @@ const DashboardPage = () => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted animate-float">
                 <FolderOpen className="h-8 w-8 text-muted-foreground" />
               </div>
               <p className="mb-6 text-sm text-muted-foreground">{t("dash.noProjects")}</p>
-              <Button asChild className="rounded-xl bg-primary px-8 py-5 text-base font-bold text-primary-foreground hover:bg-primary/90">
+              <Button asChild variant="luxury" className="px-8 py-5 text-base font-bold shadow-luxury-md">
                 <Link to="/welcome">{t("dash.firstVideo")}</Link>
               </Button>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Recent Videos */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
+        <Card variant="glass" className="p-6 shadow-luxury-md animate-luxury-fade-up md:p-8">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-foreground">{t("dash.recentVideos")}</h2>
+            <h2 className="text-xl font-cal-sans text-foreground">{t("dash.recentVideos")}</h2>
             {recentVideos.length > 0 && (
-              <Button asChild variant="ghost" size="sm" className="gap-1 text-primary">
+              <Button asChild variant="luxury-outline" size="sm" className="gap-1">
                 <Link to="/projects">
                   {t("dash.viewAll")} <ExternalLink className="h-3.5 w-3.5" />
                 </Link>
@@ -211,7 +212,7 @@ const DashboardPage = () => {
               {recentVideos.map((video) => (
                 <div
                   key={video.id}
-                  className="group relative overflow-hidden rounded-xl border border-border bg-muted/30 transition-all hover:border-primary/40 hover:shadow-md"
+                  className="group relative overflow-hidden rounded-luxury bg-card/50 backdrop-blur-sm transition-all hover:shadow-luxury-md border border-border/50"
                 >
                   <div className="relative aspect-video bg-muted">
                     {video.thumbnail_url ? (
@@ -242,17 +243,17 @@ const DashboardPage = () => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted animate-float">
                 <Film className="h-8 w-8 text-muted-foreground" />
               </div>
               <p className="mb-1 text-lg font-semibold text-foreground">{t("dash.noVideos")}</p>
               <p className="mb-6 text-sm text-muted-foreground">{t("dash.startCreating")}</p>
-              <Button asChild className="rounded-xl bg-primary px-8 py-5 text-base font-bold text-primary-foreground hover:bg-primary/90">
+              <Button asChild variant="luxury" className="px-8 py-5 text-base font-bold shadow-luxury-md">
                 <Link to="/welcome">{t("dash.firstVideo")}</Link>
               </Button>
             </div>
           )}
-        </div>
+        </Card>
       </main>
     </PageTransition>
   );

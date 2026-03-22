@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -277,20 +278,21 @@ const ProjectsPage = () => {
           </div>
 
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-foreground">{playingVideo.title || t.videos}</h2>
+            <h2 className="text-2xl font-cal-sans text-foreground">{playingVideo.title || t.videos}</h2>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="luxury-outline"
                 size="sm"
-                className="rounded-xl gap-1.5"
+                className="gap-1.5"
                 onClick={() => setShowVersions(playingVideo)}
               >
                 <History className="h-4 w-4" />
                 {t.versions}
               </Button>
               <Button
+                variant="luxury"
                 size="sm"
-                className="rounded-xl gap-1.5 bg-green-500 hover:bg-green-600 text-white"
+                className="gap-1.5 shadow-luxury-sm"
                 onClick={() => {
                   if (!playingVideo.video_url) return;
                   const url = getVideoPublicUrl(playingVideo.video_url);
@@ -301,9 +303,9 @@ const ProjectsPage = () => {
                 הורדה
               </Button>
               <Button
-                variant="outline"
+                variant="luxury-outline"
                 size="sm"
-                className="rounded-xl gap-1.5"
+                className="gap-1.5"
                 onClick={() =>
                   setShareTarget({
                     projectId: playingVideo.project_id,
@@ -371,10 +373,10 @@ const ProjectsPage = () => {
         {/* Drag overlay */}
         {dragOver && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary/10 backdrop-blur-sm">
-            <div className="rounded-2xl border-2 border-dashed border-primary bg-card p-12 text-center shadow-2xl">
-              <Upload className="mx-auto mb-4 h-12 w-12 text-primary" />
-              <p className="text-lg font-bold text-foreground">{t.dragDrop}</p>
-            </div>
+            <Card variant="glass" className="border-2 border-dashed border-primary p-12 text-center shadow-luxury-lg">
+              <Upload className="mx-auto mb-4 h-12 w-12 text-primary animate-float" />
+              <p className="text-lg font-cal-sans text-foreground">{t.dragDrop}</p>
+            </Card>
           </div>
         )}
 
@@ -390,11 +392,11 @@ const ProjectsPage = () => {
 
           {/* Header */}
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-2xl font-bold text-foreground">{selectedProject.name}</h2>
+            <h2 className="text-2xl font-cal-sans text-foreground">{selectedProject.name}</h2>
             <div className="flex gap-2">
               <Button
-                variant="outline"
-                className="rounded-xl gap-2"
+                variant="luxury-outline"
+                className="gap-2"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadToProject.isPending}
               >
@@ -402,8 +404,8 @@ const ProjectsPage = () => {
                 {t.upload}
               </Button>
               <Button
-                variant="outline"
-                className="rounded-xl gap-2"
+                variant="luxury-outline"
+                className="gap-2"
                 onClick={() => setShareTarget({ projectId: selectedProject.id, name: selectedProject.name })}
               >
                 <Share2 className="h-4 w-4" />
@@ -414,10 +416,10 @@ const ProjectsPage = () => {
 
           {/* Upload progress */}
           {uploadProgress !== null && (
-            <div className="mb-6 rounded-xl border border-border bg-card p-4">
+            <Card variant="glass" className="mb-6 p-4 shadow-luxury-sm">
               <p className="mb-2 text-sm font-medium text-foreground">{t.uploading}</p>
               <Progress value={uploadProgress} className="h-2" />
-            </div>
+            </Card>
           )}
 
           {/* View toggle */}
@@ -443,7 +445,7 @@ const ProjectsPage = () => {
           {/* Videos section */}
           {projectVideos.length > 0 && (
             <div className="mb-8">
-              <h3 className="mb-4 text-lg font-semibold text-foreground">{t.videos}</h3>
+              <h3 className="mb-4 text-lg font-cal-sans text-foreground">{t.videos}</h3>
               <div className={viewMode === "grid" ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3" : "space-y-2"}>
                 {projectVideos.map((vid) => (
                   <VideoCard
@@ -467,7 +469,7 @@ const ProjectsPage = () => {
           {/* Files section — exclude video files (they're in the Videos section above) */}
           {projectFilesList.filter(f => !f.file_type?.startsWith("video")).length > 0 && (
             <div>
-              <h3 className="mb-4 text-lg font-semibold text-foreground">{t.filesLabel}</h3>
+              <h3 className="mb-4 text-lg font-cal-sans text-foreground">{t.filesLabel}</h3>
               <div className={viewMode === "grid" ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-4" : "space-y-2"}>
                 {projectFilesList.filter(f => !f.file_type?.startsWith("video")).map((file) => {
                   const Icon = getFileIcon(file.file_type);
@@ -495,19 +497,19 @@ const ProjectsPage = () => {
 
           {/* Empty project */}
           {projectVideos.length === 0 && projectFilesList.length === 0 && (
-            <div className="rounded-2xl border border-border bg-card p-12 text-center">
-              <Video className="mx-auto mb-4 h-12 w-12 text-muted-foreground/40" />
+            <Card variant="glass" className="p-12 text-center shadow-luxury-md">
+              <Video className="mx-auto mb-4 h-12 w-12 text-muted-foreground/40 animate-float" />
               <p className="mb-1 text-lg font-semibold text-foreground">{t.noVideos}</p>
               <p className="mb-6 text-sm text-muted-foreground">{t.noFiles}</p>
               <div className="flex justify-center gap-3">
-                <Button variant="outline" className="rounded-xl gap-2" onClick={() => fileInputRef.current?.click()}>
+                <Button variant="luxury-outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
                   <Upload className="h-4 w-4" /> {t.upload}
                 </Button>
-                <Button asChild className="rounded-xl bg-primary text-primary-foreground">
+                <Button asChild variant="luxury" className="shadow-luxury-sm">
                   <Link to="/welcome">{t.createFirst}</Link>
                 </Button>
               </div>
-            </div>
+            </Card>
           )}
         </main>
 
@@ -568,16 +570,17 @@ const ProjectsPage = () => {
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold text-foreground md:text-3xl">{t.title}</h1>
+            <h1 className="text-2xl font-cal-sans text-foreground md:text-3xl">{t.title}</h1>
             <p className="mt-1 text-muted-foreground">{t.subtitle}</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="rounded-xl gap-2" onClick={() => setShowNewProject(true)}>
+            <Button variant="luxury-outline" className="gap-2" onClick={() => setShowNewProject(true)}>
               <Plus className="h-4 w-4" />
               {t.newProject}
             </Button>
             <Button
-              className="rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+              variant="luxury"
+              className="gap-2 shadow-luxury-sm"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadFiles.isPending}
             >
@@ -592,10 +595,11 @@ const ProjectsPage = () => {
           <div className="relative max-w-lg flex-1">
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              variant="luxury"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t.search}
-              className="rounded-xl ps-10"
+              className="ps-10"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -650,10 +654,10 @@ const ProjectsPage = () => {
               </div>
             )}
             {searchResults.projects.length === 0 && searchResults.videos.length === 0 && searchResults.files.length === 0 && searchResults.standalone.length === 0 && (
-              <div className="rounded-2xl border border-border bg-card p-12 text-center">
-                <Search className="mx-auto mb-4 h-10 w-10 text-muted-foreground/40" />
+              <Card variant="glass" className="p-12 text-center shadow-luxury-md">
+                <Search className="mx-auto mb-4 h-10 w-10 text-muted-foreground/40 animate-float" />
                 <p className="text-foreground font-semibold">{tr("projects.noResults")}</p>
-              </div>
+              </Card>
             )}
           </div>
         )}
@@ -691,22 +695,22 @@ const ProjectsPage = () => {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : !projects || projects.length === 0 ? (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <Card variant="glass" className="p-6 shadow-luxury-md">
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+                  <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted animate-float">
                     <Video className="h-10 w-10 text-muted-foreground" />
                   </div>
-                  <p className="mb-1 text-xl font-bold text-foreground">{t.noProjects}</p>
+                  <p className="mb-1 text-xl font-cal-sans text-foreground">{t.noProjects}</p>
                   <div className="mt-4 flex gap-3">
-                    <Button variant="outline" className="rounded-xl gap-2" onClick={() => setShowNewProject(true)}>
+                    <Button variant="luxury-outline" className="gap-2" onClick={() => setShowNewProject(true)}>
                       <Plus className="h-4 w-4" /> {t.newProject}
                     </Button>
-                    <Button asChild className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Button asChild variant="luxury" className="shadow-luxury-sm">
                       <Link to="/welcome">{t.createFirst}</Link>
                     </Button>
                   </div>
                 </div>
-              </div>
+              </Card>
             ) : (
               <div className={viewMode === "grid" ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3" : "space-y-2"}>
                 {projects.filter(p => p.status !== "deleted").map((project) => (
@@ -730,13 +734,13 @@ const ProjectsPage = () => {
 
       {/* ── New Project Dialog ── */}
       <Dialog open={showNewProject} onOpenChange={setShowNewProject}>
-        <DialogContent className="rounded-2xl">
-          <DialogHeader><DialogTitle>{t.newProject}</DialogTitle></DialogHeader>
+        <DialogContent className="rounded-luxury-lg">
+          <DialogHeader><DialogTitle className="font-cal-sans">{t.newProject}</DialogTitle></DialogHeader>
           <form onSubmit={(e) => { e.preventDefault(); if (newName.trim()) { createProject.mutate(newName.trim()); setNewName(""); setShowNewProject(false); } }} className="space-y-4">
-            <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t.projectName} className="rounded-xl" autoFocus />
+            <Input variant="luxury" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t.projectName} autoFocus />
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowNewProject(false)}>{t.cancel}</Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">{t.create}</Button>
+              <Button type="button" variant="luxury-outline" onClick={() => setShowNewProject(false)}>{t.cancel}</Button>
+              <Button type="submit" variant="luxury" className="shadow-luxury-sm">{t.create}</Button>
             </div>
           </form>
         </DialogContent>
@@ -744,13 +748,13 @@ const ProjectsPage = () => {
 
       {/* ── New Folder Dialog ── */}
       <Dialog open={showNewFolder} onOpenChange={setShowNewFolder}>
-        <DialogContent className="rounded-2xl">
-          <DialogHeader><DialogTitle>{t.newFolder}</DialogTitle></DialogHeader>
+        <DialogContent className="rounded-luxury-lg">
+          <DialogHeader><DialogTitle className="font-cal-sans">{t.newFolder}</DialogTitle></DialogHeader>
           <form onSubmit={(e) => { e.preventDefault(); if (newName.trim()) { createFolder.mutate(newName.trim()); setNewName(""); setShowNewFolder(false); } }} className="space-y-4">
-            <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={isRTL ? "שם התיקיה" : "Folder name"} className="rounded-xl" autoFocus />
+            <Input variant="luxury" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={isRTL ? "שם התיקיה" : "Folder name"} autoFocus />
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowNewFolder(false)}>{t.cancel}</Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">{t.create}</Button>
+              <Button type="button" variant="luxury-outline" onClick={() => setShowNewFolder(false)}>{t.cancel}</Button>
+              <Button type="submit" variant="luxury" className="shadow-luxury-sm">{t.create}</Button>
             </div>
           </form>
         </DialogContent>
@@ -798,8 +802,8 @@ function ProjectCard({ project, viewMode, t, isRTL, onClick, onShare, onRename, 
 
   if (viewMode === "list") {
     return (
-      <div className="group flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm transition-all duration-200 hover:shadow-md" onClick={onClick}>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+      <div className="group flex cursor-pointer items-center gap-3 rounded-luxury bg-card/50 backdrop-blur-sm p-3 shadow-luxury-sm transition-all duration-200 hover:shadow-luxury-md border border-border/50" onClick={onClick}>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary animate-float">
           <FolderOpen className="h-5 w-5" />
         </div>
         <span className="flex-1 truncate font-medium text-foreground">{project.name}</span>
@@ -823,8 +827,8 @@ function ProjectCard({ project, viewMode, t, isRTL, onClick, onShare, onRename, 
   }
 
   return (
-    <div className="group cursor-pointer rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md" onClick={onClick}>
-      <div className="relative aspect-video overflow-hidden rounded-t-xl bg-muted/50">
+    <div className="group cursor-pointer rounded-luxury bg-card/50 backdrop-blur-sm shadow-luxury-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-luxury-md border border-border/50" onClick={onClick}>
+      <div className="relative aspect-video overflow-hidden rounded-t-luxury bg-muted/50">
         {thumb ? (
           <img src={thumb} alt={project.name} className="h-full w-full object-cover" loading="lazy" />
         ) : (
@@ -875,7 +879,7 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
 }) {
   if (viewMode === "list") {
     return (
-      <div className="group flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm transition-all duration-200 hover:shadow-md" onClick={onPlay}>
+      <div className="group flex cursor-pointer items-center gap-3 rounded-luxury bg-card/50 backdrop-blur-sm p-3 shadow-luxury-sm transition-all duration-200 hover:shadow-luxury-md border border-border/50" onClick={onPlay}>
         <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
           {vid.thumbnail_url ? (
             <img src={vid.thumbnail_url} className="h-full w-full object-cover" loading="lazy" alt="" />
@@ -916,8 +920,8 @@ function VideoCard({ vid, viewMode, isRTL, t, onPlay, onShare, onRename, onDelet
   }
 
   return (
-    <div className="group cursor-pointer rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md" onClick={onPlay}>
-      <div className="relative aspect-video overflow-hidden rounded-t-xl bg-muted/50">
+    <div className="group cursor-pointer rounded-luxury bg-card/50 backdrop-blur-sm shadow-luxury-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-luxury-md border border-border/50" onClick={onPlay}>
+      <div className="relative aspect-video overflow-hidden rounded-t-luxury bg-muted/50">
         {vid.thumbnail_url ? (
           <img src={vid.thumbnail_url} alt={vid.title} className="h-full w-full object-cover" loading="lazy" />
         ) : (
@@ -998,7 +1002,7 @@ function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onSt
 }) {
   if (viewMode === "list") {
     return (
-      <div className="group flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm transition-all duration-200 hover:shadow-md">
+      <div className="group flex items-center gap-3 rounded-luxury bg-card/50 backdrop-blur-sm p-3 shadow-luxury-sm transition-all duration-200 hover:shadow-luxury-md border border-border/50">
         <Icon className="h-5 w-5 shrink-0 text-muted-foreground" />
         <span className="flex-1 truncate font-medium text-foreground cursor-pointer" onClick={onPreview}>{file.file_name}</span>
         <span className="hidden text-xs text-muted-foreground sm:block">{formatSize(file.file_size)}</span>
@@ -1025,10 +1029,10 @@ function FileCard({ file, Icon, viewMode, t, onPreview, onRename, onDelete, onSt
   }
 
   return (
-    <div className="group flex flex-col rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex aspect-[4/3] cursor-pointer items-center justify-center rounded-t-xl bg-muted/50 overflow-hidden" onClick={onPreview}>
+    <div className="group flex flex-col rounded-luxury bg-card/50 backdrop-blur-sm shadow-luxury-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-luxury-md border border-border/50">
+      <div className="flex aspect-[4/3] cursor-pointer items-center justify-center rounded-t-luxury bg-muted/50 overflow-hidden" onClick={onPreview}>
         {file.file_type.startsWith("image") ? (
-          <img src={file.file_url} alt={file.file_name} className="h-full w-full rounded-t-xl object-cover" loading="lazy" />
+          <img src={file.file_url} alt={file.file_name} className="h-full w-full rounded-t-luxury object-cover" loading="lazy" />
         ) : file.file_type.startsWith("audio") ? (
           <div className="flex flex-col items-center justify-center gap-2 p-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
@@ -1097,14 +1101,14 @@ function RenameDialog({ renameTarget, onClose, onSave, isRTL, t }: {
 
   return (
     <Dialog open={!!renameTarget} onOpenChange={onClose}>
-      <DialogContent className="rounded-2xl">
-        <DialogHeader><DialogTitle>{t.rename}</DialogTitle></DialogHeader>
+      <DialogContent className="rounded-luxury-lg">
+        <DialogHeader><DialogTitle className="font-cal-sans">{t.rename}</DialogTitle></DialogHeader>
         {renameTarget && (
           <form onSubmit={(e) => { e.preventDefault(); onSave(renameTarget.id, localName, renameTarget.type); }} className="space-y-4">
-            <Input value={localName} onChange={(e) => setLocalName(e.target.value)} className="rounded-xl" autoFocus />
+            <Input variant="luxury" value={localName} onChange={(e) => setLocalName(e.target.value)} autoFocus />
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" className="rounded-xl" onClick={onClose}>{t.cancel}</Button>
-              <Button type="submit" className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">{t.save}</Button>
+              <Button type="button" variant="luxury-outline" onClick={onClose}>{t.cancel}</Button>
+              <Button type="submit" variant="luxury" className="shadow-luxury-sm">{t.save}</Button>
             </div>
           </form>
         )}
@@ -1120,8 +1124,8 @@ function VersionHistoryDialog({ video, onClose, onSelect, t }: {
   // Simple version display — in a real app we'd fetch versions from the hook
   return (
     <Dialog open={!!video} onOpenChange={onClose}>
-      <DialogContent className="rounded-2xl sm:max-w-md">
-        <DialogHeader><DialogTitle>{t.versions}</DialogTitle></DialogHeader>
+      <DialogContent className="rounded-luxury-lg sm:max-w-md">
+        <DialogHeader><DialogTitle className="font-cal-sans">{t.versions}</DialogTitle></DialogHeader>
         {video && (
           <div className="space-y-2">
             <div
@@ -1154,13 +1158,13 @@ function MoveToProjectDialog({ moveTarget, projects, onClose, onMove, t }: {
   const [selectedProjectId, setSelectedProjectId] = useState("");
   return (
     <Dialog open={!!moveTarget} onOpenChange={onClose}>
-      <DialogContent className="rounded-2xl sm:max-w-md">
-        <DialogHeader><DialogTitle>{t.moveTo}</DialogTitle></DialogHeader>
+      <DialogContent className="rounded-luxury-lg sm:max-w-md">
+        <DialogHeader><DialogTitle className="font-cal-sans">{t.moveTo}</DialogTitle></DialogHeader>
         {moveTarget && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">{moveTarget.fileName}</p>
             <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-              <SelectTrigger className="rounded-xl">
+              <SelectTrigger className="rounded-luxury">
                 <SelectValue placeholder={t.allProjects} />
               </SelectTrigger>
               <SelectContent>
@@ -1170,9 +1174,10 @@ function MoveToProjectDialog({ moveTarget, projects, onClose, onMove, t }: {
               </SelectContent>
             </Select>
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" className="rounded-xl" onClick={onClose}>{t.cancel}</Button>
+              <Button type="button" variant="luxury-outline" onClick={onClose}>{t.cancel}</Button>
               <Button
-                className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+                variant="luxury"
+                className="shadow-luxury-sm"
                 disabled={!selectedProjectId}
                 onClick={() => onMove(selectedProjectId)}
               >
