@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, Plus, Trash2, Pencil, Upload, FileVideo, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -27,6 +28,7 @@ interface UpdateItem {
 const AdminUpdatesPage = () => {
   const { t, isRTL } = useDirection();
   const { toast } = useToast();
+  const { user } = useAuth();
   const qc = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<UpdateItem | null>(null);
@@ -56,7 +58,7 @@ const AdminUpdatesPage = () => {
   const handleVideoUpload = async (file: File) => {
     setUploading(true);
     try {
-      const filePath = `updates/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const filePath = `${user!.id}/updates/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const { error: uploadError } = await supabase.storage
         .from("user-files")
         .upload(filePath, file);
