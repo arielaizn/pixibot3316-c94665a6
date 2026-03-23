@@ -30,6 +30,7 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
   const { isRTL } = useDirection();
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const retriedRef = useRef(false);
 
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -48,8 +49,28 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
   const togglePlay = useCallback(() => {
     if (!video || !src) return;
     if (!started) setStarted(true);
-    if (video.paused) { video.play().catch(() => setError(true)); setPlaying(true); }
-    else { video.pause(); setPlaying(false); }
+
+    if (video.paused) {
+      // If the video is ready, play immediately. Otherwise wait for canplay.
+      if (video.readyState >= 3) {
+        video.play().catch(() => setError(true));
+        setPlaying(true);
+      } else {
+        const onReady = () => {
+          video.removeEventListener("canplay", onReady);
+          video.play().catch(() => setError(true));
+          setPlaying(true);
+        };
+        video.addEventListener("canplay", onReady);
+        // If src was already set, trigger load
+        if (!video.src || video.src === window.location.href) {
+          video.load();
+        }
+      }
+    } else {
+      video.pause();
+      setPlaying(false);
+    }
   }, [video, started, src]);
 
   const seek = useCallback((val: number[]) => {
@@ -122,14 +143,24 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
       });
   }, [src, title, onDownload]);
 
-  // Time updates
+  // Event listeners
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     const onTime = () => setCurrentTime(v.currentTime);
     const onMeta = () => setDuration(v.duration);
     const onEnd = () => setPlaying(false);
-    const onError = () => setError(true);
+    const onError = () => {
+      // Auto-retry once on error
+      if (!retriedRef.current) {
+        retriedRef.current = true;
+        setTimeout(() => {
+          v.load();
+        }, 1000);
+      } else {
+        setError(true);
+      }
+    };
     v.addEventListener("timeupdate", onTime);
     v.addEventListener("loadedmetadata", onMeta);
     v.addEventListener("ended", onEnd);
@@ -140,7 +171,7 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
       v.removeEventListener("ended", onEnd);
       v.removeEventListener("error", onError);
     };
-  }, [started]);
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -196,7 +227,14 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
             <AlertCircle className="mx-auto mb-3 h-12 w-12 text-destructive/70" />
             <p className="text-sm font-medium text-foreground">{isRTL ? "שגיאה בטעינת הסרטון" : "Video failed to load"}</p>
             <button
-              onClick={() => { setError(false); setStarted(false); }}
+              onClick={() => {
+                setError(false);
+                retriedRef.current = false;
+                const v = videoRef.current;
+                if (v) {
+                  v.load();
+                }
+              }}
               className="mt-3 rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 transition-colors"
             >
               {isRTL ? "נסה שוב" : "Try Again"}
@@ -222,12 +260,13 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
 
       <video
         ref={videoRef}
-        src={started ? src : undefined}
+        src={src}
         className="aspect-video w-full bg-muted"
         onClick={togglePlay}
         playsInline
         autoPlay={autoPlay}
         preload="metadata"
+        crossOrigin="anonymous"
       />
 
       {/* Controls overlay */}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useDirection } from "@/contexts/DirectionContext";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Pencil } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, Upload, FileVideo, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface UpdateItem {
@@ -37,6 +37,9 @@ const AdminUpdatesPage = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState("");
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: updates, isLoading } = useQuery({
     queryKey: ["admin-updates"],
@@ -49,6 +52,25 @@ const AdminUpdatesPage = () => {
       return data as unknown as UpdateItem[];
     },
   });
+
+  const handleVideoUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const filePath = `updates/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { error: uploadError } = await supabase.storage
+        .from("user-files")
+        .upload(filePath, file);
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(filePath);
+      setVideoUrl(urlData.publicUrl);
+      setUploadedFileName(file.name);
+      toast({ title: isRTL ? "הסרטון הועלה בהצלחה" : "Video uploaded successfully" });
+    } catch (err: any) {
+      toast({ title: isRTL ? "שגיאה בהעלאה" : "Upload error", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -110,6 +132,7 @@ const AdminUpdatesPage = () => {
     setTitle("");
     setDescription("");
     setVideoUrl("");
+    setUploadedFileName("");
     const now = new Date();
     setStartDate(now.toISOString().slice(0, 16));
     const week = new Date(now.getTime() + 7 * 86400000);
@@ -123,6 +146,7 @@ const AdminUpdatesPage = () => {
     setTitle(u.title);
     setDescription(u.description);
     setVideoUrl(u.video_url || "");
+    setUploadedFileName("");
     setStartDate(new Date(u.start_date).toISOString().slice(0, 16));
     setEndDate(new Date(u.end_date).toISOString().slice(0, 16));
     setIsActive(u.is_active);
@@ -132,6 +156,7 @@ const AdminUpdatesPage = () => {
   const closeDialog = () => {
     setDialogOpen(false);
     setEditing(null);
+    setUploadedFileName("");
   };
 
   return (
@@ -157,6 +182,7 @@ const AdminUpdatesPage = () => {
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "כותרת" : "Title"}</th>
+                <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "סרטון" : "Video"}</th>
                 <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "התחלה" : "Start"}</th>
                 <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "סיום" : "End"}</th>
                 <th className="px-4 py-3 text-start font-semibold text-foreground">{isRTL ? "פעיל" : "Active"}</th>
@@ -167,6 +193,16 @@ const AdminUpdatesPage = () => {
               {(updates || []).map((u) => (
                 <tr key={u.id} className="border-b border-border last:border-0">
                   <td className="px-4 py-3 text-foreground font-medium">{u.title}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">
+                    {u.video_url ? (
+                      <span className="flex items-center gap-1 text-primary">
+                        <FileVideo className="h-3.5 w-3.5" />
+                        {isRTL ? "יש סרטון" : "Has video"}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground/50">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground text-xs">
                     {new Date(u.start_date).toLocaleDateString()}
                   </td>
@@ -193,7 +229,7 @@ const AdminUpdatesPage = () => {
               ))}
               {(!updates || updates.length === 0) && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                     {isRTL ? "אין עדכונים" : "No updates yet"}
                   </td>
                 </tr>
@@ -205,9 +241,9 @@ const AdminUpdatesPage = () => {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg rounded-luxury-lg">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="font-cal-sans">
               {editing ? (isRTL ? "עריכת עדכון" : "Edit Update") : (isRTL ? "עדכון חדש" : "New Update")}
             </DialogTitle>
           </DialogHeader>
@@ -220,10 +256,61 @@ const AdminUpdatesPage = () => {
               <Label>{isRTL ? "תיאור" : "Description"}</Label>
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
             </div>
+
+            {/* Video: Upload or URL */}
             <div className="space-y-2">
-              <Label>{isRTL ? "קישור לסרטון" : "Video URL"}</Label>
-              <Input variant="luxury" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} dir="ltr" placeholder="https://..." />
+              <Label>{isRTL ? "סרטון" : "Video"}</Label>
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleVideoUpload(file);
+                  e.target.value = "";
+                }}
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="luxury-outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => videoInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  {isRTL ? "העלאת סרטון" : "Upload Video"}
+                </Button>
+                {uploadedFileName && (
+                  <span className="flex items-center gap-1 text-xs text-primary">
+                    <FileVideo className="h-3.5 w-3.5" />
+                    {uploadedFileName}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{isRTL ? "או הדבק קישור:" : "or paste URL:"}</span>
+              </div>
+              <Input
+                variant="luxury"
+                value={videoUrl}
+                onChange={(e) => { setVideoUrl(e.target.value); setUploadedFileName(""); }}
+                dir="ltr"
+                placeholder="https://..."
+              />
+              {videoUrl && (
+                <button
+                  onClick={() => { setVideoUrl(""); setUploadedFileName(""); }}
+                  className="flex items-center gap-1 text-xs text-destructive hover:underline"
+                >
+                  <X className="h-3 w-3" />
+                  {isRTL ? "הסר סרטון" : "Remove video"}
+                </button>
+              )}
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{isRTL ? "תאריך התחלה" : "Start Date"}</Label>

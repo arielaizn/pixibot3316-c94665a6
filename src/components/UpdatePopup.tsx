@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useDirection } from "@/contexts/DirectionContext";
+import { getVideoPublicUrl } from "@/lib/videoUrl";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
-import { X } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface UpdateData {
@@ -16,6 +18,7 @@ const SESSION_KEY = "pixi_update_seen";
 
 const UpdatePopup = () => {
   const { isRTL } = useDirection();
+  const navigate = useNavigate();
   const [update, setUpdate] = useState<UpdateData | null>(null);
   const [visible, setVisible] = useState(false);
 
@@ -44,6 +47,11 @@ const UpdatePopup = () => {
   }, []);
 
   const close = () => setVisible(false);
+
+  const goToUpdates = () => {
+    close();
+    navigate(`/updates#update-${update?.id}`);
+  };
 
   return (
     <AnimatePresence>
@@ -74,7 +82,7 @@ const UpdatePopup = () => {
             {/* Video */}
             {update.video_url && (
               <div className="w-full">
-                <PixiVideoPlayer src={update.video_url} title={update.title} />
+                <PixiVideoPlayer src={getVideoPublicUrl(update.video_url)} title={update.title} />
               </div>
             )}
 
@@ -82,8 +90,17 @@ const UpdatePopup = () => {
             <div className="p-6 space-y-3" dir={isRTL ? "rtl" : "ltr"}>
               <h2 className="text-xl font-bold text-foreground">{update.title}</h2>
               {update.description && (
-                <p className="text-sm text-muted-foreground leading-relaxed">{update.description}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{update.description}</p>
               )}
+
+              {/* Read More link */}
+              <button
+                onClick={goToUpdates}
+                className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline transition-colors mt-2"
+              >
+                {isRTL ? "קרא עוד" : "Read More"}
+                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+              </button>
             </div>
           </motion.div>
         </motion.div>

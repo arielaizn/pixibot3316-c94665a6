@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import FloatingMascot from "@/components/FloatingMascot";
 import PageTransition from "@/components/motion/PageTransition";
 import UpdatePopup from "@/components/UpdatePopup";
+import ChallengePopup from "@/components/ChallengePopup";
 
 const Index = () => {
   return (
@@ -22,6 +23,7 @@ const Index = () => {
         <Footer />
         <FloatingMascot />
         <UpdatePopup />
+        <ChallengePopup />
       </div>
     </PageTransition>
   );

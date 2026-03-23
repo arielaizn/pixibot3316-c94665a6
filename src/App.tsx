@@ -21,6 +21,7 @@ import PaymentCallbackPage from "./pages/PaymentCallbackPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SharedPage from "./pages/SharedPage.tsx";
 import PublicVideoPage from "./pages/PublicVideoPage.tsx";
+import UpdatesPage from "./pages/UpdatesPage.tsx";
 // Admin pages
 import AdminLoginPage from "./pages/admin/AdminLoginPage.tsx";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage.tsx";
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/projects/:projectId/video/:videoId" element={<ProjectsPage />} />
                 <Route path="/projects/file/:fileId" element={<FilePreviewPage />} />
                 <Route path="/projects/document/:fileId" element={<DocumentEditorPage />} />
+                <Route path="/updates" element={<UpdatesPage />} />
                 <Route path="/payment/callback" element={<PaymentCallbackPage />} />
                 {/* Admin */}
                 <Route path="/admin" element={<AdminLoginPage />} />

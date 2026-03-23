@@ -18,4 +18,18 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-popover", "@radix-ui/react-tabs", "@radix-ui/react-tooltip", "@radix-ui/react-select"],
+          charts: ["recharts"],
+          supabase: ["@supabase/supabase-js"],
+          query: ["@tanstack/react-query"],
+          motion: ["framer-motion"],
+        },
+      },
+    },
+  },
 }));

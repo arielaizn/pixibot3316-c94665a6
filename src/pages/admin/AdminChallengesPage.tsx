@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useDirection } from "@/contexts/DirectionContext";
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Pencil, Trophy } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, Trophy, Upload, FileVideo, X, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface ChallengeItem {
@@ -22,6 +22,8 @@ interface ChallengeItem {
   end_date: string;
   is_active: boolean;
   created_at: string;
+  details_url: string | null;
+  video_url: string | null;
 }
 
 function getChallengeStatus(c: ChallengeItem, isRTL: boolean) {
@@ -65,6 +67,11 @@ const AdminChallengesPage = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [detailsUrl, setDetailsUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState("");
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: challenges, isLoading } = useQuery({
     queryKey: ["admin-challenges"],
@@ -78,6 +85,25 @@ const AdminChallengesPage = () => {
     },
   });
 
+  const handleVideoUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const filePath = `challenges/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { error: uploadError } = await supabase.storage
+        .from("user-files")
+        .upload(filePath, file);
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(filePath);
+      setVideoUrl(urlData.publicUrl);
+      setUploadedFileName(file.name);
+      toast({ title: isRTL ? "הסרטון הועלה בהצלחה" : "Video uploaded successfully" });
+    } catch (err: any) {
+      toast({ title: isRTL ? "שגיאה בהעלאה" : "Upload error", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const payload = {
@@ -86,6 +112,8 @@ const AdminChallengesPage = () => {
         start_date: new Date(startDate).toISOString(),
         end_date: new Date(endDate).toISOString(),
         is_active: isActive,
+        details_url: detailsUrl || null,
+        video_url: videoUrl || null,
       };
       if (editing) {
         const { error } = await supabase
@@ -141,6 +169,9 @@ const AdminChallengesPage = () => {
     const week = new Date(now.getTime() + 7 * 86400000);
     setEndDate(week.toISOString().slice(0, 16));
     setIsActive(true);
+    setDetailsUrl("");
+    setVideoUrl("");
+    setUploadedFileName("");
     setDialogOpen(true);
   };
 
@@ -151,12 +182,16 @@ const AdminChallengesPage = () => {
     setStartDate(new Date(c.start_date).toISOString().slice(0, 16));
     setEndDate(new Date(c.end_date).toISOString().slice(0, 16));
     setIsActive(c.is_active);
+    setDetailsUrl(c.details_url || "");
+    setVideoUrl(c.video_url || "");
+    setUploadedFileName("");
     setDialogOpen(true);
   };
 
   const closeDialog = () => {
     setDialogOpen(false);
     setEditing(null);
+    setUploadedFileName("");
   };
 
   const formatDate = (d: string) =>
@@ -206,6 +241,9 @@ const AdminChallengesPage = () => {
                     {isRTL ? "סטטוס" : "Status"}
                   </th>
                   <th className="px-4 py-3 text-start font-semibold text-foreground">
+                    {isRTL ? "מדיה" : "Media"}
+                  </th>
+                  <th className="px-4 py-3 text-start font-semibold text-foreground">
                     {isRTL ? "התחלה" : "Start"}
                   </th>
                   <th className="px-4 py-3 text-start font-semibold text-foreground">
@@ -239,6 +277,23 @@ const AdminChallengesPage = () => {
                           {status.label}
                         </Badge>
                       </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          {c.video_url && (
+                            <span className="text-primary" title={isRTL ? "סרטון" : "Video"}>
+                              <FileVideo className="h-4 w-4" />
+                            </span>
+                          )}
+                          {c.details_url && (
+                            <span className="text-blue-500" title={isRTL ? "קישור" : "Link"}>
+                              <ExternalLink className="h-4 w-4" />
+                            </span>
+                          )}
+                          {!c.video_url && !c.details_url && (
+                            <span className="text-muted-foreground/50">—</span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
                         {formatDate(c.start_date)}
                       </td>
@@ -271,7 +326,7 @@ const AdminChallengesPage = () => {
                 })}
                 {(!challenges || challenges.length === 0) && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center">
+                    <td colSpan={7} className="px-4 py-12 text-center">
                       <Trophy className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40 animate-float" />
                       <p className="text-muted-foreground">
                         {isRTL ? "אין אתגרים עדיין" : "No challenges yet"}
@@ -291,7 +346,7 @@ const AdminChallengesPage = () => {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg rounded-luxury-lg">
+        <DialogContent className="max-w-lg rounded-luxury-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-cal-sans flex items-center gap-2">
               <Trophy className="h-5 w-5 text-primary" />
@@ -319,6 +374,76 @@ const AdminChallengesPage = () => {
                 placeholder={isRTL ? "תיאור קצר של האתגר..." : "Short description of the challenge..."}
               />
             </div>
+
+            {/* Details URL */}
+            <div className="space-y-2">
+              <Label>{isRTL ? "קישור לעמוד פרטים" : "Details Page URL"}</Label>
+              <Input
+                variant="luxury"
+                value={detailsUrl}
+                onChange={(e) => setDetailsUrl(e.target.value)}
+                dir="ltr"
+                placeholder="https://..."
+              />
+              <p className="text-xs text-muted-foreground">
+                {isRTL ? "קישור לעמוד חיצוני עם כל הפרטים על האתגר" : "Link to an external page with full challenge details"}
+              </p>
+            </div>
+
+            {/* Video Upload */}
+            <div className="space-y-2">
+              <Label>{isRTL ? "סרטון" : "Video"}</Label>
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleVideoUpload(file);
+                  e.target.value = "";
+                }}
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="luxury-outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => videoInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  {isRTL ? "העלאת סרטון" : "Upload Video"}
+                </Button>
+                {uploadedFileName && (
+                  <span className="flex items-center gap-1 text-xs text-primary">
+                    <FileVideo className="h-3.5 w-3.5" />
+                    {uploadedFileName}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{isRTL ? "או הדבק קישור:" : "or paste URL:"}</span>
+              </div>
+              <Input
+                variant="luxury"
+                value={videoUrl}
+                onChange={(e) => { setVideoUrl(e.target.value); setUploadedFileName(""); }}
+                dir="ltr"
+                placeholder="https://..."
+              />
+              {videoUrl && (
+                <button
+                  onClick={() => { setVideoUrl(""); setUploadedFileName(""); }}
+                  className="flex items-center gap-1 text-xs text-destructive hover:underline"
+                >
+                  <X className="h-3 w-3" />
+                  {isRTL ? "הסר סרטון" : "Remove video"}
+                </button>
+              )}
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{isRTL ? "תאריך התחלה" : "Start Date"}</Label>

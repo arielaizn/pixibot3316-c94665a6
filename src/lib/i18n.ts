@@ -10,6 +10,7 @@ const translations = {
   "nav.signup": { he: "הרשמה", en: "Sign Up" },
   "nav.dashboard": { he: "דשבורד", en: "Dashboard" },
   "nav.projects": { he: "פרויקטים", en: "Projects" },
+  "nav.updates": { he: "עדכונים", en: "Updates" },
   "nav.upgrade": { he: "שדרוג", en: "Upgrade" },
   "nav.getStarted": { he: "התחל עכשיו", en: "Get Started" },
   "nav.logout": { he: "התנתק", en: "Log Out" },

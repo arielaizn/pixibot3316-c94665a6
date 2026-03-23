@@ -90,6 +90,7 @@ const ProjectsPage = () => {
   const [showVersions, setShowVersions] = useState<VideoRecord | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
   const {
     folders, files, allFiles, loading,
@@ -238,6 +239,40 @@ const ProjectsPage = () => {
     [uploadFiles, uploadToProject, selectedProject]
   );
 
+  const handleFolderSelect = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selected = Array.from(e.target.files || []);
+      if (selected.length === 0) return;
+      // Extract folder name from the first file's webkitRelativePath
+      const firstPath = (selected[0] as any).webkitRelativePath || "";
+      const folderName = firstPath.split("/")[0] || (isRTL ? "תיקייה חדשה" : "New Folder");
+
+      if (selectedProject && selectedProject.id !== "__orphan__") {
+        // Upload all files into the current project
+        setUploadProgress(0);
+        uploadToProject.mutate(
+          { projectId: selectedProject.id, files: selected },
+          { onSettled: () => setUploadProgress(null) }
+        );
+      } else {
+        // Create a new project with the folder name, then upload
+        createProject.mutate(folderName, {
+          onSuccess: (data: any) => {
+            if (data?.id) {
+              setUploadProgress(0);
+              uploadToProject.mutate(
+                { projectId: data.id, files: selected },
+                { onSettled: () => setUploadProgress(null) }
+              );
+            }
+          },
+        });
+      }
+      e.target.value = "";
+    },
+    [uploadToProject, createProject, selectedProject, isRTL]
+  );
+
   /* auth guards */
   if (authLoading) {
     return (
@@ -369,6 +404,8 @@ const ProjectsPage = () => {
       >
         <Navbar />
         <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileSelect} />
+        {/* @ts-ignore — webkitdirectory is not in React types */}
+        <input ref={folderInputRef} type="file" multiple className="hidden" onChange={handleFolderSelect} {...{ webkitdirectory: "", directory: "" } as any} />
 
         {/* Drag overlay */}
         {dragOver && (
@@ -402,6 +439,15 @@ const ProjectsPage = () => {
               >
                 {uploadToProject.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 {t.upload}
+              </Button>
+              <Button
+                variant="luxury-outline"
+                className="gap-2"
+                onClick={() => folderInputRef.current?.click()}
+                disabled={uploadToProject.isPending}
+              >
+                <FolderInput className="h-4 w-4" />
+                {isRTL ? "העלאת תיקייה" : "Upload Folder"}
               </Button>
               <Button
                 variant="luxury-outline"
@@ -555,6 +601,8 @@ const ProjectsPage = () => {
     >
       <Navbar />
       <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileSelect} />
+      {/* @ts-ignore — webkitdirectory is not in React types */}
+      <input ref={folderInputRef} type="file" multiple className="hidden" onChange={handleFolderSelect} {...{ webkitdirectory: "", directory: "" } as any} />
 
       {/* Drag overlay */}
       {dragOver && (
@@ -577,6 +625,15 @@ const ProjectsPage = () => {
             <Button variant="luxury-outline" className="gap-2" onClick={() => setShowNewProject(true)}>
               <Plus className="h-4 w-4" />
               {t.newProject}
+            </Button>
+            <Button
+              variant="luxury-outline"
+              className="gap-2"
+              onClick={() => folderInputRef.current?.click()}
+              disabled={uploadFiles.isPending || uploadToProject.isPending}
+            >
+              <FolderInput className="h-4 w-4" />
+              {isRTL ? "העלאת תיקייה" : "Upload Folder"}
             </Button>
             <Button
               variant="luxury"
