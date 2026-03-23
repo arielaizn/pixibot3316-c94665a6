@@ -318,6 +318,7 @@ const translations = {
   "admin.nav.userStats": { he: "סטטיסטיקות סרטונים", en: "Video Stats" },
   "admin.nav.updates": { he: "עדכונים", en: "Updates" },
   "admin.nav.admins": { he: "מנהלים", en: "Admins" },
+  "admin.nav.challenges": { he: "אתגרים", en: "Challenges" },
 
   // ── Common ──
   "common.video": { he: "סרטון", en: "Video" },

@@ -8,6 +8,17 @@ const corsHeaders = {
 
 const WHATSAPP_NUMBER = "972525515776";
 
+async function hasActiveChallenge(adminClient: ReturnType<typeof createClient>): Promise<boolean> {
+  const { data } = await adminClient
+    .from("challenges")
+    .select("id")
+    .eq("is_active", true)
+    .lte("start_date", new Date().toISOString())
+    .gte("end_date", new Date().toISOString())
+    .limit(1);
+  return (data && data.length > 0) || false;
+}
+
 function generateShortToken(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
@@ -77,7 +88,8 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    const isUnlimited = userCredits?.is_unlimited === true || isAdmin;
+    const challengeActive = await hasActiveChallenge(adminClient);
+    const isUnlimited = userCredits?.is_unlimited === true || isAdmin || challengeActive;
     const plan = isUnlimited ? "enterprise" : (userCredits?.plan_type || "free");
     const quota = isUnlimited ? 999999 : Math.max(0, (userCredits?.plan_credits || 0) + (userCredits?.extra_credits || 0) - (userCredits?.used_credits || 0));
 

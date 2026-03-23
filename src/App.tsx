@@ -33,6 +33,7 @@ import AdminWhatsAppPage from "./pages/admin/AdminWhatsAppPage.tsx";
 import AdminReferralsPage from "./pages/admin/AdminReferralsPage.tsx";
 import AdminUserStatsPage from "./pages/admin/AdminUserStatsPage.tsx";
 import AdminUpdatesPage from "./pages/admin/AdminUpdatesPage.tsx";
+import AdminChallengesPage from "./pages/admin/AdminChallengesPage.tsx";
 import AdminAdminsPage from "./pages/admin/AdminAdminsPage.tsx";
 import NotAdminPage from "./pages/admin/NotAdminPage.tsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
@@ -77,6 +78,7 @@ const App = () => (
                 <Route path="/admin/referrals" element={<AdminReferralsPage />} />
                 <Route path="/admin/user-stats" element={<AdminUserStatsPage />} />
                 <Route path="/admin/updates" element={<AdminUpdatesPage />} />
+                <Route path="/admin/challenges" element={<AdminChallengesPage />} />
                 <Route path="/admin/admins" element={<AdminAdminsPage />} />
                 <Route path="/not-admin" element={<NotAdminPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />

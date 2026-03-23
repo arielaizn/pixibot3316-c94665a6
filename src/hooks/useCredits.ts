@@ -18,6 +18,7 @@ export interface CreditSummary extends UserCredits {
   isLow: boolean;
   isEmpty: boolean;
   isUnlimited: boolean;
+  challengeActive: boolean;
 }
 
 const PLAN_LABELS: Record<string, { he: string; en: string }> = {
@@ -39,10 +40,11 @@ export function useCredits() {
     queryKey: ["user-credits", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      // Fetch credits and admin role in parallel
-      const [creditsResult, roleResult] = await Promise.all([
+      // Fetch credits, admin role, and active challenges in parallel
+      const [creditsResult, roleResult, challengeResult] = await Promise.all([
         supabase.from("user_credits").select("*").eq("user_id", user!.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user!.id).eq("role", "admin"),
+        supabase.from("challenges" as any).select("id").limit(1),
       ]);
 
       if (creditsResult.error) throw creditsResult.error;
@@ -50,7 +52,8 @@ export function useCredits() {
       if (!data) return null;
 
       const isAdmin = (roleResult.data && roleResult.data.length > 0) || false;
-      const isUnlimited = data.is_unlimited === true || isAdmin;
+      const hasActiveChallenge = (challengeResult.data && challengeResult.data.length > 0) || false;
+      const isUnlimited = data.is_unlimited === true || isAdmin || hasActiveChallenge;
       const totalCredits = data.plan_credits + data.extra_credits;
       const remainingCredits = isUnlimited ? Infinity : Math.max(0, totalCredits - data.used_credits);
       const usagePercent = isUnlimited ? 0 : totalCredits > 0 ? (data.used_credits / totalCredits) * 100 : 100;
@@ -66,6 +69,7 @@ export function useCredits() {
         remainingCredits,
         usagePercent,
         isUnlimited,
+        challengeActive: hasActiveChallenge,
         isLow: !isUnlimited && remainingCredits > 0 && remainingCredits / totalCredits < 0.2,
         isEmpty: !isUnlimited && remainingCredits <= 0,
       };

@@ -3,7 +3,7 @@ import { Link, useLocation, Navigate } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useDirection } from "@/contexts/DirectionContext";
 import {
-  LayoutDashboard, Users, CreditCard, Film, FolderOpen, MessageCircle, Shield, LogOut, Loader2, Menu, Gift, BarChart3, Bell, ShieldCheck,
+  LayoutDashboard, Users, CreditCard, Film, FolderOpen, MessageCircle, Shield, LogOut, Loader2, Menu, Gift, BarChart3, Bell, ShieldCheck, Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,6 +20,7 @@ const navItems = [
   { path: "/admin/referrals", icon: Gift, labelKey: "admin.nav.referrals" as const },
   { path: "/admin/user-stats", icon: BarChart3, labelKey: "admin.nav.userStats" as const },
   { path: "/admin/updates", icon: Bell, labelKey: "admin.nav.updates" as const },
+  { path: "/admin/challenges", icon: Trophy, labelKey: "admin.nav.challenges" as const },
   { path: "/admin/admins", icon: ShieldCheck, labelKey: "admin.nav.admins" as const },
 ];
 

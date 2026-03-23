@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useDirection } from "@/contexts/DirectionContext";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Film } from "lucide-react";
+import { AlertTriangle, Film, Trophy } from "lucide-react";
 import type { CreditSummary } from "@/hooks/useCredits";
 import { getPlanLabel } from "@/hooks/useCredits";
 
@@ -18,6 +18,14 @@ const CreditBar = ({ credits, showPlan = false, showWarning = true }: CreditBarP
   if (credits.isUnlimited) {
     return (
       <div className="space-y-3">
+        {credits.challengeActive && (
+          <div className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5">
+            <Trophy className="h-5 w-5 text-primary animate-float" />
+            <span className="text-sm font-bold text-primary">
+              {isRTL ? "אתגר פעיל - קרדיטים ללא הגבלה!" : "Challenge Active - Unlimited Credits!"}
+            </span>
+          </div>
+        )}
         {showPlan && (
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">{t("credits.currentPlan")}:</span>

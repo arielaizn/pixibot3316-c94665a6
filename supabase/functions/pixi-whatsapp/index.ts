@@ -18,6 +18,18 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ── Challenge check helper ──
+async function hasActiveChallenge(adminClient: ReturnType<typeof createClient>): Promise<boolean> {
+  const { data } = await adminClient
+    .from("challenges")
+    .select("id")
+    .eq("is_active", true)
+    .lte("start_date", new Date().toISOString())
+    .gte("end_date", new Date().toISOString())
+    .limit(1);
+  return (data && data.length > 0) || false;
+}
+
 // ── Plan metadata ──
 const PLAN_CREDITS: Record<string, number> = {
   free: 1,
@@ -121,7 +133,8 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       const plan = credits?.plan_type || "free";
-      const isUnlimited = credits?.is_unlimited || isAdmin;
+      const challengeActive = await hasActiveChallenge(admin);
+      const isUnlimited = credits?.is_unlimited || isAdmin || challengeActive;
       const remaining = isUnlimited
         ? -1
         : Math.max(0, (credits?.plan_credits || 0) + (credits?.extra_credits || 0) - (credits?.used_credits || 0));
@@ -316,7 +329,8 @@ async function handleTokenMessage(
   const name = profile?.full_name?.split(" ")[0] || "";
   const greeting = name ? `שלום ${name}! 👋` : "שלום! 👋";
   const plan = isAdmin ? "enterprise" : (credits?.plan_type || "free");
-  const isUnlimited = credits?.is_unlimited || isAdmin;
+  const challengeActive = await hasActiveChallenge(admin);
+  const isUnlimited = credits?.is_unlimited || isAdmin || challengeActive;
   const remaining = isUnlimited
     ? -1
     : Math.max(0, (credits?.plan_credits || 0) + (credits?.extra_credits || 0) - (credits?.used_credits || 0));
@@ -435,7 +449,8 @@ async function handleReturningUser(
     .maybeSingle();
 
   const plan = credits?.plan_type || "free";
-  const isUnlimited = credits?.is_unlimited || isAdmin;
+  const challengeActive2 = await hasActiveChallenge(admin);
+  const isUnlimited = credits?.is_unlimited || isAdmin || challengeActive2;
   const remaining = isUnlimited
     ? -1
     : Math.max(0, (credits?.plan_credits || 0) + (credits?.extra_credits || 0) - (credits?.used_credits || 0));
