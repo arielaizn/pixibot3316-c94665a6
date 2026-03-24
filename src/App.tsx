@@ -22,6 +22,9 @@ import NotFound from "./pages/NotFound.tsx";
 import SharedPage from "./pages/SharedPage.tsx";
 import PublicVideoPage from "./pages/PublicVideoPage.tsx";
 import UpdatesPage from "./pages/UpdatesPage.tsx";
+import AcademyPage from "./pages/AcademyPage.tsx";
+import CourseDetailPage from "./pages/CourseDetailPage.tsx";
+import LessonViewerPage from "./pages/LessonViewerPage.tsx";
 // Admin pages
 import AdminLoginPage from "./pages/admin/AdminLoginPage.tsx";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage.tsx";
@@ -35,6 +38,8 @@ import AdminReferralsPage from "./pages/admin/AdminReferralsPage.tsx";
 import AdminUserStatsPage from "./pages/admin/AdminUserStatsPage.tsx";
 import AdminUpdatesPage from "./pages/admin/AdminUpdatesPage.tsx";
 import AdminChallengesPage from "./pages/admin/AdminChallengesPage.tsx";
+import AdminAcademyPage from "./pages/admin/AdminAcademyPage.tsx";
+import AdminCourseEditorPage from "./pages/admin/AdminCourseEditorPage.tsx";
 import AdminAdminsPage from "./pages/admin/AdminAdminsPage.tsx";
 import NotAdminPage from "./pages/admin/NotAdminPage.tsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
@@ -68,6 +73,9 @@ const App = () => (
                 <Route path="/projects/document/:fileId" element={<DocumentEditorPage />} />
                 <Route path="/updates" element={<UpdatesPage />} />
                 <Route path="/updates/:updateId" element={<UpdatesPage />} />
+                <Route path="/academy" element={<AcademyPage />} />
+                <Route path="/academy/:courseSlug" element={<CourseDetailPage />} />
+                <Route path="/academy/:courseSlug/lesson/:lessonSlug" element={<LessonViewerPage />} />
                 <Route path="/payment/callback" element={<PaymentCallbackPage />} />
                 {/* Admin */}
                 <Route path="/admin" element={<AdminLoginPage />} />
@@ -82,6 +90,8 @@ const App = () => (
                 <Route path="/admin/user-stats" element={<AdminUserStatsPage />} />
                 <Route path="/admin/updates" element={<AdminUpdatesPage />} />
                 <Route path="/admin/challenges" element={<AdminChallengesPage />} />
+                <Route path="/admin/academy" element={<AdminAcademyPage />} />
+                <Route path="/admin/academy/:courseId" element={<AdminCourseEditorPage />} />
                 <Route path="/admin/admins" element={<AdminAdminsPage />} />
                 <Route path="/not-admin" element={<NotAdminPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
