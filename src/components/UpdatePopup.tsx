@@ -50,7 +50,7 @@ const UpdatePopup = () => {
 
   const goToUpdates = () => {
     close();
-    navigate(`/updates#update-${update?.id}`);
+    navigate(`/updates/${update?.id}`);
   };
 
   return (

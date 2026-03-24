@@ -67,6 +67,7 @@ const App = () => (
                 <Route path="/projects/file/:fileId" element={<FilePreviewPage />} />
                 <Route path="/projects/document/:fileId" element={<DocumentEditorPage />} />
                 <Route path="/updates" element={<UpdatesPage />} />
+                <Route path="/updates/:updateId" element={<UpdatesPage />} />
                 <Route path="/payment/callback" element={<PaymentCallbackPage />} />
                 {/* Admin */}
                 <Route path="/admin" element={<AdminLoginPage />} />
