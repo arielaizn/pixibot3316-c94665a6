@@ -51,15 +51,29 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
     if (!started) setStarted(true);
 
     if (video.paused) {
+      // Mobile browsers (especially iOS) require user interaction for unmuted playback
+      // Try to play, and if it fails due to autoplay policy, mute and try again
+      const attemptPlay = () => {
+        video.play().catch((err) => {
+          // NotAllowedError means autoplay policy blocked it
+          if (err.name === 'NotAllowedError' && !video.muted) {
+            video.muted = true;
+            setMuted(true);
+            video.play().catch(() => setError(true));
+          } else {
+            setError(true);
+          }
+        });
+        setPlaying(true);
+      };
+
       // If the video is ready, play immediately. Otherwise wait for canplay.
       if (video.readyState >= 3) {
-        video.play().catch(() => setError(true));
-        setPlaying(true);
+        attemptPlay();
       } else {
         const onReady = () => {
           video.removeEventListener("canplay", onReady);
-          video.play().catch(() => setError(true));
-          setPlaying(true);
+          attemptPlay();
         };
         video.addEventListener("canplay", onReady);
         // If src was already set, trigger load
@@ -143,10 +157,15 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
       });
   }, [src, title, onDownload]);
 
-  // Event listeners
+  // Event listeners + mobile attributes
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
+
+    // Add mobile-specific attributes for older iOS devices
+    v.setAttribute('webkit-playsinline', 'true');
+    v.setAttribute('x-webkit-airplay', 'allow');
+
     const onTime = () => setCurrentTime(v.currentTime);
     const onMeta = () => setDuration(v.duration);
     const onEnd = () => setPlaying(false);
@@ -265,6 +284,7 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
         onClick={togglePlay}
         playsInline
         autoPlay={autoPlay}
+        muted={autoPlay}
         preload="metadata"
         crossOrigin="anonymous"
       />
