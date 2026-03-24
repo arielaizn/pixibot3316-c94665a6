@@ -38,19 +38,21 @@ const PluginAuthPage = () => {
         throw new Error('No active session');
       }
 
-      // Store auth session in database for plugin to poll
-      const { error: insertError } = await supabase
+      // Store auth session in database for plugin to poll (upsert to avoid duplicates)
+      const { error: upsertError } = await supabase
         .from('plugin_auth_sessions')
-        .insert({
+        .upsert({
           session_id: sessionId,
           user_id: user.id,
           access_token: sessionData.session.access_token,
           refresh_token: sessionData.session.refresh_token,
           authenticated: true,
           expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 minutes
+        }, {
+          onConflict: 'session_id',
         });
 
-      if (insertError) throw insertError;
+      if (upsertError) throw upsertError;
 
       setSuccess(true);
       toast({
