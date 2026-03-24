@@ -57,7 +57,7 @@ export default function AdminCourseEditorPage() {
   const handleAddModule = () => {
     setEditingModule(null);
     setModuleTitle("");
-    const maxSortOrder = Math.max(0, ...(course?.modules?.map((m) => m.sort_order) || []));
+    const maxSortOrder = Math.max(0, ...(course?.course_modules?.map((m) => m.sort_order) || []));
     setModuleSortOrder(maxSortOrder + 1);
     setModuleDialogOpen(true);
   };
@@ -126,8 +126,8 @@ export default function AdminCourseEditorPage() {
     setLessonDuration(10);
     setLessonVideoUrl("");
 
-    const module = course?.modules?.find((m) => m.id === moduleId);
-    const maxSortOrder = Math.max(0, ...(module?.lessons?.map((l) => l.sort_order) || []));
+    const module = course?.course_modules?.find((m) => m.id === moduleId);
+    const maxSortOrder = Math.max(0, ...(module?.course_lessons?.map((l) => l.sort_order) || []));
     setLessonSortOrder(maxSortOrder + 1);
 
     setLessonDialogOpen(true);
@@ -269,7 +269,7 @@ export default function AdminCourseEditorPage() {
     );
   }
 
-  const sortedModules = [...(course.modules || [])].sort((a, b) => a.sort_order - b.sort_order);
+  const sortedModules = [...(course.course_modules || [])].sort((a, b) => a.sort_order - b.sort_order);
 
   return (
     <AdminLayout>
@@ -303,7 +303,7 @@ export default function AdminCourseEditorPage() {
         {/* Modules */}
         <div className="space-y-6">
           {sortedModules.map((module) => {
-            const sortedLessons = [...(module.lessons || [])].sort((a, b) => a.sort_order - b.sort_order);
+            const sortedLessons = [...(module.course_lessons || [])].sort((a, b) => a.sort_order - b.sort_order);
 
             return (
               <Card key={module.id} variant="glass" className="shadow-luxury-md">
