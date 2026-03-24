@@ -54,32 +54,44 @@ const PixiVideoPlayer = ({ src, title, thumbnail, onShare, onDownload, autoPlay 
       // Mobile browsers (especially iOS) require user interaction for unmuted playback
       // Try to play, and if it fails due to autoplay policy, mute and try again
       const attemptPlay = () => {
-        video.play().catch((err) => {
-          // NotAllowedError means autoplay policy blocked it
-          if (err.name === 'NotAllowedError' && !video.muted) {
-            video.muted = true;
-            setMuted(true);
-            video.play().catch(() => setError(true));
-          } else {
-            setError(true);
-          }
-        });
-        setPlaying(true);
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setPlaying(true);
+            })
+            .catch((err) => {
+              // NotAllowedError means autoplay policy blocked it
+              if (err.name === 'NotAllowedError' && !video.muted) {
+                video.muted = true;
+                setMuted(true);
+                video.play()
+                  .then(() => setPlaying(true))
+                  .catch(() => setError(true));
+              } else {
+                setError(true);
+              }
+            });
+        } else {
+          setPlaying(true);
+        }
       };
 
-      // If the video is ready, play immediately. Otherwise wait for canplay.
-      if (video.readyState >= 3) {
-        attemptPlay();
-      } else {
+      // Always load the video first on mobile to ensure it's ready
+      // Check if we need to load
+      if (video.readyState < 2) {
+        // Not enough data loaded, wait for it
         const onReady = () => {
+          video.removeEventListener("loadeddata", onReady);
           video.removeEventListener("canplay", onReady);
           attemptPlay();
         };
+        video.addEventListener("loadeddata", onReady);
         video.addEventListener("canplay", onReady);
-        // If src was already set, trigger load
-        if (!video.src || video.src === window.location.href) {
-          video.load();
-        }
+        video.load();
+      } else {
+        // Ready to play
+        attemptPlay();
       }
     } else {
       video.pause();
