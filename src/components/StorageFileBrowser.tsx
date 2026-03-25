@@ -16,10 +16,10 @@ import {
 /* ── Section config ── */
 const SECTIONS: { key: StorageCategory; icon: typeof FileVideo; defaultOpen: boolean }[] = [
   { key: "final", icon: FileVideo, defaultOpen: true },
-  { key: "images", icon: ImageIcon, defaultOpen: false },
-  { key: "animations", icon: Film, defaultOpen: false },
-  { key: "music", icon: Music, defaultOpen: false },
-  { key: "narration", icon: Mic, defaultOpen: false },
+  { key: "images", icon: ImageIcon, defaultOpen: true },
+  { key: "animations", icon: Film, defaultOpen: true },
+  { key: "music", icon: Music, defaultOpen: true },
+  { key: "narration", icon: Mic, defaultOpen: true },
 ];
 
 const SECTION_TITLE_KEYS: Record<StorageCategory, string> = {
@@ -133,15 +133,12 @@ function StorageSection({ category, files, icon: Icon, defaultOpen, tr, onLightb
   onLightbox: (url: string, name: string) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const isImage = category === "images";
-  const isVideo = category === "final" || category === "animations";
-  const isAudio = category === "music" || category === "narration";
 
-  const gridClass = isImage
-    ? "grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-    : isVideo
-    ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-    : "grid gap-3 sm:grid-cols-2";
+  // Group files by MIME type for proper grid layout
+  const imageFiles = files.filter(f => f.mimeType.startsWith("image/"));
+  const videoFiles = files.filter(f => f.mimeType.startsWith("video/"));
+  const audioFiles = files.filter(f => f.mimeType.startsWith("audio/"));
+  const hasMultipleTypes = [imageFiles.length > 0, videoFiles.length > 0, audioFiles.length > 0].filter(Boolean).length > 1;
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="mb-6">
@@ -157,29 +154,46 @@ function StorageSection({ category, files, icon: Icon, defaultOpen, tr, onLightb
       </CollapsibleTrigger>
 
       <CollapsibleContent className="pt-3 ps-3">
-        <div className={gridClass}>
-          {files.map((file) => {
-            const handleDownload = () => downloadFile(file.publicUrl, file.name);
+        {/* Images */}
+        {imageFiles.length > 0 && (
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mb-4">
+            {imageFiles.map((file) => (
+              <ImageTile
+                key={file.fullPath}
+                file={file}
+                onLightbox={() => onLightbox(file.publicUrl, file.name)}
+                onDownload={() => downloadFile(file.publicUrl, file.name)}
+              />
+            ))}
+          </div>
+        )}
 
-            if (isImage) {
-              return (
-                <ImageTile
-                  key={file.fullPath}
-                  file={file}
-                  onLightbox={() => onLightbox(file.publicUrl, file.name)}
-                  onDownload={handleDownload}
-                />
-              );
-            }
-            if (isVideo) {
-              return <VideoTile key={file.fullPath} file={file} onDownload={handleDownload} />;
-            }
-            if (isAudio) {
-              return <AudioTile key={file.fullPath} file={file} category={category} onDownload={handleDownload} />;
-            }
-            return null;
-          })}
-        </div>
+        {/* Videos */}
+        {videoFiles.length > 0 && (
+          <div className={`grid gap-4 sm:grid-cols-2 lg:grid-cols-3 ${hasMultipleTypes ? 'mb-4' : ''}`}>
+            {videoFiles.map((file) => (
+              <VideoTile
+                key={file.fullPath}
+                file={file}
+                onDownload={() => downloadFile(file.publicUrl, file.name)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Audio */}
+        {audioFiles.length > 0 && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {audioFiles.map((file) => (
+              <AudioTile
+                key={file.fullPath}
+                file={file}
+                category={category}
+                onDownload={() => downloadFile(file.publicUrl, file.name)}
+              />
+            ))}
+          </div>
+        )}
       </CollapsibleContent>
     </Collapsible>
   );
