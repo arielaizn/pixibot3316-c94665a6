@@ -21,3 +21,9 @@ project_id = "ymhcczxxrgcnyxaqmohj"
     verify_jwt = true
   [functions.sumit-webhook]
     verify_jwt = false
+  [functions.pixi-plugin-download]
+    verify_jwt = false
+  [functions.pixi-plugin-projects]
+    verify_jwt = false
+  [functions.pixi-plugin-auth-check]
+    verify_jwt = false

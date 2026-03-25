@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Moon, Sun, Globe, ChevronDown, LogOut, LayoutDashboard, FolderOpen, Sparkles, Film, Newspaper, GraduationCap } from "lucide-react";
+import { Menu, X, Moon, Sun, Globe, ChevronDown, LogOut, LayoutDashboard, FolderOpen, Sparkles, Film, Newspaper, GraduationCap, Plug } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,7 @@ const Navbar = () => {
     { label: t("nav.projects"), href: "/projects", icon: FolderOpen },
     { label: t("nav.updates"), href: "/updates", icon: Newspaper },
     { label: t("nav.academy"), href: "/academy", icon: GraduationCap },
+    { label: t("nav.plugin"), href: "/plugin", icon: Plug },
     { label: t("nav.upgrade"), href: "/pricing", icon: Sparkles },
   ];
 

@@ -365,6 +365,28 @@ const translations = {
   "storage.music": { he: "מוזיקה", en: "Music" },
   "storage.narration": { he: "קריינות", en: "Narration" },
   "storage.download": { he: "הורדה", en: "Download" },
+
+  // ── Plugin Download ──
+  "nav.plugin": { he: "פלאגין", en: "Plugin" },
+  "plugin.title": { he: "פלאגין Adobe", en: "Adobe Plugin" },
+  "plugin.subtitle": { he: "ייבא פרויקטים ישירות ל-Premiere Pro ו-After Effects", en: "Import projects directly to Premiere Pro and After Effects" },
+  "plugin.mac": { he: "Mac", en: "Mac" },
+  "plugin.windows": { he: "Windows", en: "Windows" },
+  "plugin.macReq": { he: "macOS 10.15+", en: "macOS 10.15+" },
+  "plugin.winReq": { he: "Windows 10+", en: "Windows 10+" },
+  "plugin.download": { he: "הורדה", en: "Download" },
+  "plugin.version": { he: "גרסה 1.0", en: "Version 1.0" },
+  "plugin.step1title": { he: "הורדה", en: "Download" },
+  "plugin.step1": { he: "הורד את הפלאגין למערכת ההפעלה שלך", en: "Download the plugin for your OS" },
+  "plugin.step2title": { he: "התקנה", en: "Install" },
+  "plugin.step2": { he: "התקן והפעל מחדש את Adobe", en: "Install and restart Adobe" },
+  "plugin.step3title": { he: "חיבור", en: "Connect" },
+  "plugin.step3": { he: "פתח את הפאנל מ-Window → Extensions → Pixibot", en: "Open the panel from Window → Extensions → Pixibot" },
+  "plugin.howToInstall": { he: "איך מתקינים?", en: "How to Install" },
+  "plugin.requires": { he: "דרישות", en: "Requirements" },
+  "plugin.premiere": { he: "Premiere Pro 2022+", en: "Premiere Pro 2022+" },
+  "plugin.aftereffects": { he: "After Effects 2022+", en: "After Effects 2022+" },
+  "plugin.account": { he: "חשבון Pixibot פעיל", en: "Active Pixibot account" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

@@ -6,6 +6,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const STORAGE_SUBFOLDERS = ['final', 'images', 'animations', 'music', 'narration'];
+
+function inferMimeType(fileName: string): string {
+  const ext = (fileName.split('.').pop() || '').toLowerCase();
+  const map: Record<string, string> = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+    gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml',
+    mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime',
+    mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg',
+    m4a: 'audio/mp4', aac: 'audio/aac',
+  };
+  return map[ext] || 'application/octet-stream';
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -21,7 +35,7 @@ serve(async (req) => {
       );
     }
 
-    const { file_ids, video_ids } = await req.json();
+    const { file_ids, video_ids, storage_path } = await req.json();
 
     const token = authHeader.replace('Bearer ', '');
 
@@ -46,6 +60,73 @@ serve(async (req) => {
       );
     }
 
+    // ─── Storage-based download mode ───
+    if (storage_path) {
+      const basePath = storage_path.endsWith('/') ? storage_path : `${storage_path}/`;
+
+      // Verify the storage path belongs to this user
+      if (!basePath.startsWith(user.id + '/')) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized storage path' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const categorizedFiles: Record<string, any[]> = {};
+
+      // List all subfolders in parallel
+      const listings = await Promise.all(
+        STORAGE_SUBFOLDERS.map(async (folder) => {
+          const prefix = `${basePath}${folder}`;
+          const { data, error } = await supabaseService.storage
+            .from('user-files')
+            .list(prefix, { limit: 200, sortBy: { column: 'name', order: 'asc' } });
+
+          if (error) {
+            console.warn(`Storage list error for ${prefix}:`, error.message);
+            return { folder, files: [] };
+          }
+
+          // Filter out placeholder files and folder entries
+          const realFiles = (data || []).filter(
+            (f: any) => f.name && !f.name.startsWith('.') && f.id
+          );
+          return { folder, files: realFiles };
+        })
+      );
+
+      // Generate signed URLs for all files
+      for (const { folder, files } of listings) {
+        if (files.length === 0) continue;
+
+        const paths = files.map((f: any) => `${basePath}${folder}/${f.name}`);
+        const { data: signedBatch, error: signError } = await supabaseService.storage
+          .from('user-files')
+          .createSignedUrls(paths, 3600);
+
+        if (signError || !signedBatch) {
+          console.warn(`Signed URLs error for ${folder}:`, signError?.message);
+          continue;
+        }
+
+        categorizedFiles[folder] = signedBatch
+          .filter((s: any) => !s.error && s.signedUrl)
+          .map((s: any, i: number) => ({
+            name: files[i].name,
+            url: s.signedUrl,
+            size: files[i].metadata?.size || 0,
+            folder,
+            mimeType: inferMimeType(files[i].name),
+          }));
+      }
+
+      return new Response(
+        JSON.stringify({ categorizedFiles }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // ─── Legacy: DB-based download mode ───
     const downloadUrls: any[] = [];
 
     // Fetch file records
