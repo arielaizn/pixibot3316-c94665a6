@@ -7,6 +7,7 @@ import { downloadFile } from "@/lib/downloadFile";
 import { useFileManager, UserFile, UserFolder } from "@/hooks/useFileManager";
 import { useProjects, ProjectWithContent, VideoRecord, ProjectFile } from "@/hooks/useProjects";
 import Navbar from "@/components/Navbar";
+import StorageFileBrowser from "@/components/StorageFileBrowser";
 import PixiVideoPlayer from "@/components/PixiVideoPlayer";
 import ShareModal from "@/components/ShareModal";
 import FileShareModal from "@/components/FileShareModal";
@@ -541,8 +542,15 @@ const ProjectsPage = () => {
             </div>
           )}
 
+          {/* Storage files browser */}
+          {selectedProject.storage_path && (
+            <div className="mt-8">
+              <StorageFileBrowser storagePath={selectedProject.storage_path} />
+            </div>
+          )}
+
           {/* Empty project */}
-          {projectVideos.length === 0 && projectFilesList.length === 0 && (
+          {projectVideos.length === 0 && projectFilesList.length === 0 && !selectedProject.storage_path && (
             <Card variant="glass" className="p-12 text-center shadow-luxury-md">
               <Video className="mx-auto mb-4 h-12 w-12 text-muted-foreground/40 animate-float" />
               <p className="mb-1 text-lg font-semibold text-foreground">{t.noVideos}</p>

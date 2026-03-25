@@ -356,6 +356,15 @@ const translations = {
   "common.error": { he: "שגיאה", en: "Error" },
   "common.remaining": { he: "נשארו לכם", en: "remaining" },
   "common.creditsRemaining": { he: "קרדיטים", en: "credits" },
+
+  // ── Storage Browser ──
+  "storage.title": { he: "קבצי פרויקט", en: "Project Files" },
+  "storage.final": { he: "סרטונים סופיים", en: "Final Videos" },
+  "storage.images": { he: "תמונות", en: "Images" },
+  "storage.animations": { he: "אנימציות", en: "Animations" },
+  "storage.music": { he: "מוזיקה", en: "Music" },
+  "storage.narration": { he: "קריינות", en: "Narration" },
+  "storage.download": { he: "הורדה", en: "Download" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

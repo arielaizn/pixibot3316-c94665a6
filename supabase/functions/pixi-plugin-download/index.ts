@@ -86,21 +86,33 @@ serve(async (req) => {
 
       if (videosError) throw videosError;
 
-      // Generate signed URLs for videos
       for (const video of videos || []) {
         if (video.video_url) {
-          const { data: signedData, error: signError } = await supabaseService.storage
-            .from('user-files')
-            .createSignedUrl(video.video_url, 3600); // 1 hour
-
-          if (!signError && signedData) {
+          // Check if video_url is already a full public URL
+          if (video.video_url.startsWith('http://') || video.video_url.startsWith('https://')) {
+            // Already a full URL - use directly (these are public URLs)
             downloadUrls.push({
               id: video.id,
               name: (video.title || 'video') + '.mp4',
-              url: signedData.signedUrl,
+              url: video.video_url,
               size: 0,
               type: 'video/mp4',
             });
+          } else {
+            // Relative storage path - generate signed URL
+            const { data: signedData, error: signError } = await supabaseService.storage
+              .from('user-files')
+              .createSignedUrl(video.video_url, 3600);
+
+            if (!signError && signedData) {
+              downloadUrls.push({
+                id: video.id,
+                name: (video.title || 'video') + '.mp4',
+                url: signedData.signedUrl,
+                size: 0,
+                type: 'video/mp4',
+              });
+            }
           }
         }
       }

@@ -46,6 +46,7 @@ export interface ProjectWithContent {
   status: string;
   created_at: string;
   user_id: string;
+  storage_path: string | null;
   videos: VideoRecord[];
   files: ProjectFile[];
 }
@@ -119,6 +120,7 @@ export const useProjects = () => {
           status: "active",
           created_at: orphanVideos[0].created_at,
           user_id: user!.id,
+          storage_path: null,
           videos: orphanVideos,
           files: [],
         });
