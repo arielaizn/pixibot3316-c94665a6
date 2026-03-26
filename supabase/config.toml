@@ -27,3 +27,5 @@ project_id = "ymhcczxxrgcnyxaqmohj"
     verify_jwt = false
   [functions.pixi-plugin-auth-check]
     verify_jwt = false
+  [functions.pixi-agent-streaming]
+    verify_jwt = false
