@@ -259,20 +259,25 @@ function parseLocalEditCommand(command: string, context?: any): AgentResponse | 
 // Parse command for web app (non-plugin) context
 function parseWebCommand(command: string, composition: any): AgentResponse {
   const lowerCommand = command.toLowerCase();
+  const clips = composition?.clips || [];
 
-  if (lowerCommand.includes('remove') || lowerCommand.includes('delete')) {
-    if (lowerCommand.includes('all')) {
+  // Helper to get selected clip or first clip
+  const getTargetClip = () => clips.length > 0 ? clips[0] : null;
+
+  // Remove/Delete commands (Hebrew: מחק, הסר)
+  if (lowerCommand.includes('remove') || lowerCommand.includes('delete') ||
+      lowerCommand.includes('מחק') || lowerCommand.includes('הסר')) {
+    if (lowerCommand.includes('all') || lowerCommand.includes('הכל')) {
       return {
-        message: 'Removing all clips from the timeline.',
+        message: 'מסיר את כל הקליפים מהטיימליין.',
         action: { type: 'remove_clip', payload: { clipId: 'all' } },
         status: 'completed',
       };
     }
-    if (lowerCommand.includes('last')) {
-      const clips = composition?.clips || [];
+    if (lowerCommand.includes('last') || lowerCommand.includes('אחרון')) {
       if (clips.length > 0) {
         return {
-          message: 'Removing the last clip.',
+          message: 'מסיר את הקליפ האחרון.',
           action: { type: 'remove_clip', payload: { clipId: clips[clips.length - 1].id } },
           status: 'completed',
         };
@@ -280,16 +285,23 @@ function parseWebCommand(command: string, composition: any): AgentResponse {
     }
   }
 
-  if (lowerCommand.includes('scale')) {
-    const scaleMatch = lowerCommand.match(/(\d+)%?/);
+  // Scale commands (Hebrew: הגדל, הקטן, שנה גודל, סקייל)
+  if (lowerCommand.includes('scale') || lowerCommand.includes('הגדל') ||
+      lowerCommand.includes('הקטן') || lowerCommand.includes('גודל') || lowerCommand.includes('סקייל')) {
+    const scaleMatch = lowerCommand.match(/(\d+(?:\.\d+)?)%?/);
     if (scaleMatch) {
-      const clips = composition?.clips || [];
-      if (clips.length > 0) {
+      const clip = getTargetClip();
+      if (clip) {
+        const scaleValue = parseFloat(scaleMatch[1]);
+        const scaleFactor = scaleValue > 10 ? scaleValue / 100 : scaleValue; // Handle both 150 and 1.5
         return {
-          message: `Scaling video to ${scaleMatch[1]}%.`,
+          message: `משנה גודל לסרטון ל-${Math.round(scaleFactor * 100)}%.`,
           action: {
             type: 'update_clip',
-            payload: { clipId: clips[0].id, updates: { transform: { ...clips[0].transform, scale: parseInt(scaleMatch[1]) / 100 } } },
+            payload: {
+              clipId: clip.id,
+              updates: { scale: scaleFactor }
+            },
           },
           status: 'completed',
         };
@@ -297,16 +309,21 @@ function parseWebCommand(command: string, composition: any): AgentResponse {
     }
   }
 
-  if (lowerCommand.includes('rotate')) {
-    const rotateMatch = lowerCommand.match(/(\d+)\s*degrees?/);
+  // Rotate commands (Hebrew: סובב, סיבוב)
+  if (lowerCommand.includes('rotate') || lowerCommand.includes('סובב') || lowerCommand.includes('סיבוב')) {
+    const rotateMatch = lowerCommand.match(/(\d+)\s*(?:degrees?|מעלות)?/);
     if (rotateMatch) {
-      const clips = composition?.clips || [];
-      if (clips.length > 0) {
+      const clip = getTargetClip();
+      if (clip) {
+        const degrees = parseInt(rotateMatch[1]);
         return {
-          message: `Rotating video ${rotateMatch[1]} degrees.`,
+          message: `מסובב את הסרטון ${degrees} מעלות.`,
           action: {
             type: 'update_clip',
-            payload: { clipId: clips[0].id, updates: { transform: { ...clips[0].transform, rotate: parseInt(rotateMatch[1]) } } },
+            payload: {
+              clipId: clip.id,
+              updates: { rotate: degrees }
+            },
           },
           status: 'completed',
         };
@@ -314,24 +331,94 @@ function parseWebCommand(command: string, composition: any): AgentResponse {
     }
   }
 
-  if (lowerCommand.includes('trim') || lowerCommand.includes('cut')) {
-    const timeMatch = lowerCommand.match(/(\d+)\s*s(?:econds?)?/g);
-    if (timeMatch && timeMatch.length >= 2) {
-      const start = parseInt(timeMatch[0]) * 30;
-      const end = parseInt(timeMatch[1]) * 30;
-      const clips = composition?.clips || [];
-      if (clips.length > 0) {
+  // Move/Position commands (Hebrew: הזז, מקם, מיקום)
+  if (lowerCommand.includes('move') || lowerCommand.includes('position') ||
+      lowerCommand.includes('הזז') || lowerCommand.includes('מקם') || lowerCommand.includes('מיקום')) {
+    const xMatch = lowerCommand.match(/x[:\s]*(-?\d+)/i);
+    const yMatch = lowerCommand.match(/y[:\s]*(-?\d+)/i);
+
+    if (xMatch || yMatch) {
+      const clip = getTargetClip();
+      if (clip) {
+        const x = xMatch ? parseInt(xMatch[1]) : (clip.transform?.x || 0);
+        const y = yMatch ? parseInt(yMatch[1]) : (clip.transform?.y || 0);
         return {
-          message: `Trimming video from ${timeMatch[0]} to ${timeMatch[1]}.`,
-          action: { type: 'trim_clip', payload: { clipId: clips[0].id, start, duration: end - start } },
+          message: `מזיז את הסרטון למיקום X:${x}, Y:${y}.`,
+          action: {
+            type: 'update_clip',
+            payload: {
+              clipId: clip.id,
+              updates: { x, y }
+            },
+          },
           status: 'completed',
         };
       }
     }
   }
 
+  // Trim/Cut commands (Hebrew: חתך, קצץ, גזור)
+  if (lowerCommand.includes('trim') || lowerCommand.includes('cut') ||
+      lowerCommand.includes('חתך') || lowerCommand.includes('קצץ') || lowerCommand.includes('גזור')) {
+    const timeMatch = lowerCommand.match(/(\d+(?:\.\d+)?)\s*s(?:ec|econds)?/gi);
+    if (timeMatch && timeMatch.length >= 2) {
+      const clip = getTargetClip();
+      if (clip) {
+        const start = parseFloat(timeMatch[0]) * 30;
+        const end = parseFloat(timeMatch[1]) * 30;
+        return {
+          message: `חותך את הסרטון מ-${timeMatch[0]} עד ${timeMatch[1]}.`,
+          action: {
+            type: 'trim_clip',
+            payload: { clipId: clip.id, start, duration: end - start }
+          },
+          status: 'completed',
+        };
+      }
+    }
+  }
+
+  // Reset/Clear transform (Hebrew: אפס, נקה)
+  if (lowerCommand.includes('reset') || lowerCommand.includes('אפס') || lowerCommand.includes('נקה')) {
+    const clip = getTargetClip();
+    if (clip) {
+      return {
+        message: 'מאפס את כל השינויים בסרטון.',
+        action: {
+          type: 'update_clip',
+          payload: {
+            clipId: clip.id,
+            updates: { x: 0, y: 0, scale: 1, rotate: 0 }
+          },
+        },
+        status: 'completed',
+      };
+    }
+  }
+
+  // Flip commands (Hebrew: הפוך)
+  if (lowerCommand.includes('flip') || lowerCommand.includes('הפוך')) {
+    const clip = getTargetClip();
+    if (clip) {
+      if (lowerCommand.includes('horizontal') || lowerCommand.includes('אופקי')) {
+        return {
+          message: 'מהפך את הסרטון אופקית.',
+          action: {
+            type: 'update_clip',
+            payload: {
+              clipId: clip.id,
+              updates: { scale: -Math.abs(clip.transform?.scale || 1) }
+            },
+          },
+          status: 'completed',
+        };
+      }
+    }
+  }
+
+  // No command matched
   return {
-    message: "I understand you want to edit the video, but I need more specific instructions. Try commands like:\n• 'Remove the last clip'\n• 'Scale to 150%'\n• 'Rotate 90 degrees'\n• 'Trim from 2s to 5s'",
+    message: "אני מבין שאתה רוצה לערוך את הסרטון, אבל אני צריך הוראות ספציפיות יותר. נסה פקודות כמו:\n• 'הסר את הקליפ האחרון'\n• 'הגדל ל-150%'\n• 'סובב 90 מעלות'\n• 'חתך מ-2s עד 5s'\n• 'הזז X:100 Y:50'\n• 'אפס הכל'",
     status: 'completed',
   };
 }

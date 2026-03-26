@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 215 28% 17%;
+    --card: 210 40% 98%;
+    --card-foreground: 215 28% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 17%;
+    --primary: 145 63% 49%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 170 38% 31%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 239 84% 67%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215 16% 47%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 145 63% 49%;
+    --radius: 0.75rem;
+
+    /* Premium color variants */
+    --primary-glow: 145 80% 60%;
+    --primary-dark: 145 63% 35%;
+
+    /* Gradient system */
+    --gradient-from: 145 70% 55%;
+    --gradient-via: 170 45% 48%;
+    --gradient-to: 239 84% 67%;
+
+    /* Multi-layer luxury shadows */
+    --shadow-luxury-sm:
+      0 2px 8px -2px hsl(var(--primary) / 0.08),
+      0 4px 16px -4px hsl(var(--foreground) / 0.04),
+      0 1px 0 0 hsl(var(--border));
+
+    --shadow-luxury-md:
+      0 4px 16px -4px hsl(var(--primary) / 0.12),
+      0 8px 32px -8px hsl(var(--foreground) / 0.08),
+      0 1px 0 0 hsl(var(--border)),
+      inset 0 1px 0 0 hsl(var(--card) / 0.4);
+
+    --shadow-luxury-lg:
+      0 8px 32px -8px hsl(var(--primary) / 0.16),
+      0 16px 64px -16px hsl(var(--foreground) / 0.12),
+      0 2px 0 0 hsl(var(--border)),
+      inset 0 1px 0 0 hsl(var(--card) / 0.6);
+
+    /* Glow effects */
+    --glow-primary: 0 0 24px hsl(var(--primary) / 0.4);
+    --glow-primary-strong: 0 0 40px hsl(var(--primary) / 0.6),
+                            0 0 80px hsl(var(--primary) / 0.3);
+  }
+
+  .dark {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 145 63% 49%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 170 38% 31%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 239 84% 67%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 145 63% 49%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Luxury shadow utilities */
+@layer utilities {
+  .shadow-luxury-sm {
+    box-shadow: var(--shadow-luxury-sm);
+  }
+
+  .shadow-luxury-md {
+    box-shadow: var(--shadow-luxury-md);
+  }
+
+  .shadow-luxury-lg {
+    box-shadow: var(--shadow-luxury-lg);
+  }
+
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .glow-primary-strong {
+    box-shadow: var(--glow-primary-strong);
+  }
+}

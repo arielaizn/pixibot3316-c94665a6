@@ -1,0 +1,2 @@
+# This file keeps the installers directory in git
+# Actual installer files (.pkg, .exe, .zxp) should not be committed

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionList>
+  <Extension Id="com.pixibot.premiere">
+    <HostList>
+      <Host Name="PPRO" Port="8088"/>
+    </HostList>
+  </Extension>
+  <Extension Id="com.pixibot.aftereffects">
+    <HostList>
+      <Host Name="AEFT" Port="8089"/>
+    </HostList>
+  </Extension>
+</ExtensionList>

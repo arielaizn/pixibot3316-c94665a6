@@ -1,0 +1,33 @@
+# Build outputs
+dist/
+client/dist/
+*.zxp
+*.pkg
+*.exe
+*.zip
+
+# Certificates
+*.p12
+cert.p12
+
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp
+*.tmp
+.temp/

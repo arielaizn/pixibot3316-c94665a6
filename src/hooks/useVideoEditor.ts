@@ -98,8 +98,7 @@ export const useVideoEditor = create<VideoEditorState>()(
 
     seek: (time) =>
       set((state) => {
-        state.currentTime = time;
-        state.isPlaying = false;
+        state.currentTime = Math.max(0, Math.min(299, time));
       }),
 
     selectClip: (id) =>

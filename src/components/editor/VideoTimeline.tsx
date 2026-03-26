@@ -206,11 +206,11 @@ export const VideoTimeline = ({
                   e.stopPropagation();
                   onClipSelect?.(clip.id);
                 }}
-                className={`absolute h-20 rounded-lg border-2 transition-all duration-200 cursor-move group backdrop-blur-sm select-none ${
+                className={`absolute h-20 rounded-lg border-2 transition-all duration-200 cursor-grab active:cursor-grabbing group backdrop-blur-sm select-none z-10 ${
                   isSelected
-                    ? 'bg-gradient-to-br from-accent via-accent/90 to-accent/80 border-accent shadow-luxury-xl ring-4 ring-accent/30 z-10'
-                    : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 border-primary/50 hover:border-primary hover:shadow-luxury-lg'
-                } ${draggingClip === clip.id ? 'opacity-80 scale-105' : ''}`}
+                    ? 'bg-gradient-to-br from-accent via-accent/90 to-accent/80 border-accent shadow-luxury-xl ring-4 ring-accent/30 z-20'
+                    : 'bg-gradient-to-br from-primary via-primary/90 to-primary/80 border-primary/50 hover:border-primary hover:shadow-luxury-lg hover:scale-102'
+                } ${draggingClip === clip.id ? 'opacity-70 scale-105 shadow-2xl ring-4 ring-primary/50 cursor-grabbing z-30' : ''}`}
                 style={{
                   left: clip.start * pixelsPerFrame,
                   width: clip.duration * pixelsPerFrame,
@@ -246,14 +246,17 @@ export const VideoTimeline = ({
           )}
         </div>
 
-        {/* Click to seek */}
+        {/* Click to seek (behind clips) */}
         <div
-          className="absolute inset-0 cursor-pointer z-5"
+          className="absolute inset-0 cursor-pointer"
           onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const frame = Math.floor(x / pixelsPerFrame);
-            onSeek(Math.max(0, Math.min(frame, totalDuration)));
+            // Only seek if clicking empty space (not on a clip)
+            if (e.target === e.currentTarget) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const frame = Math.floor(x / pixelsPerFrame);
+              onSeek(Math.max(0, Math.min(frame, totalDuration)));
+            }
           }}
         />
       </div>

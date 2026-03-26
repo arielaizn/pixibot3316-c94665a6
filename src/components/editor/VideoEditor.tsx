@@ -81,20 +81,28 @@ export const VideoEditor = () => {
   useEffect(() => {
     if (!playerRef.current) return;
 
+    const player = playerRef.current;
+
     if (isPlaying) {
-      playerRef.current.play();
+      // Ensure we're at the right frame before playing
+      if (player.getCurrentFrame() !== currentTime) {
+        player.seekTo(currentTime);
+      }
+      player.play();
     } else {
-      playerRef.current.pause();
+      player.pause();
     }
-  }, [isPlaying]);
+  }, [isPlaying, currentTime]);
 
-  // Sync player frame when seeking
+  // Sync player frame when seeking (only when not playing)
   useEffect(() => {
-    if (!playerRef.current) return;
+    if (!playerRef.current || isPlaying) return;
 
-    const currentFrame = playerRef.current.getCurrentFrame();
-    if (currentFrame !== currentTime && !isPlaying) {
-      playerRef.current.seekTo(currentTime);
+    const player = playerRef.current;
+    const playerFrame = player.getCurrentFrame();
+
+    if (playerFrame !== currentTime) {
+      player.seekTo(currentTime);
     }
   }, [currentTime, isPlaying]);
 
@@ -102,26 +110,33 @@ export const VideoEditor = () => {
   useEffect(() => {
     if (!playerRef.current || !isPlaying) return;
 
-    let animationFrameId: number;
+    const player = playerRef.current;
+    let lastFrame = -1;
 
     const updateFrame = () => {
-      const frame = playerRef.current?.getCurrentFrame();
-      if (frame !== undefined) {
+      const frame = player.getCurrentFrame();
+
+      if (frame !== undefined && frame !== lastFrame) {
+        lastFrame = frame;
         seek(frame);
+
+        // Auto-pause at end
+        if (frame >= 299) {
+          pause();
+        }
       }
-      if (isPlaying) {
-        animationFrameId = requestAnimationFrame(updateFrame);
+
+      if (isPlaying && frame < 299) {
+        requestAnimationFrame(updateFrame);
       }
     };
 
-    animationFrameId = requestAnimationFrame(updateFrame);
+    const animationFrameId = requestAnimationFrame(updateFrame);
 
     return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
+      cancelAnimationFrame(animationFrameId);
     };
-  }, [isPlaying, seek]);
+  }, [isPlaying, seek, pause]);
 
   return (
     <div className="h-screen flex flex-col bg-background">

@@ -94,6 +94,11 @@ export const VideoComposition: React.FC<Props> = ({ videoUrl, clips }) => {
             <Video
               src={clip.videoUrl}
               startFrom={Math.max(0, clipFrame)}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
             />
           </AbsoluteFill>
         );

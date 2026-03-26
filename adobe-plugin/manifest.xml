@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionManifest Version="9.0" ExtensionBundleId="com.pixibot.adobe.plugin"
+    ExtensionBundleVersion="1.0.0" ExtensionBundleName="Pixibot"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <Author>
+    <![CDATA[Pixibot]]>
+  </Author>
+
+  <Contact mailto="info@pixibot.app" />
+
+  <Legal>
+    <![CDATA[Copyright (c) 2026 Pixibot. All rights reserved.]]>
+  </Legal>
+
+  <Abstract>
+    <![CDATA[Import projects from Pixibot and use AI-powered editing in Premiere Pro & After Effects]]>
+  </Abstract>
+
+  <ExtensionList>
+    <Extension Id="com.pixibot.premiere" Version="1.0.0" />
+    <Extension Id="com.pixibot.aftereffects" Version="1.0.0" />
+  </ExtensionList>
+
+  <ExecutionEnvironment>
+    <HostList>
+      <!-- Premiere Pro 2022+ (version 16.0+) -->
+      <Host Name="PPRO" Version="[16.0,99.9]" />
+      <!-- After Effects 2022+ (version 18.0+) -->
+      <Host Name="AEFT" Version="[18.0,99.9]" />
+    </HostList>
+    <LocaleList>
+      <Locale Code="All" />
+    </LocaleList>
+    <RequiredRuntimeList>
+      <RequiredRuntime Name="CSXS" Version="9.0" />
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+
+  <DispatchInfoList>
+    <!-- Premiere Pro Extension -->
+    <Extension Id="com.pixibot.premiere">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./client/index.html</MainPath>
+          <ScriptPath>./host/premiere.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>Pixibot</Menu>
+          <Geometry>
+            <Size>
+              <Height>600</Height>
+              <Width>400</Width>
+            </Size>
+            <MinSize>
+              <Height>400</Height>
+              <Width>300</Width>
+            </MinSize>
+            <MaxSize>
+              <Height>1200</Height>
+              <Width>800</Width>
+            </MaxSize>
+          </Geometry>
+          <Icons>
+            <Icon Type="Normal">./icons/icon_light.png</Icon>
+            <Icon Type="RollOver">./icons/icon_light.png</Icon>
+            <Icon Type="Disabled">./icons/icon_disabled.png</Icon>
+            <Icon Type="DarkNormal">./icons/icon_dark.png</Icon>
+            <Icon Type="DarkRollOver">./icons/icon_dark.png</Icon>
+          </Icons>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+
+    <!-- After Effects Extension -->
+    <Extension Id="com.pixibot.aftereffects">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./client/index.html</MainPath>
+          <ScriptPath>./host/aftereffects.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>Pixibot</Menu>
+          <Geometry>
+            <Size>
+              <Height>600</Height>
+              <Width>400</Width>
+            </Size>
+            <MinSize>
+              <Height>400</Height>
+              <Width>300</Width>
+            </MinSize>
+            <MaxSize>
+              <Height>1200</Height>
+              <Width>800</Width>
+            </MaxSize>
+          </Geometry>
+          <Icons>
+            <Icon Type="Normal">./icons/icon_light.png</Icon>
+            <Icon Type="RollOver">./icons/icon_light.png</Icon>
+            <Icon Type="Disabled">./icons/icon_disabled.png</Icon>
+            <Icon Type="DarkNormal">./icons/icon_dark.png</Icon>
+            <Icon Type="DarkRollOver">./icons/icon_dark.png</Icon>
+          </Icons>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>
