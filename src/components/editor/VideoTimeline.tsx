@@ -18,6 +18,7 @@ interface Clip {
 interface Props {
   clips: Clip[];
   currentTime: number;
+  totalDuration?: number;
   onSeek: (time: number) => void;
   onClipUpdate: (id: string, updates: Partial<Clip>) => void;
   onClipDelete: (id: string) => void;
@@ -28,13 +29,14 @@ interface Props {
 export const VideoTimeline = ({
   clips,
   currentTime,
+  totalDuration: totalDurationProp = 300,
   onSeek,
   onClipUpdate,
   onClipDelete,
   selectedClipId,
   onClipSelect,
 }: Props) => {
-  const totalDuration = 300; // 10 seconds @ 30fps
+  const totalDuration = totalDurationProp;
   const [zoom, setZoom] = useState(3); // pixels per frame
   const pixelsPerFrame = zoom;
   const timelineWidth = totalDuration * pixelsPerFrame;
@@ -177,9 +179,9 @@ export const VideoTimeline = ({
         </div>
 
         {/* Timeline ruler */}
-        <div className="h-8 border-b-2 border-border/50 flex items-center px-2 text-xs font-semibold text-muted-foreground bg-muted/30 backdrop-blur-sm sticky top-0 z-10">
-          {Array.from({ length: 11 }).map((_, i) => (
-            <div key={i} className="flex-1 text-center relative">
+        <div className="h-8 border-b-2 border-border/50 flex items-center px-2 text-xs font-semibold text-muted-foreground bg-muted/30 backdrop-blur-sm sticky top-0 z-10" style={{ minWidth: `${timelineWidth}px` }}>
+          {Array.from({ length: Math.ceil(totalDuration / 30) + 1 }).map((_, i) => (
+            <div key={i} style={{ width: `${30 * pixelsPerFrame}px`, flexShrink: 0 }} className="text-center relative">
               <span className="relative z-10">{i}s</span>
               <div className="absolute left-0 top-1/2 w-px h-3 bg-border/50 -translate-y-1/2" />
             </div>

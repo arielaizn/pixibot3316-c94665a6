@@ -13,6 +13,18 @@ interface Clip {
     scale?: number;
     rotate?: number;
   };
+  effects?: {
+    filters?: {
+      blur?: number;
+      brightness?: number;
+      contrast?: number;
+      saturate?: number;
+    };
+    transition?: {
+      type: string;
+      duration: number;
+    };
+  };
 }
 
 interface VideoEditorState {
@@ -24,6 +36,7 @@ interface VideoEditorState {
   currentTime: number;
   isPlaying: boolean;
   selectedClipId: string | null;
+  totalDuration: number; // dynamic total duration in frames
 
   // Actions
   addClip: (videoUrl: string, start: number, duration: number) => void;
@@ -43,6 +56,7 @@ interface VideoEditorState {
   moveClip: (id: string, x: number, y: number) => void;
   removeAllClips: () => void;
   getClipById: (id: string) => Clip | undefined;
+  recalcDuration: () => void;
 }
 
 export const useVideoEditor = create<VideoEditorState>()(
@@ -55,6 +69,7 @@ export const useVideoEditor = create<VideoEditorState>()(
     currentTime: 0,
     isPlaying: false,
     selectedClipId: null,
+    totalDuration: 300,
 
     addClip: (videoUrl, start, duration) =>
       set((state) => {
@@ -64,6 +79,9 @@ export const useVideoEditor = create<VideoEditorState>()(
           duration,
           videoUrl,
         });
+        // Recalculate total duration
+        const maxEnd = Math.max(...state.composition.clips.map(c => c.start + c.duration), 300);
+        state.totalDuration = maxEnd;
       }),
 
     removeClip: (id) =>
@@ -71,6 +89,10 @@ export const useVideoEditor = create<VideoEditorState>()(
         state.composition.clips = state.composition.clips.filter(
           (clip) => clip.id !== id
         );
+        const maxEnd = state.composition.clips.length > 0
+          ? Math.max(...state.composition.clips.map(c => c.start + c.duration), 300)
+          : 300;
+        state.totalDuration = maxEnd;
       }),
 
     updateClip: (id, updates) =>
@@ -98,7 +120,7 @@ export const useVideoEditor = create<VideoEditorState>()(
 
     seek: (time) =>
       set((state) => {
-        state.currentTime = Math.max(0, Math.min(299, time));
+        state.currentTime = Math.max(0, Math.min(state.totalDuration - 1, time));
       }),
 
     selectClip: (id) =>
@@ -159,5 +181,13 @@ export const useVideoEditor = create<VideoEditorState>()(
       const state = get();
       return state.composition.clips.find((c) => c.id === id);
     },
+
+    recalcDuration: () =>
+      set((state) => {
+        const maxEnd = state.composition.clips.length > 0
+          ? Math.max(...state.composition.clips.map(c => c.start + c.duration), 300)
+          : 300;
+        state.totalDuration = maxEnd;
+      }),
   }))
 );

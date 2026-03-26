@@ -19,6 +19,7 @@ export const VideoEditor = () => {
     currentTime,
     isPlaying,
     selectedClipId,
+    totalDuration,
     play,
     pause,
     seek,
@@ -69,7 +70,7 @@ export const VideoEditor = () => {
       }
       if (e.code === 'ArrowRight') {
         e.preventDefault();
-        seek(Math.min(299, currentTime + (e.shiftKey ? 30 : 1)));
+        seek(currentTime + (e.shiftKey ? 30 : 1));
       }
 
       // Home/End - Jump to start/end
@@ -79,7 +80,7 @@ export const VideoEditor = () => {
       }
       if (e.code === 'End') {
         e.preventDefault();
-        seek(299);
+        seek(totalDuration - 1);
       }
     };
 
@@ -120,7 +121,7 @@ export const VideoEditor = () => {
         setCurrentTime(frame);
 
         // Auto-pause at end
-        if (frame >= 299) {
+        if (frame >= totalDuration - 1) {
           pause();
           return;
         }
@@ -131,7 +132,7 @@ export const VideoEditor = () => {
 
     const id = requestAnimationFrame(updateFrame);
     return () => cancelAnimationFrame(id);
-  }, [isPlaying, setCurrentTime, pause]);
+  }, [isPlaying, setCurrentTime, pause, totalDuration]);
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -155,7 +156,7 @@ export const VideoEditor = () => {
                 ref={playerRef}
                 component={VideoComposition}
                 inputProps={composition}
-                durationInFrames={300}
+                durationInFrames={Math.max(totalDuration, 30)}
                 fps={30}
                 compositionWidth={1920}
                 compositionHeight={1080}
@@ -238,6 +239,7 @@ export const VideoEditor = () => {
         <VideoTimeline
           clips={composition.clips}
           currentTime={currentTime}
+          totalDuration={totalDuration}
           selectedClipId={selectedClipId}
           onSeek={seek}
           onClipUpdate={updateClip}

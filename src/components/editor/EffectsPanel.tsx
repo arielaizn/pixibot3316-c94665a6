@@ -8,13 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sparkles, Droplets, Sun, Contrast, Palette, Zap, Check, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-interface Effect {
-  id: string;
-  type: 'filter' | 'transition';
-  name: string;
-  properties: Record<string, number>;
-}
-
 const FILTER_PRESETS = [
   { name: 'טשטוש', icon: Droplets, property: 'blur', default: 0, max: 20, unit: 'px' },
   { name: 'בהירות', icon: Sun, property: 'brightness', default: 100, max: 200, unit: '%' },
@@ -45,7 +38,6 @@ export const EffectsPanel = () => {
     if (!selectedClip) return;
 
     updateClip(selectedClip.id, {
-      ...selectedClip,
       effects: {
         ...selectedClip.effects,
         filters,
@@ -53,7 +45,7 @@ export const EffectsPanel = () => {
     });
 
     toast({
-      title: "✨ פילטרים הוחלו",
+      title: "פילטרים הוחלו",
       description: "האפקטים נשמרו בהצלחה",
     });
   };
@@ -71,7 +63,6 @@ export const EffectsPanel = () => {
     if (!selectedClip) return;
 
     updateClip(selectedClip.id, {
-      ...selectedClip,
       effects: {
         ...selectedClip.effects,
         transition: {

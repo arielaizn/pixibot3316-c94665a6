@@ -51,17 +51,32 @@ export const ImportVideoDialog = ({ open, onClose, onImport }: Props) => {
     setSelectedVideo(null); // Clear project video selection
   };
 
+  // Get video duration in frames (30fps)
+  const getVideoDuration = (url: string): Promise<number> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => {
+        const durationInFrames = Math.ceil(video.duration * 30);
+        URL.revokeObjectURL(video.src); // Clean up if blob
+        resolve(Math.max(durationInFrames, 30)); // Minimum 1 second
+      };
+      video.onerror = () => resolve(300); // Fallback 10s
+      video.src = url;
+    });
+  };
+
   const handleImportFromProjects = async () => {
     if (!selectedVideo) return;
 
     setIsImporting(true);
     try {
-      // TODO: Get actual video duration from metadata
-      onImport(selectedVideo, 300); // Default 10s for now
+      const duration = await getVideoDuration(selectedVideo);
+      onImport(selectedVideo, duration);
 
       toast({
         title: "✅ וידאו יובא בהצלחה",
-        description: "הוידאו נוסף ל-timeline",
+        description: `הוידאו נוסף ל-timeline (${(duration / 30).toFixed(1)}s)`,
       });
 
       onClose();
@@ -84,12 +99,12 @@ export const ImportVideoDialog = ({ open, onClose, onImport }: Props) => {
 
     setIsImporting(true);
     try {
-      // Use the local file URL
-      onImport(uploadPreview, 300); // Default 10s for now
+      const duration = await getVideoDuration(uploadPreview);
+      onImport(uploadPreview, duration);
 
       toast({
         title: "✅ וידאו הועלה בהצלחה",
-        description: "הוידאו נוסף ל-timeline",
+        description: `הוידאו נוסף ל-timeline (${(duration / 30).toFixed(1)}s)`,
       });
 
       onClose();
