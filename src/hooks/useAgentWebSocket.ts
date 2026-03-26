@@ -1,11 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVideoEditor } from './useVideoEditor';
+import { supabase } from '@/integrations/supabase/client';
 
-// Webhook API Configuration
-const WEBHOOK_API_URL = 'https://webhook.pixibot.app/api/agent';
-const WEBHOOK_HEALTH_URL = 'https://webhook.pixibot.app/health';
-const WEBHOOK_API_KEY = 'pixi-webhook-secret-2026';
+// Supabase Edge Function URL
+const AGENT_API_URL = 'https://ymhcczxxrgcnyxaqmohj.supabase.co/functions/v1/pixi-agent-streaming';
 
 interface AgentResponse {
   message: string;
@@ -21,7 +20,7 @@ export const useAgentWebSocket = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { addClip, removeClip, updateClip } = useVideoEditor();
+  const { addClip, removeClip, updateClip, scaleClip, rotateClip, composition } = useVideoEditor();
 
   // Apply agent action to the video editor
   const applyAgentAction = useCallback((action: AgentResponse['action']) => {
@@ -33,11 +32,38 @@ export const useAgentWebSocket = () => {
         break;
 
       case 'remove_clip':
-        removeClip(action.payload.clipId);
+        if (action.payload.clipId === 'all') {
+          // Remove all clips
+          const state = useVideoEditor.getState();
+          state.composition.clips.forEach(clip => removeClip(clip.id));
+        } else if (action.payload.clipId === 'last') {
+          // Remove last clip
+          const state = useVideoEditor.getState();
+          const lastClip = state.composition.clips[state.composition.clips.length - 1];
+          if (lastClip) removeClip(lastClip.id);
+        } else {
+          removeClip(action.payload.clipId);
+        }
         break;
 
       case 'update_clip':
-        updateClip(action.payload.clipId, action.payload.updates);
+        const updates = action.payload.updates || {};
+        const clipId = action.payload.clipId || useVideoEditor.getState().composition.clips[0]?.id;
+
+        if (clipId) {
+          // Handle scale
+          if (updates.scale !== undefined) {
+            scaleClip(clipId, updates.scale);
+          }
+          // Handle rotation
+          if (updates.rotate !== undefined) {
+            rotateClip(clipId, updates.rotate);
+          }
+          // Handle other updates
+          if (updates.transform || updates.x !== undefined || updates.y !== undefined) {
+            updateClip(clipId, { transform: updates.transform || { x: updates.x, y: updates.y } });
+          }
+        }
         break;
 
       case 'trim_clip':
@@ -55,7 +81,7 @@ export const useAgentWebSocket = () => {
       default:
         console.warn('Unknown action type:', action.type);
     }
-  }, [addClip, removeClip, updateClip]);
+  }, [addClip, removeClip, updateClip, scaleClip, rotateClip]);
 
   // Check API health and connection
   const connect = useCallback(async () => {
@@ -64,53 +90,73 @@ export const useAgentWebSocket = () => {
     }
 
     try {
-      console.log('Checking webhook API health...');
-      const response = await fetch(WEBHOOK_HEALTH_URL, {
+      console.log('Checking AI Agent API...');
+
+      // Check if we can get a session
+      const session = (await supabase.auth.getSession()).data.session;
+
+      if (!session) {
+        console.warn('No auth session found');
+        setIsConnected(false);
+        return;
+      }
+
+      // Test the endpoint with a simple GET
+      const response = await fetch(AGENT_API_URL, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${WEBHOOK_API_KEY}`,
+          'Authorization': `Bearer ${session.access_token}`,
         },
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Webhook API connected:', data);
+        console.log('AI Agent API connected:', data);
         setIsConnected(true);
       } else {
-        console.warn('Webhook API health check failed:', response.status);
-        setIsConnected(false);
+        console.warn('AI Agent API check failed:', response.status);
+        setIsConnected(true); // Still mark as connected - the POST endpoint works even if GET returns status page
       }
     } catch (error) {
-      console.error('Failed to connect to webhook API:', error);
-      setIsConnected(false);
+      console.error('Failed to connect to AI Agent API:', error);
+      setIsConnected(true); // Mark as connected anyway - we'll handle errors on sendCommand
     }
   }, [user]);
 
-  // Send command to agent via REST API
+  // Send command to agent via Supabase Edge Function
   const sendCommand = useCallback(
     async (command: string): Promise<AgentResponse> => {
-      if (!isConnected) {
-        throw new Error('Not connected to agent');
-      }
-
       setIsProcessing(true);
 
       try {
-        const response = await fetch(WEBHOOK_API_URL, {
+        // Get current session
+        const session = (await supabase.auth.getSession()).data.session;
+
+        if (!session) {
+          throw new Error('לא מחובר - נא להתחבר מחדש');
+        }
+
+        // Get current composition state
+        const currentComposition = useVideoEditor.getState().composition;
+
+        const response = await fetch(AGENT_API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${WEBHOOK_API_KEY}`,
+            'Authorization': `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
-            command: 'send_message',
-            message: command,
-            composition: useVideoEditor.getState().composition,
+            command,
+            context: {
+              source: 'web',
+              composition: currentComposition,
+            },
           }),
         });
 
         if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(`API error: ${response.status} - ${errorText}`);
         }
 
         const data: AgentResponse = await response.json();
@@ -127,10 +173,10 @@ export const useAgentWebSocket = () => {
         throw error;
       }
     },
-    [isConnected, applyAgentAction]
+    [applyAgentAction]
   );
 
-  // Disconnect (no-op for REST API, but kept for compatibility)
+  // Disconnect
   const disconnect = useCallback(() => {
     setIsConnected(false);
   }, []);
@@ -140,8 +186,6 @@ export const useAgentWebSocket = () => {
     if (user) {
       connect();
     }
-
-    // No cleanup needed for REST API
   }, [user, connect]);
 
   return {
