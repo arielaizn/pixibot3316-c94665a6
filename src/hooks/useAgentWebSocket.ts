@@ -17,10 +17,10 @@ interface AgentResponse {
 
 export const useAgentWebSocket = () => {
   const { user } = useAuth();
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(true); // Optimistic - assume connected
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { addClip, removeClip, updateClip, scaleClip, rotateClip, composition } = useVideoEditor();
+  const { addClip, removeClip, updateClip, scaleClip, rotateClip, removeAllClips } = useVideoEditor();
 
   // Apply agent action to the video editor
   const applyAgentAction = useCallback((action: AgentResponse['action']) => {
@@ -33,9 +33,7 @@ export const useAgentWebSocket = () => {
 
       case 'remove_clip':
         if (action.payload.clipId === 'all') {
-          // Remove all clips
-          const state = useVideoEditor.getState();
-          state.composition.clips.forEach(clip => removeClip(clip.id));
+          removeAllClips();
         } else if (action.payload.clipId === 'last') {
           // Remove last clip
           const state = useVideoEditor.getState();
@@ -81,7 +79,7 @@ export const useAgentWebSocket = () => {
       default:
         console.warn('Unknown action type:', action.type);
     }
-  }, [addClip, removeClip, updateClip, scaleClip, rotateClip]);
+  }, [addClip, removeClip, removeAllClips, updateClip, scaleClip, rotateClip]);
 
   // Check API health and connection
   const connect = useCallback(async () => {

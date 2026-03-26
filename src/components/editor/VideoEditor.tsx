@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Player, PlayerRef } from '@remotion/player';
 import { VideoComposition } from '@/remotion/VideoComposition';
 import { VideoTimeline } from './VideoTimeline';
@@ -27,16 +27,26 @@ export const VideoEditor = () => {
     updateClip,
     selectClip,
     exportVideo,
+    setCurrentTime,
   } = useVideoEditor();
 
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const playerRef = useRef<PlayerRef>(null);
+  const isPlayingRef = useRef(isPlaying);
+
+  // Keep ref in sync
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in inputs
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
       // Space - Play/Pause
-      if (e.code === 'Space' && e.target === document.body) {
+      if (e.code === 'Space') {
         e.preventDefault();
         if (isPlaying) {
           pause();
@@ -77,66 +87,51 @@ export const VideoEditor = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [isPlaying, selectedClipId, currentTime, play, pause, seek, removeClip, selectClip]);
 
-  // Sync player playback with state
+  // Toggle play/pause on the Remotion player
   useEffect(() => {
     if (!playerRef.current) return;
 
-    const player = playerRef.current;
-
     if (isPlaying) {
-      // Ensure we're at the right frame before playing
-      if (player.getCurrentFrame() !== currentTime) {
-        player.seekTo(currentTime);
-      }
-      player.play();
+      playerRef.current.play();
     } else {
-      player.pause();
+      playerRef.current.pause();
     }
-  }, [isPlaying, currentTime]);
+  }, [isPlaying]);
 
-  // Sync player frame when seeking (only when not playing)
+  // Sync player frame when seeking (only when NOT playing)
   useEffect(() => {
     if (!playerRef.current || isPlaying) return;
-
-    const player = playerRef.current;
-    const playerFrame = player.getCurrentFrame();
-
-    if (playerFrame !== currentTime) {
-      player.seekTo(currentTime);
-    }
+    playerRef.current.seekTo(currentTime);
   }, [currentTime, isPlaying]);
 
-  // Update currentTime from player during playback
+  // During playback: read frames from player and update store
   useEffect(() => {
     if (!playerRef.current || !isPlaying) return;
 
     const player = playerRef.current;
-    let lastFrame = -1;
 
     const updateFrame = () => {
+      if (!isPlayingRef.current) return;
+
       const frame = player.getCurrentFrame();
 
-      if (frame !== undefined && frame !== lastFrame) {
-        lastFrame = frame;
-        seek(frame);
+      if (frame !== undefined) {
+        // Use setCurrentTime to avoid pausing (seek pauses)
+        setCurrentTime(frame);
 
         // Auto-pause at end
         if (frame >= 299) {
           pause();
+          return;
         }
       }
 
-      if (isPlaying && frame < 299) {
-        requestAnimationFrame(updateFrame);
-      }
+      requestAnimationFrame(updateFrame);
     };
 
-    const animationFrameId = requestAnimationFrame(updateFrame);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [isPlaying, seek, pause]);
+    const id = requestAnimationFrame(updateFrame);
+    return () => cancelAnimationFrame(id);
+  }, [isPlaying, setCurrentTime, pause]);
 
   return (
     <div className="h-screen flex flex-col bg-background">

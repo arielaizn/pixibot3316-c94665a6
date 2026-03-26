@@ -13,11 +13,11 @@ interface Message {
 }
 
 const exampleCommands = [
-  "Scale to 150%",
-  "Rotate 90 degrees",
-  "Add fade in effect",
-  "Trim from 2s to 5s",
-  "Remove the last clip",
+  "הגדל ל-150%",
+  "סובב 90 מעלות",
+  "הסר את הקליפ האחרון",
+  "חתך מ-2s עד 5s",
+  "אפס הכל",
 ];
 
 export const ChatSidebar = () => {
@@ -27,19 +27,19 @@ export const ChatSidebar = () => {
   const [showExamples, setShowExamples] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Add initial message based on connection status
+  // Add welcome message
   useEffect(() => {
-    if (!isConnected && messages.length === 0) {
+    if (messages.length === 0) {
       setMessages([
         {
-          id: 'offline-info',
+          id: 'welcome',
           role: 'system',
-          content: "👋 שלום! ברוך הבא לעורך הוידאו.\n\n🤖 תכונת ה-AI Agent תהיה זמינה בקרוב!\n\nבינתיים, תוכל להשתמש בכל כלי העריכה הידניים:\n• מאפיינים - עריכת מיקום, גודל וסיבוב\n• אפקטים - פילטרים ומעברים\n• טקסט - הוספת כותרות וטקסטים",
+          content: "שלום! אני Pixi AI Agent.\n\nאני יכול לעזור לך לערוך את הסרטון שלך! נסה פקודות כמו:\n• 'הגדל ל-150%'\n• 'סובב 90 מעלות'\n• 'הסר את הקליפ האחרון'\n• 'אפס הכל'",
           timestamp: new Date(),
         },
       ]);
     }
-  }, [isConnected]);
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim() || isProcessing) return;
