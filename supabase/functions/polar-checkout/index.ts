@@ -6,16 +6,24 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const POLAR_API = 'https://api.polar.sh';
 
-// Product IDs - set via Supabase secrets after creating products in Polar dashboard
+// ── Product ID map: {plan_key}_{billing_cycle} → Polar product UUID ──────────
 const POLAR_PRODUCTS: Record<string, string> = {
-  starter:    Deno.env.get('POLAR_PRODUCT_STARTER')    || '',
-  creator:    Deno.env.get('POLAR_PRODUCT_CREATOR')    || '',
-  pro:        Deno.env.get('POLAR_PRODUCT_PRO')        || '',
-  business:   Deno.env.get('POLAR_PRODUCT_BUSINESS')   || '',
-  enterprise: Deno.env.get('POLAR_PRODUCT_ENTERPRISE') || '',
-  credits_3:  Deno.env.get('POLAR_PRODUCT_CREDITS_3')  || '',
-  credits_10: Deno.env.get('POLAR_PRODUCT_CREDITS_10') || '',
-  credits_25: Deno.env.get('POLAR_PRODUCT_CREDITS_25') || '',
+  // Monthly subscriptions
+  starter_monthly:    '7b9d4d65-fd0e-40bf-9779-7cfd092b331f',
+  creator_monthly:    'ef98ef2a-6f11-4124-bb0e-8d3d4c6499d6',
+  pro_monthly:        'c66574d3-b320-4921-9ed5-c5fa6bc442d5',
+  business_monthly:   'b3f00ab6-568d-4768-bf72-8a65ac5aa2d4',
+  enterprise_monthly: '28eb8f49-e3ab-4034-b28d-9e0264f9c426',
+  // Yearly subscriptions
+  starter_yearly:     'e3c77faa-b2b8-4d0d-a425-1cf590b9450d',
+  creator_yearly:     'fdb46606-cb35-4c0b-84e2-51863db794f8',
+  pro_yearly:         'dd2cf617-e4fb-4480-a4b6-d3ec2fd0b36a',
+  business_yearly:    '509119c9-f411-4930-b45f-bfe0524afcb2',
+  enterprise_yearly:  '7cb94768-f9ad-42a8-ace8-6c2006eedb97',
+  // One-time credit packs
+  credits_3:          'c48a5a2a-049a-4ba3-b730-8bed6e39df62',
+  credits_10:         'c8214823-cabe-4e84-a922-23f324420554',
+  credits_25:         '59d7e7ea-34f6-423d-8b30-c6ac570788f9',
 };
 
 const corsHeaders = {
@@ -36,7 +44,8 @@ serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   try {
-    const { action, plan_key, product_id, pack_credits, billing_cycle, pixi_user_id } = await req.json();
+    const body = await req.json();
+    const { action, plan_key, product_id, pack_credits, billing_cycle, pixi_user_id } = body;
 
     // Verify auth
     const authHeader = req.headers.get('Authorization');
@@ -54,16 +63,22 @@ serve(async (req) => {
     if (action === 'create_checkout') {
       let productId = product_id;
 
-      // Map plan_key to product ID
-      if (!productId && plan_key) {
-        const key = pack_credits
-          ? `credits_${pack_credits}`
-          : plan_key;
-        productId = POLAR_PRODUCTS[key];
+      if (!productId) {
+        if (pack_credits) {
+          // Credit pack: key = credits_3 / credits_10 / credits_25
+          productId = POLAR_PRODUCTS[`credits_${pack_credits}`];
+        } else if (plan_key) {
+          // Subscription: key = {plan_key}_{billing_cycle}
+          const cycle = billing_cycle || 'monthly';
+          productId = POLAR_PRODUCTS[`${plan_key}_${cycle}`];
+        }
       }
 
       if (!productId) {
-        return json({ error: `Product ID not configured for: ${plan_key || product_id}` }, 400);
+        const attempted = pack_credits
+          ? `credits_${pack_credits}`
+          : `${plan_key}_${billing_cycle || 'monthly'}`;
+        return json({ error: `Product not configured for: ${attempted}` }, 400);
       }
 
       const successUrl = `${baseUrl}/payment/callback?checkout_id={CHECKOUT_ID}&plan=${plan_key || ''}&cycle=${billing_cycle || 'monthly'}`;
@@ -108,26 +123,24 @@ serve(async (req) => {
         billing_cycle: billing_cycle || 'monthly',
         credits: pack_credits || null,
         polar_checkout_id: checkout.id,
-      }).select().maybeSingle();
+      });
 
       return json({ checkoutUrl: checkout.url, checkoutId: checkout.id });
     }
 
     // ── VERIFY CHECKOUT STATUS ───────────────────────────────────────────────
     if (action === 'verify_checkout') {
-      const { checkout_id } = await req.json().catch(() => ({}));
-      const cId = checkout_id || req.url.split('checkout_id=')[1];
+      const checkoutId = body.checkout_id;
+      if (!checkoutId) return json({ status: 'unknown' });
 
-      const checkoutRes = await fetch(`${POLAR_API}/v1/checkouts/${cId}`, {
+      const checkoutRes = await fetch(`${POLAR_API}/v1/checkouts/${checkoutId}`, {
         headers: { 'Authorization': `Bearer ${POLAR_ACCESS_TOKEN}` },
       });
 
       if (!checkoutRes.ok) return json({ status: 'unknown' });
 
       const checkout = await checkoutRes.json();
-      const succeeded = checkout.status === 'succeeded';
-
-      return json({ status: checkout.status, succeeded });
+      return json({ status: checkout.status, succeeded: checkout.status === 'succeeded' });
     }
 
     return json({ error: 'Unknown action' }, 400);

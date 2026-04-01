@@ -47,6 +47,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import EditPage from "./pages/EditPage.tsx";
 import PluginAuthPage from "./pages/PluginAuthPage.tsx";
 import PluginDownloadPage from "./pages/PluginDownloadPage.tsx";
+import AuthCallbackPage from "./pages/AuthCallbackPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 <Route path="/plugin-auth" element={<PluginAuthPage />} />
                 <Route path="/plugin" element={<PluginDownloadPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
