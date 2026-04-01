@@ -5,29 +5,22 @@ import { useToast } from "@/hooks/use-toast";
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-const PLAN_PAYMENT_LINKS: Record<string, string> = {
-  starter: "https://pay.sumit.co.il/sngpsi/sol9v3/sol9v4/payment/",
-  creator: "https://pay.sumit.co.il/sngpsi/snjfxu/snjfxv/payment/",
-  pro: "https://pay.sumit.co.il/sngpsi/solav9/solava/payment/",
-  business: "https://pay.sumit.co.il/sngpsi/snrb6s/snrb6t/payment/",
-  enterprise: "https://pay.sumit.co.il/sngpsi/solbu2/solbu3/payment/",
-};
-
-async function paymentAction(action: string, params: Record<string, any> = {}) {
+async function polarCheckout(action: string, params: Record<string, any> = {}) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const url = `https://${PROJECT_ID}.supabase.co/functions/v1/sumit-payment`;
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${session.access_token}`,
-      apikey: ANON_KEY,
+  const res = await fetch(
+    `https://${PROJECT_ID}.supabase.co/functions/v1/polar-checkout`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: ANON_KEY,
+      },
+      body: JSON.stringify({ action, ...params }),
     },
-    body: JSON.stringify({ action, ...params }),
-  });
+  );
 
   if (!res.ok) {
     const err = await res.json();
@@ -47,25 +40,17 @@ export function usePayment() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) throw new Error("Not authenticated");
 
-      const paymentLink = PLAN_PAYMENT_LINKS[planKey];
-      if (!paymentLink) throw new Error("Invalid plan");
+      const result = await polarCheckout("create_checkout", {
+        plan_key: planKey,
+        billing_cycle: billingCycle,
+        pixi_user_id: session.user.id,
+      });
 
-      const user = session.user;
-
-      // Build the success return URL with user identification
-      const successUrl = new URL(`${window.location.origin}/payment/callback`);
-      successUrl.searchParams.set("pixi_user_id", user.id);
-      successUrl.searchParams.set("plan", planKey);
-      successUrl.searchParams.set("cycle", billingCycle);
-      successUrl.searchParams.set("email", user.email || "");
-
-      // Append params to the Sumit hosted payment link
-      const url = new URL(paymentLink);
-      url.searchParams.set("email", user.email || "");
-      url.searchParams.set("pixi_user_id", user.id);
-      url.searchParams.set("successUrl", successUrl.toString());
-
-      window.location.href = url.toString();
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
     } catch (err: any) {
       toast({
         title: "שגיאה",
@@ -77,19 +62,22 @@ export function usePayment() {
     }
   };
 
-  const buyCredits = async (credits: number, price: number) => {
+  const buyCredits = async (credits: number, _price: number) => {
     setLoading(true);
     try {
-      const baseUrl = window.location.origin;
-      const result = await paymentAction("open_terminal", {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("Not authenticated");
+
+      const result = await polarCheckout("create_checkout", {
+        plan_key: `credits_${credits}`,
         pack_credits: credits,
-        pack_price: price,
-        success_url: `${baseUrl}/payment/callback`,
-        cancel_url: `${baseUrl}/pricing`,
+        pixi_user_id: session.user.id,
       });
 
-      if (result.paymentUrl) {
-        window.location.href = result.paymentUrl;
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
+        throw new Error("No checkout URL returned");
       }
     } catch (err: any) {
       toast({
@@ -102,9 +90,9 @@ export function usePayment() {
     }
   };
 
-  const verifyPayment = async (paymentId: string) => {
-    return paymentAction("verify_payment", { payment_id: paymentId });
+  const verifyCheckout = async (checkoutId: string) => {
+    return polarCheckout("verify_checkout", { checkout_id: checkoutId });
   };
 
-  return { startSubscription, buyCredits, verifyPayment, loading };
+  return { startSubscription, buyCredits, verifyCheckout, loading };
 }

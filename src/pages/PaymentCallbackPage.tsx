@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const ANON_KEY  = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const PaymentCallbackPage = () => {
   const [searchParams] = useSearchParams();
@@ -18,31 +18,31 @@ const PaymentCallbackPage = () => {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const pixiUserId = searchParams.get("pixi_user_id");
-  const plan = searchParams.get("plan");
-  const cycle = searchParams.get("cycle");
-  const paymentId = searchParams.get("payment_id");
+  // Polar redirects back with ?checkout_id=xxx
+  const checkoutId = searchParams.get("checkout_id");
 
   useEffect(() => {
-    const activate = async () => {
+    const verify = async () => {
       try {
-        const userId = pixiUserId || user?.id;
-        if (!userId) {
-          setStatus("error");
-          setErrorMsg(t("payment.noUser"));
+        // Polar webhook activates the plan server-side.
+        // We just poll the checkout status to confirm.
+        if (!checkoutId) {
+          // No checkout ID = user landed here directly; treat as success.
+          setStatus("success");
           return;
         }
 
-        if (plan) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session) {
-            setStatus("error");
-            setErrorMsg(t("payment.loginRequired"));
-            return;
-          }
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setStatus("error");
+          setErrorMsg(t("payment.loginRequired"));
+          return;
+        }
 
+        let attempts = 0;
+        const poll = async () => {
           const res = await fetch(
-            `https://${PROJECT_ID}.supabase.co/functions/v1/sumit-payment`,
+            `https://${PROJECT_ID}.supabase.co/functions/v1/polar-checkout`,
             {
               method: "POST",
               headers: {
@@ -50,67 +50,41 @@ const PaymentCallbackPage = () => {
                 Authorization: `Bearer ${session.access_token}`,
                 apikey: ANON_KEY,
               },
-              body: JSON.stringify({
-                action: "activate_plan",
-                plan_key: plan,
-                billing_cycle: cycle || "monthly",
-                pixi_user_id: userId,
-              }),
+              body: JSON.stringify({ action: "verify_checkout", checkout_id: checkoutId }),
             }
           );
 
           const result = await res.json();
-          if (!res.ok) throw new Error(result.error || "Activation failed");
 
-          setStatus("success");
-          return;
-        }
-
-        if (paymentId) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session) {
-            setStatus("error");
-            setErrorMsg(t("payment.loginRequired"));
+          if (result.status === "succeeded" || result.succeeded) {
+            setStatus("success");
             return;
           }
 
-          let attempts = 0;
-          const poll = async () => {
-            const res = await fetch(
-              `https://${PROJECT_ID}.supabase.co/functions/v1/sumit-payment`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${session.access_token}`,
-                  apikey: ANON_KEY,
-                },
-                body: JSON.stringify({ action: "verify_payment", payment_id: paymentId }),
-              }
-            );
-            const result = await res.json();
-            if (result.status === "completed" || result.status === "already_completed") {
-              setStatus("success");
-              return;
-            }
-            attempts++;
-            if (attempts < 15) setTimeout(poll, 3000);
-            else setStatus("success");
-          };
-          poll();
-          return;
-        }
+          if (result.status === "failed") {
+            setStatus("error");
+            setErrorMsg(t("payment.error"));
+            return;
+          }
 
-        setStatus("error");
-        setErrorMsg(t("payment.missingDetails"));
+          attempts++;
+          if (attempts < 15) {
+            setTimeout(poll, 2000);
+          } else {
+            // If still not confirmed after 30s, assume success (webhook will handle activation)
+            setStatus("success");
+          }
+        };
+
+        poll();
       } catch (err: any) {
         setStatus("error");
         setErrorMsg(err.message);
       }
     };
 
-    activate();
-  }, [pixiUserId, plan, cycle, paymentId, user?.id]);
+    verify();
+  }, [checkoutId, user?.id]);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
