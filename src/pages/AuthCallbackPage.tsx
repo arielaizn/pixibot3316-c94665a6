@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -7,18 +7,27 @@ import { Loader2 } from "lucide-react";
  * OAuth callback page for Supabase PKCE flow.
  * Google redirects here after authentication with ?code=... in the URL.
  * Supabase auto-exchanges the code; we wait for SIGNED_IN then redirect.
+ * Also handles ?error=... redirects from Supabase when exchange fails.
  */
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    // If Supabase returned an error (e.g. Unable to exchange external code),
+    // send the user back to login immediately.
+    const error = searchParams.get("error");
+    if (error) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
     // onAuthStateChange fires SIGNED_IN once the PKCE code is exchanged
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
         subscription.unsubscribe();
         navigate("/dashboard", { replace: true });
       } else if (event === "INITIAL_SESSION" && session) {
-        // Already have a session (e.g. already logged in)
         subscription.unsubscribe();
         navigate("/dashboard", { replace: true });
       }
@@ -42,7 +51,7 @@ const AuthCallbackPage = () => {
       subscription.unsubscribe();
       clearTimeout(timeout);
     };
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
