@@ -1,57 +1,53 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 
 /**
  * OAuth callback page for Supabase PKCE flow.
- * Google redirects here after authentication with ?code=... in the URL.
- * Supabase auto-exchanges the code; we wait for SIGNED_IN then redirect.
- * Also handles ?error=... redirects from Supabase when exchange fails.
+ * Waits for AuthContext to confirm the session before navigating,
+ * which avoids the race condition where DashboardPage sees user=null.
  */
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user, loading } = useAuth();
+  const exchanged = useRef(false);
 
+  // Step 1: Explicitly exchange the code for a session (PKCE)
   useEffect(() => {
-    // If Supabase returned an error (e.g. Unable to exchange external code),
-    // send the user back to login immediately.
+    if (exchanged.current) return;
+
     const error = searchParams.get("error");
     if (error) {
       navigate("/login", { replace: true });
       return;
     }
 
-    // onAuthStateChange fires SIGNED_IN once the PKCE code is exchanged
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        subscription.unsubscribe();
-        navigate("/dashboard", { replace: true });
-      } else if (event === "INITIAL_SESSION" && session) {
-        subscription.unsubscribe();
-        navigate("/dashboard", { replace: true });
-      }
-    });
+    const code = searchParams.get("code");
+    if (code && !exchanged.current) {
+      exchanged.current = true;
+      supabase.auth.exchangeCodeForSession(window.location.href).catch(() => {
+        // If exchange fails, fall through to timeout → /login
+      });
+    }
+  }, [searchParams, navigate]);
 
-    // Fallback: if getSession resolves with a user, navigate directly
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        subscription.unsubscribe();
-        navigate("/dashboard", { replace: true });
-      }
-    });
+  // Step 2: Once AuthContext confirms user is set, navigate to dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, loading, navigate]);
 
-    // Safety timeout: if nothing happens in 10s, send to login
+  // Step 3: Safety timeout — if nothing resolves in 12s, go to login
+  useEffect(() => {
     const timeout = setTimeout(() => {
-      subscription.unsubscribe();
-      navigate("/login", { replace: true });
-    }, 10000);
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeout);
-    };
-  }, [navigate, searchParams]);
+      if (!user) navigate("/login", { replace: true });
+    }, 12000);
+    return () => clearTimeout(timeout);
+  }, [navigate, user]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
