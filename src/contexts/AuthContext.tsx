@@ -20,12 +20,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // If the URL contains a ?code= param, we're in a PKCE OAuth callback.
+    // Keep loading=true until SIGNED_IN fires (or timeout), so DashboardPage
+    // never sees loading=false with user=null and redirects to /login.
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPkceCallback = urlParams.has("code") && !urlParams.has("error");
+
+    let pkceTimeout: ReturnType<typeof setTimeout> | null = null;
+    if (isPkceCallback) {
+      // Safety valve: if SIGNED_IN never fires, stop blocking after 15s
+      pkceTimeout = setTimeout(() => setLoading(false), 15000);
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // During PKCE callback: INITIAL_SESSION fires first with null session.
+      // Ignore it — wait for the real SIGNED_IN event.
+      if (isPkceCallback && event === "INITIAL_SESSION" && !session) {
+        return;
+      }
+
+      // Clear PKCE timeout now that we have a definitive event
+      if (pkceTimeout) {
+        clearTimeout(pkceTimeout);
+        pkceTimeout = null;
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // Save pending WhatsApp number from signup form
       if (session?.user) {
         const pending = localStorage.getItem("pixi_pending_whatsapp");
         if (pending) {
@@ -36,27 +59,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .eq("user_id", session.user.id);
         }
 
-        // Attribute referral signup
         const refCode = localStorage.getItem("pixi_referral_code");
         if (refCode) {
           localStorage.removeItem("pixi_referral_code");
           try {
             await attributeReferralSignup(refCode, session.user.id);
           } catch (e) {
-            // Silently fail — may be duplicate or self-referral
             console.log("Referral attribution:", e);
           }
         }
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // For non-PKCE pages: resolve session immediately via getSession()
+    if (!isPkceCallback) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+    }
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (pkceTimeout) clearTimeout(pkceTimeout);
+    };
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
