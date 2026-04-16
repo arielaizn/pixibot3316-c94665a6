@@ -20,11 +20,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If the URL contains a ?code= param, we're in a PKCE OAuth callback.
-    // Keep loading=true until SIGNED_IN fires (or timeout), so DashboardPage
-    // never sees loading=false with user=null and redirects to /login.
+    // If we're on /auth/callback (with or without ?code= still in the URL),
+    // we're in a PKCE OAuth callback. Keep loading=true until SIGNED_IN fires
+    // (or timeout), so no page sees loading=false with user=null and redirects
+    // to /login before the exchange completes.
+    // NOTE: we check pathname (not just ?code=) because Supabase can strip the
+    // code param via history.replaceState before this useEffect runs.
     const urlParams = new URLSearchParams(window.location.search);
-    const isPkceCallback = urlParams.has("code") && !urlParams.has("error");
+    const isCallbackRoute = window.location.pathname === "/auth/callback";
+    const isPkceCallback =
+      (isCallbackRoute || urlParams.has("code")) && !urlParams.has("error");
 
     let pkceTimeout: ReturnType<typeof setTimeout> | null = null;
     if (isPkceCallback) {

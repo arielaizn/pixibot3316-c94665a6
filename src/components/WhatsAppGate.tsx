@@ -21,7 +21,8 @@ const WhatsAppGate = ({ children }: { children: React.ReactNode }) => {
     location.pathname === "/" ||
     location.pathname === "/signup" ||
     location.pathname === "/login" ||
-    location.pathname === "/pricing";
+    location.pathname === "/pricing" ||
+    location.pathname === "/auth/callback";
 
   if (!isExcluded && needsWhatsApp) {
     return (

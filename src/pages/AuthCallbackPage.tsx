@@ -1,33 +1,56 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
 /**
  * OAuth callback page for Supabase PKCE flow.
  *
- * When Google redirects here with ?code=..., AuthContext keeps loading=true
- * until the PKCE exchange completes and SIGNED_IN fires. We simply wait for
- * loading=false, then navigate based on whether user is set.
+ * Subscribes directly to Supabase auth events so it doesn't depend on
+ * AuthContext.loading (which can have timing issues with the PKCE exchange).
+ * On SIGNED_IN / INITIAL_SESSION with a user → /dashboard.
+ * On error param → /login immediately.
+ * Safety timeout: redirect to /login after 15 s if nothing fires.
  */
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
 
-  // Handle error params returned by Supabase (e.g. exchange failure)
   useEffect(() => {
-    const error = new URLSearchParams(window.location.search).get("error");
-    if (error) {
+    // Redirect immediately if Supabase returned an error param
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error")) {
       navigate("/login", { replace: true });
+      return;
     }
-  }, [navigate]);
 
-  // Once AuthContext resolves (loading=false), navigate to the right place
-  useEffect(() => {
-    if (!loading) {
-      navigate(user ? "/dashboard" : "/login", { replace: true });
-    }
-  }, [loading, user, navigate]);
+    // Subscribe directly to auth state so we catch SIGNED_IN reliably,
+    // regardless of when AuthContext's own subscription fires.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          // Session established — go to dashboard
+          navigate("/dashboard", { replace: true });
+        } else if (event === "INITIAL_SESSION") {
+          // PKCE exchange still in progress — wait for SIGNED_IN
+        } else {
+          // Any other event without a user means auth failed
+          navigate("/login", { replace: true });
+        }
+      }
+    );
+
+    // Safety valve: if the exchange never completes, bail to login
+    const timeout = setTimeout(() => {
+      navigate("/login", { replace: true });
+    }, 15_000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
+    // navigate is stable — intentionally omitting to avoid re-running the effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
